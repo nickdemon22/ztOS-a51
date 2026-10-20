@@ -1,0 +1,16 @@
+[app]
+id = "com.zerone.music"
+name = "Music"
+caps = "MUSIC"
+version = "1.0.0"
+entry = "main.py"
+icon = "icon.svg"
+description = "ztOS Music Player and Streaming"
+requires = ["yt-dlp", "mpv", "mpv-mpris", "cava"]
+performance = "eco"
+
+[build]
+include = ["**/*.py", "**/*.ui", "**/*.svg", "**/*.png", "**/*.json", "**/*.ttf"]
+
+[device]
+host = "zerone@172.16.42.1"

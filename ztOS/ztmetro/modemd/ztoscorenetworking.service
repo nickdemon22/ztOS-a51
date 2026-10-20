@@ -1,0 +1,12 @@
+[Unit]
+Description=Modem state for the shell (signal, operator, data), airplane mode, SMS
+After=ztoscorenetworking-modem.service
+Wants=ztoscorenetworking-modem.service
+
+[Service]
+ExecStart=/usr/local/sbin/ztoscorenetworkingd
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=graphical.target

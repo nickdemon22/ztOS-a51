@@ -1,0 +1,16 @@
+#!/usr/bin/python3
+"""SUDO_ASKPASS adapter; verification remains sudo's responsibility."""
+import os
+import sys
+sys.path.insert(0, '/usr/local/lib')
+from ztos_auth import Prompt
+try:
+    prompt = Prompt()
+    secret = prompt.password(sys.argv[1] if len(sys.argv)>1 else 'Enter your password')
+    try:
+        os.write(1, secret+b'\n')
+    finally:
+        secret[:] = b'\0'*len(secret)
+        prompt.close()
+except (OSError, InterruptedError, KeyError):
+    sys.exit(1)

@@ -1,0 +1,329 @@
+--- a/drivers/gpu/drm/s9p/s9p-decon.c
++++ b/drivers/gpu/drm/s9p/s9p-decon.c
+@@ -38,6 +38,7 @@
+  * with Panfrost through kmsro.
+  */
+ #include <linux/aperture.h>
++#include <linux/backlight.h>
+ #include <linux/interrupt.h>
+ #include <linux/module.h>
+ #include <linux/platform_device.h>
+@@ -126,10 +127,13 @@
+ #define DSIM_INTSRC			0x0050
+ #define  DSIM_INTSRC_PH_FIFO_EMPTY	BIT(28)
+ #define DSIM_PKTHDR			0x0058
++#define DSIM_PAYLOAD			0x005C
+ #define  DSIM_PKTHDR_ID(x)		((x) << 0)
+ #define  DSIM_PKTHDR_DATA0(x)		((x) << 8)
+ #define  DSIM_PKTHDR_DATA1(x)		((x) << 16)
+ #define MIPI_DCS_SHORT_WRITE		0x05
++#define MIPI_DCS_SHORT_WRITE_PARAM	0x15
++#define MIPI_DCS_LONG_WRITE		0x39
+ #define MIPI_DCS_ENTER_SLEEP_MODE	0x10
+ #define MIPI_DCS_EXIT_SLEEP_MODE	0x11
+ #define MIPI_DCS_SET_DISPLAY_OFF	0x28
+@@ -195,6 +199,7 @@
+ 	void __iomem *dsim;		/* DSIM0, for DCS display off/on */
+ 	void *black_cpu;
+ 	dma_addr_t black_dma;
++	struct backlight_device *bl;
+ };
+ 
+ #define to_s9p_decon(x) container_of(x, struct s9p_decon, drm)
+@@ -257,6 +262,24 @@
+ 	writel_relaxed(v, priv->decon + DECON_HW_SW_TRIG_CONTROL);
+ }
+ 
++/*
++ * The other half: hold the trigger off. In command mode a frame transfer
++ * starts on every TE edge, and it shares DSIM's command FIFO, so a panel
++ * command sent in the middle of one is simply dropped (measured: from
++ * userspace, where this cannot be done, roughly one write in thirty lands).
++ * The vendor driver masks the trigger around its panel sequences too.
++ */
++static void s9p_hw_trigger_mask(struct s9p_decon *priv)
++{
++	u32 v;
++
++	if (!priv->command_mode || !priv->hw_trigger)
++		return;
++	v = readl_relaxed(priv->decon + DECON_HW_SW_TRIG_CONTROL);
++	v |= DECON_HW_TRIG_EN | DECON_HW_TRIG_MASK_DECON;
++	writel_relaxed(v, priv->decon + DECON_HW_SW_TRIG_CONTROL);
++}
++
+ static void s9p_decon_program_address(struct s9p_decon *priv, dma_addr_t addr)
+ {
+ 	void __iomem *ch = s9p_chan_regs(priv, priv->chan);
+@@ -367,17 +390,20 @@
+  */
+ static void s9p_panel_down(struct s9p_decon *priv)
+ {
++	s9p_hw_trigger_mask(priv);
+ 	s9p_decon_dcs(priv, MIPI_DCS_SET_DISPLAY_OFF);
+ 	if (!s9p_panel_sleep)
+ 		return;
+ 	msleep(PANEL_FRAME_DELAY_MS);
+ 	s9p_decon_dcs(priv, MIPI_DCS_ENTER_SLEEP_MODE);
+ 	msleep(PANEL_SLEEP_DELAY_MS);
++	s9p_hw_trigger_unmask(priv);
+ }
+ 
+ /* Panel up: the reverse, with the boost converter's settling time. */
+ static void s9p_panel_up(struct s9p_decon *priv)
+ {
++	s9p_hw_trigger_mask(priv);
+ 	if (s9p_panel_sleep) {
+ 		s9p_decon_dcs(priv, MIPI_DCS_EXIT_SLEEP_MODE);
+ 		msleep(PANEL_SLEEP_DELAY_MS);
+@@ -385,6 +411,228 @@
+ 	s9p_decon_dcs(priv, MIPI_DCS_SET_DISPLAY_ON);
+ }
+ 
++
++/* ------------------------------------------------------- panel commands */
++
++/*
++ * One DCS write of any length. Short (one or two bytes) goes in the packet
++ * header alone; longer ones go through the payload FIFO first, little-endian
++ * four bytes at a time, and then a long-write header carrying the length --
++ * the order the vendor's dsim_write_data uses.
++ *
++ * The caller holds the hardware trigger off (s9p_hw_trigger_mask) so that no
++ * frame transfer is using the FIFO.
++ */
++static void s9p_dsim_write(struct s9p_decon *priv, const u8 *data, size_t len)
++{
++	u32 v, word = 0;
++	size_t i;
++
++	if (!priv->dsim || !s9p_panel_dcs || !len)
++		return;
++
++	writel_relaxed(DSIM_INTSRC_PH_FIFO_EMPTY, priv->dsim + DSIM_INTSRC);
++	if (len <= 2) {
++		writel_relaxed(DSIM_PKTHDR_ID(len == 1 ? MIPI_DCS_SHORT_WRITE :
++						 MIPI_DCS_SHORT_WRITE_PARAM) |
++			       DSIM_PKTHDR_DATA0(data[0]) |
++			       DSIM_PKTHDR_DATA1(len == 2 ? data[1] : 0),
++			       priv->dsim + DSIM_PKTHDR);
++	} else {
++		for (i = 0; i < len; i++) {
++			word |= (u32)data[i] << (8 * (i % 4));
++			if (i % 4 == 3 || i == len - 1) {
++				writel_relaxed(word, priv->dsim + DSIM_PAYLOAD);
++				word = 0;
++			}
++		}
++		writel_relaxed(DSIM_PKTHDR_ID(MIPI_DCS_LONG_WRITE) |
++			       DSIM_PKTHDR_DATA0(len & 0xff) |
++			       DSIM_PKTHDR_DATA1(len >> 8),
++			       priv->dsim + DSIM_PKTHDR);
++	}
++	if (readl_poll_timeout_atomic(priv->dsim + DSIM_INTSRC, v,
++				      v & DSIM_INTSRC_PH_FIFO_EMPTY, 10, 20000))
++		dev_warn_once(priv->drm.dev,
++			      "panel did not take DCS %02x (INTSRC=%08x)\n",
++			      data[0], v);
++}
++
++/*
++ * The panel's registers are behind access keys (the vendor calls them
++ * levels 1 to 3). Level 2 is the one the brightness and the self mask need.
++ */
++static const u8 s9p_key2_on[]  = { 0xF0, 0x5A, 0x5A };
++static const u8 s9p_key2_off[] = { 0xF0, 0xA5, 0xA5 };
++
++#define s9p_dcs(priv, ...) ({						\
++	static const u8 _b[] = { __VA_ARGS__ };				\
++	s9p_dsim_write((priv), _b, sizeof(_b));				\
++})
++
++/*
++ * The self mask: the panel overlays an image held in its own side memory on
++ * the first 150 and the last 150 rows (the rounded corners). The bootloader
++ * loads that image and switches the mask on; the side memory does not
++ * survive DCS sleep, so once the panel has slept the mask paints dark
++ * patches along the top and the bottom instead. The vendor reloads the image
++ * on every resume. We do what its self_mask_dis sequence does and switch the
++ * mask off for good, which is what makes panel_sleep usable at all.
++ */
++static void s9p_panel_selfmask_off(struct s9p_decon *priv)
++{
++	s9p_hw_trigger_mask(priv);
++	s9p_wait_shadow_idle(priv);
++	s9p_dsim_write(priv, s9p_key2_on, sizeof(s9p_key2_on));
++	s9p_dcs(priv, 0x7A, 0x00);
++	s9p_dsim_write(priv, s9p_key2_off, sizeof(s9p_key2_off));
++	s9p_hw_trigger_unmask(priv);
++}
++
++/* ----------------------------------------------------------- brightness */
++
++/*
++ * AOR ("area overlap ratio") is this panel's own dimming: register B1 sets
++ * how much of each frame the OLED is not emitting, so a lower level really
++ * draws less current, unlike darkening the pixels in software. The table is
++ * the vendor's star_a3_s0_aor_table, 573 levels, 0 the dimmest; F7 03
++ * latches it.
++ *
++ * Not done here: the per-level gamma (CA) and ELVSS (B5) tables the vendor
++ * also walks, which trade a little accuracy at the very bottom of the range.
++ */
++#define S9P_BL_LEVELS	573
++
++static const u16 s9p_aor_table[S9P_BL_LEVELS] = {
++	0x0b76, 0x0b75, 0x0b73, 0x0b71, 0x0b6f, 0x0b6d, 0x0b63, 0x0b62,
++	0x0b5f, 0x0b5d, 0x0b53, 0x0b51, 0x0b4f, 0x0b4d, 0x0b44, 0x0b43,
++	0x0b41, 0x0b3f, 0x0b3d, 0x0b33, 0x0b31, 0x0b30, 0x0b2d, 0x0b23,
++	0x0b21, 0x0b1f, 0x0b1d, 0x0b13, 0x0b12, 0x0b0f, 0x0b0d, 0x0b03,
++	0x0b01, 0x0aff, 0x0afd, 0x0af7, 0x0af3, 0x0af0, 0x0aec, 0x0ae8,
++	0x0ae4, 0x0ae0, 0x0adc, 0x0ad8, 0x0ad3, 0x0acf, 0x0acb, 0x0ac6,
++	0x0ac2, 0x0abe, 0x0ab9, 0x0ab5, 0x0ab0, 0x0aac, 0x0aa7, 0x0aa2,
++	0x0a9e, 0x0a98, 0x0a92, 0x0a8c, 0x0a86, 0x0a80, 0x0a7a, 0x0a73,
++	0x0a6d, 0x0a66, 0x0a60, 0x0a59, 0x0a52, 0x0a4c, 0x0a46, 0x0a40,
++	0x0a3a, 0x0a34, 0x0a2e, 0x0a26, 0x0a1f, 0x0a18, 0x0a10, 0x0a09,
++	0x0a01, 0x09f9, 0x09f1, 0x09ea, 0x09e2, 0x09da, 0x09d2, 0x09cd,
++	0x09c8, 0x09c2, 0x09bd, 0x09b8, 0x09b2, 0x09ad, 0x09a7, 0x09a2,
++	0x099d, 0x0998, 0x0992, 0x098c, 0x0987, 0x0982, 0x097d, 0x0978,
++	0x0972, 0x096d, 0x0967, 0x0962, 0x095c, 0x0957, 0x0952, 0x094d,
++	0x0948, 0x0943, 0x093e, 0x0939, 0x0934, 0x092f, 0x092a, 0x0925,
++	0x0920, 0x091b, 0x0915, 0x090b, 0x0902, 0x08f8, 0x08ee, 0x08e4,
++	0x08db, 0x08d2, 0x08cd, 0x08c8, 0x08c3, 0x08be, 0x08b9, 0x08b4,
++	0x08aa, 0x08a1, 0x0897, 0x088e, 0x0884, 0x087b, 0x0872, 0x086d,
++	0x0868, 0x0863, 0x085d, 0x0858, 0x0853, 0x0849, 0x083f, 0x0836,
++	0x082c, 0x0823, 0x0819, 0x080e, 0x0804, 0x07fb, 0x07f2, 0x07e8,
++	0x07df, 0x07d5, 0x07cd, 0x07c4, 0x07ba, 0x07b1, 0x07a7, 0x079e,
++	0x0794, 0x078c, 0x0782, 0x0778, 0x076e, 0x0764, 0x075a, 0x0750,
++	0x0745, 0x073a, 0x072f, 0x0724, 0x071a, 0x070e, 0x0701, 0x06f4,
++	0x06e7, 0x06db, 0x06ce, 0x06c0, 0x06b4, 0x06a8, 0x069b, 0x068f,
++	0x0683, 0x0677, 0x066c, 0x065f, 0x0652, 0x0645, 0x0638, 0x062b,
++	0x061e, 0x0612, 0x0601, 0x05f0, 0x05e0, 0x05cf, 0x05be, 0x05ad,
++	0x059e, 0x0591, 0x0584, 0x0577, 0x056a, 0x055d, 0x0550, 0x0544,
++	0x0533, 0x0522, 0x0511, 0x0501, 0x04f0, 0x04df, 0x04d0, 0x04d3,
++	0x04c5, 0x04b7, 0x04a9, 0x049b, 0x048d, 0x0480, 0x04e7, 0x04d5,
++	0x04c4, 0x04b3, 0x04a1, 0x0490, 0x0480, 0x04e1, 0x04d0, 0x04c0,
++	0x04af, 0x049f, 0x048f, 0x0480, 0x04db, 0x04cc, 0x04bc, 0x04ad,
++	0x049d, 0x048e, 0x0480, 0x04d8, 0x04cb, 0x04bf, 0x04b2, 0x04a6,
++	0x0499, 0x048d, 0x0480, 0x04e7, 0x04d8, 0x04ca, 0x04bb, 0x04ac,
++	0x049d, 0x048f, 0x0480, 0x04e1, 0x04d3, 0x04c5, 0x04b7, 0x04aa,
++	0x049c, 0x048e, 0x0480, 0x04db, 0x04ce, 0x04c1, 0x04b4, 0x04a7,
++	0x049a, 0x048d, 0x0480, 0x04e6, 0x04d8, 0x04c9, 0x04bb, 0x04ac,
++	0x049d, 0x048f, 0x0480, 0x04e2, 0x04d6, 0x04ca, 0x04be, 0x04b2,
++	0x04a5, 0x0499, 0x048d, 0x0480, 0x04dc, 0x04d1, 0x04c6, 0x04ba,
++	0x04af, 0x04a3, 0x0498, 0x048d, 0x0480, 0x04e5, 0x04d9, 0x04cc,
++	0x04c0, 0x04b3, 0x04a7, 0x049a, 0x048e, 0x0480, 0x04de, 0x04d0,
++	0x04c3, 0x04b6, 0x04a8, 0x049b, 0x048d, 0x0480, 0x04e6, 0x04d9,
++	0x04cd, 0x04c0, 0x04b4, 0x04a7, 0x049a, 0x048e, 0x0480, 0x04e1,
++	0x04d6, 0x04cc, 0x04c1, 0x04b6, 0x04ab, 0x04a0, 0x0496, 0x048b,
++	0x0480, 0x04e5, 0x04d9, 0x04cc, 0x04c0, 0x04b3, 0x04a7, 0x049a,
++	0x048e, 0x0480, 0x04e0, 0x04d6, 0x04cb, 0x04c0, 0x04b6, 0x04ab,
++	0x04a0, 0x0496, 0x048b, 0x0480, 0x04e5, 0x04d9, 0x04ce, 0x04c3,
++	0x04b8, 0x04ad, 0x04a2, 0x0496, 0x048b, 0x0480, 0x04de, 0x04d4,
++	0x04cb, 0x04c1, 0x04b8, 0x04af, 0x04a5, 0x049c, 0x0492, 0x0489,
++	0x047e, 0x046c, 0x0459, 0x0446, 0x0434, 0x0421, 0x040e, 0x03fc,
++	0x03e9, 0x03d7, 0x03c4, 0x03b2, 0x039f, 0x038d, 0x037a, 0x0365,
++	0x034f, 0x033a, 0x0324, 0x030f, 0x02fa, 0x02e4, 0x02ce, 0x02b7,
++	0x02a1, 0x028a, 0x0274, 0x025d, 0x0246, 0x0230, 0x0202, 0x01ef,
++	0x01dc, 0x01c9, 0x01b6, 0x01a2, 0x018f, 0x017c, 0x020e, 0x01fc,
++	0x01ea, 0x01d7, 0x01c5, 0x01b3, 0x01a0, 0x018e, 0x017c, 0x0206,
++	0x01f4, 0x01e3, 0x01d2, 0x01c1, 0x01af, 0x019e, 0x018d, 0x017c,
++	0x0207, 0x01f8, 0x01e8, 0x01d9, 0x01c9, 0x01ba, 0x01aa, 0x019b,
++	0x018b, 0x017c, 0x01ed, 0x01dd, 0x01cd, 0x01bd, 0x01ad, 0x019c,
++	0x018c, 0x017c, 0x01f1, 0x01e2, 0x01d3, 0x01c5, 0x01b6, 0x01a8,
++	0x0199, 0x018a, 0x017c, 0x01eb, 0x01dd, 0x01cf, 0x01c1, 0x01b3,
++	0x01a6, 0x0198, 0x018a, 0x017c, 0x01a4, 0x0197, 0x0189, 0x017c,
++	0x01a1, 0x0194, 0x0187, 0x017a, 0x0165, 0x0150, 0x013b, 0x012c,
++	0x011d, 0x010e, 0x00ff, 0x00eb, 0x00d7, 0x00c3, 0x00af, 0x0091,
++	0x0073, 0x0055, 0x0037, 0x003a, 0x002b, 0x001b, 0x000c, 0x0039,
++	0x002a, 0x001b, 0x000c, 0x0039, 0x002a, 0x001b, 0x000c, 0x000c,
++	0x000c, 0x000c, 0x000c, 0x000c, 0x000c, 0x000c, 0x000c, 0x000c,
++	0x000c, 0x000c, 0x000c, 0x000c, 0x000c, 0x000c, 0x000c, 0x000c,
++	0x000c, 0x000c, 0x000c, 0x000c, 0x000c, 0x000c, 0x000c, 0x000c,
++	0x000c, 0x000c, 0x000c, 0x000c, 0x000c, 0x000c, 0x000c, 0x000c,
++	0x000c, 0x000c, 0x000c, 0x000c, 0x000c, 0x000c, 0x000c, 0x000c,
++	0x000c, 0x000c, 0x000c, 0x000c, 0x000c, 0x000c, 0x000c, 0x000c,
++	0x000c, 0x000c, 0x000c, 0x000c, 0x000c, 0x000c, 0x000c, 0x000c,
++	0x000c, 0x000c, 0x000c, 0x000c, 0x000c
++};
++
++static void s9p_panel_brightness(struct s9p_decon *priv, unsigned int level)
++{
++	u8 aor[3] = { 0xB1 };
++	u16 v;
++
++	if (level >= S9P_BL_LEVELS)
++		level = S9P_BL_LEVELS - 1;
++	v = s9p_aor_table[level];
++	aor[1] = v >> 8;
++	aor[2] = v & 0xff;
++
++	s9p_hw_trigger_mask(priv);
++	s9p_wait_shadow_idle(priv);
++	s9p_dsim_write(priv, s9p_key2_on, sizeof(s9p_key2_on));
++	s9p_dsim_write(priv, aor, sizeof(aor));
++	s9p_dcs(priv, 0xF7, 0x03);
++	s9p_dsim_write(priv, s9p_key2_off, sizeof(s9p_key2_off));
++	s9p_hw_trigger_unmask(priv);
++}
++
++static int s9p_bl_update(struct backlight_device *bl)
++{
++	struct s9p_decon *priv = bl_get_data(bl);
++
++	/* blanked, or the panel asleep: nothing to send, and the level is
++	 * put back when the pipeline comes up again */
++	if (!priv->enabled || backlight_is_blank(bl))
++		return 0;
++	s9p_panel_brightness(priv, bl->props.brightness);
++	return 0;
++}
++
++static const struct backlight_ops s9p_bl_ops = {
++	.options = BL_CORE_SUSPENDRESUME,
++	.update_status = s9p_bl_update,
++};
++
++static void s9p_backlight_init(struct s9p_decon *priv, struct device *dev)
++{
++	struct backlight_properties props = {
++		.type = BACKLIGHT_RAW,
++		.max_brightness = S9P_BL_LEVELS - 1,
++		/* the bootloader leaves the panel at its brightest */
++		.brightness = S9P_BL_LEVELS - 1,
++		.scale = BACKLIGHT_SCALE_NON_LINEAR,
++	};
++
++	priv->bl = devm_backlight_device_register(dev, "s9p-panel", dev, priv,
++						  &s9p_bl_ops, &props);
++	if (IS_ERR(priv->bl)) {
++		dev_warn(dev, "no backlight device: %pe\n", priv->bl);
++		priv->bl = NULL;
++	}
++}
++
+ /* ----------------------------------------------------------------- pipe */
+ 
+ static void s9p_decon_pipe_enable(struct drm_simple_display_pipe *pipe,
+@@ -406,6 +654,10 @@
+ 	s9p_decon_program_address(priv, obj->dma_addr);
+ 	s9p_frame_start_irq_set(priv, true);
+ 	priv->enabled = true;
++	/* sleep-out reloads the panel's registers from its own memory, so the
++	 * brightness has to be sent again */
++	if (priv->bl)
++		s9p_panel_brightness(priv, priv->bl->props.brightness);
+ 	drm_crtc_vblank_on(&pipe->crtc);
+ }
+ 
+@@ -786,6 +1038,10 @@
+ 	if (ret)
+ 		goto err_config;
+ 
++	/* before anything can put the panel to sleep */
++	s9p_panel_selfmask_off(priv);
++	s9p_backlight_init(priv, &pdev->dev);
++
+ 	drm_client_setup_with_fourcc(drm, s9p_formats[0]);
+ 	drm_info(drm, "DECON scanout %ux%u on window %u\n",
+ 		 priv->width, priv->height, priv->win);

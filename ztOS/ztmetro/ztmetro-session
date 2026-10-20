@@ -1,0 +1,6 @@
+#!/bin/sh
+# What greetd starts for the ztMETRO session. The log is kept for one run back.
+log=${XDG_STATE_HOME:-$HOME/.local/state}/ztmetro.log
+mkdir -p "$(dirname "$log")"
+[ -f "$log" ] && mv "$log" "$log.1"
+exec /usr/local/bin/ztmetro >"$log" 2>&1

@@ -1,0 +1,25 @@
+#!/bin/sh
+# Join a Wi-Fi network: ztoscorenetworking-wifi <ssid> [psk]
+# With no psk, the network is joined open. The password is never passed on a
+# command line to wpa_supplicant; wpa_passphrase writes the hashed form.
+set -e
+SSID=${1:?usage: ztoscorenetworking-wifi <ssid> [psk]}
+PSK=${2:-}
+IF=${IF:-wlp1s0}
+CONF=/etc/wpa_supplicant/wpa_supplicant-$IF.conf
+mkdir -p /etc/wpa_supplicant
+{
+	echo "ctrl_interface=/run/wpa_supplicant"
+	echo "update_config=1"
+	echo "country=${WIFI_COUNTRY:-KR}"
+	if [ -n "$PSK" ]; then
+		wpa_passphrase "$SSID" "$PSK" | grep -v '^\s*#psk='
+	else
+		printf 'network={\n\tssid="%s"\n\tkey_mgmt=NONE\n}\n' "$SSID"
+	fi
+} > $CONF
+chmod 600 $CONF
+systemctl enable --now "wpa_supplicant@$IF.service"
+systemctl restart "wpa_supplicant@$IF.service"
+systemctl restart systemd-networkd
+echo "joining $SSID on $IF; watch with: journalctl -fu wpa_supplicant@$IF"

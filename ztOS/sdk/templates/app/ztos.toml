@@ -1,0 +1,25 @@
+# What ztos-sdk needs to know about the app.
+[app]
+id = "@ID@"            # unique, reverse-domain; the shell knows the window by it
+name = "@NAME@"        # in the app list and on tiles
+caps = "@CAPS@"        # the small line over every page's title
+version = "0.1.0"
+entry = "main.py"
+icon = "icon.svg"      # white on transparent, like the phone's own; svg or png
+description = ""
+# system packages it needs on the phone besides Python and Qt (pacman names);
+# install and deploy check them and install what is missing
+requires = []
+# how the phone's power manager treats it while it is in front: "normal";
+# "eco" (its work never brings the big cores in); "big" (they stay open to it)
+performance = "normal"
+
+[build]
+# what goes into the app (paths in this folder); these are the defaults:
+# include = ["**/*.py", "**/*.ui", "**/*.svg", "**/*.png", "**/*.json", ...]
+# exclude = []
+# pure-Python packages from PyPI to bundle in, e.g. ["requests"]
+dependencies = []
+
+# [device]
+# host = "alarm@172.16.42.1"

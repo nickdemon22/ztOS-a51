@@ -1,0 +1,21 @@
+// Devices and Services (ztdevices): the phone's owner may start, stop and
+// restart ztOS's own services from the app without a password. Only these
+// units, only from the active session on the phone itself (not over SSH),
+// and only members of wheel. Enabling and disabling at boot still asks for
+// the password through ztos-polkit-agent.
+var ztosUnits = [
+	"ztoscirrusaudio.service", "ztoscsf-sensorhub.service", "ztoscsf-sensord.service",
+	"ztoscorenetworking-modem.service", "ztoscorenetworking.service", "zrnperfd.service",
+	"ztoscoresensorframework.service", "zrn-bluetooth.service", "zrn-bluetooth-addr.service",
+	"bluetooth.service", "NetworkManager.service", "zrn-charge.service", "zrn-cpuidle.service",
+	"ztos-panel-selfmask.service", "ztos-pstore-keep.service", "zboot-usb-gadget.service",
+	"ztos-update-check.timer", "sshd.service"
+];
+polkit.addRule(function(action, subject) {
+	if (action.id == "org.freedesktop.systemd1.manage-units" &&
+	    subject.local && subject.active && subject.isInGroup("wheel") &&
+	    ztosUnits.indexOf(action.lookup("unit")) >= 0 &&
+	    ["start", "stop", "restart"].indexOf(action.lookup("verb")) >= 0) {
+		return polkit.Result.YES;
+	}
+});

@@ -1,0 +1,76 @@
+#!/bin/sh
+# zrn-cpuidle: let idle cores power down (power/idle/zrn-cpuidle.ko), which is
+# what the phone's idle drain is waiting for: without it every core sits in
+# WFI, powered and clocked, all the time.
+#
+#	zrn-cpuidle try		load it now for CPU 2 and CPU 3
+#	zrn-cpuidle keep	load it at every boot from now on
+#	zrn-cpuidle never	stop loading it at boot
+#	zrn-cpuidle status
+#
+# Loading can freeze the phone, and once the watchdog did not bring it back:
+# try it with the charger in and the phone in reach. A mark is left before
+# loading and removed two minutes after; a boot that finds the mark does not
+# load the module again and says so (remove /var/lib/zrn-cpuidle/loading).
+D=/var/lib/zrn-cpuidle
+MARK=$D/loading
+KO=/usr/lib/modules/$(uname -r)/extra/zrn-cpuidle.ko
+# Keep a conservative default for images without the Exynos suspend hash fix.
+# Patched kernels support all eight CPUs with ZRN_CPUIDLE_CPUS=0xff.
+CPUS=${ZRN_CPUIDLE_CPUS:-0x0c}
+# Runtime SICD needs device idle reporters; keep it off by default.
+# System-suspend SICD is a separate, experimental switch.
+SICD=${ZRN_CPUIDLE_SICD:+sicd=$ZRN_CPUIDLE_SICD}
+RELAX=${ZRN_CPUIDLE_RELAX:+relax=$ZRN_CPUIDLE_RELAX}
+S2IDLE=${ZRN_CPUIDLE_S2IDLE_SICD:+s2idle_sicd=$ZRN_CPUIDLE_S2IDLE_SICD}
+mkdir -p $D
+
+load() {
+	[ -d /sys/module/zrn_cpuidle ] && { echo "zrn-cpuidle: already loaded"; return 0; }
+	[ -e "$KO" ] || { echo "zrn-cpuidle: $KO is not installed"; return 1; }
+	if [ -e $MARK ]; then
+		echo "zrn-cpuidle: the last load did not finish (the phone froze or restarted); not loading. Remove $MARK to try again."
+		return 1
+	fi
+	S=$(awk '$3=="cpu_suspend"{print $1}' /proc/kallsyms)
+	R=$(awk '$3=="cpu_resume"{print $1}' /proc/kallsyms)
+	T=$(awk '$3=="tick_nohz_get_next_hrtimer"{print $1}' /proc/kallsyms)
+	# Raw A55 MPIDRs collide in the old kernel's suspend hash. Wider masks
+	# must wait for the kernel fix, even when SICD itself is disabled.
+	if [ "$((CPUS & ~0x0c))" -ne 0 ] &&
+		! awk '$3=="exynos9810_suspend_mpidr_normalize"{found=1} END{exit !found}' /proc/kallsyms; then
+		echo "zrn-cpuidle: wider CPU masks need the Exynos9810 suspend hash fix"
+		return 1
+	fi
+	[ -n "$S" ] && [ "$S" != 0000000000000000 ] || { echo "zrn-cpuidle: cpu_suspend not found (kptr_restrict?)"; return 1; }
+	[ -n "$R" ] && [ "$R" != 0000000000000000 ] || { echo "zrn-cpuidle: cpu_resume not found (kptr_restrict?)"; return 1; }
+	touch $MARK; sync
+	insmod "$KO" suspend_enter=0x$S resume=0x$R next_event=0x${T:-0} cpus=$CPUS $SICD $RELAX $S2IDLE || { rm -f $MARK; echo "zrn-cpuidle: the module did not load"; return 1; }
+	echo "zrn-cpuidle: loaded for cores $CPUS"
+	# a freeze shows within seconds of the cores first sleeping; two minutes is ample
+	# Keep confirmation alive when the SSH connection or service exits.
+	systemd-run --quiet --collect --unit=zrn-cpuidle-confirm --on-active=120 \
+		/bin/sh -c "rm -f $MARK; sync" || return 1
+}
+
+case "$1" in
+try|start) load ;;
+keep) systemctl enable zrn-cpuidle.service && echo "zrn-cpuidle: loaded at every boot from now on" ;;
+never) systemctl disable zrn-cpuidle.service; rm -f $MARK ;;
+status)
+	[ -d /sys/module/zrn_cpuidle ] && echo "loaded" || echo "not loaded"
+	[ -e $MARK ] && echo "load not yet confirmed (or previous boot failed)"
+	systemctl is-enabled zrn-cpuidle.service 2>/dev/null
+	cat /sys/devices/system/cpu/cpuidle/current_driver 2>/dev/null
+	for c in /sys/devices/system/cpu/cpu[0-9]*/cpuidle/state1; do
+		[ -e "$c/time" ] && echo "$(echo $c | cut -d/ -f6): $(( $(cat $c/time) / 1000 )) ms asleep, $(cat $c/usage) times"
+	done
+	P=/sys/module/zrn_cpuidle/parameters
+	if [ -e $P/sicd ]; then
+		echo "sicd: $(cat $P/entries) entries, last sleep $(cat $P/last_sleep_us) us, blocked: $(cat $P/last_block)"
+		[ ! -e $P/blocked_ip ] || echo "sicd blocks: short=$(cat $P/blocked_short), cpu=$(cat $P/blocked_cpu), device=$(cat $P/blocked_ip)"
+		[ ! -e $P/suspend_entries ] || echo "system SICD: $(cat $P/suspend_entries) sleeps, $(cat $P/attempts) attempts, last error $(cat $P/last_error)"
+		[ ! -e $P/alarm_fires ] || echo "hardware wake alarm: $(cat $P/alarm_fires) fired; MCT late events: $(cat $P/mct_late_events)"
+	fi ;;
+*) echo "usage: zrn-cpuidle try | keep | never | status"; exit 2 ;;
+esac

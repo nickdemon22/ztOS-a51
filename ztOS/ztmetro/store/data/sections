@@ -1,0 +1,12 @@
+# ztOS App Store: the lists on the "top" page, top to bottom.
+# Copy to ~/.config/ztstore/sections to change them for yourself.
+#
+#   title | source | sort | count [| caption]
+#
+#   source aur:  sort popularity | votes | modified | submitted
+#   source repo: sort popular (pkgstats.archlinux.org) | builddate
+popular apps in your repos | repo | popular   | 10 | your repos · most installed on Arch
+popular in the AUR         | aur  | popularity | 10 | AUR · by popularity
+most voted in the AUR      | aur  | votes      | 10 | AUR · by votes
+new to the AUR             | aur  | submitted  | 10 | AUR · newest first
+recently built             | repo | builddate  | 10 | your repos · newest builds

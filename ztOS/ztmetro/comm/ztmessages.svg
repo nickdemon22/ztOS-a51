@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <!-- a speech bubble with three lines of a message cut out of it -->
+  <path fill="#ffffff" fill-rule="evenodd"
+    d="M4 7h40v27H20l-10 9v-9H4z M11 14v3h26v-3z M11 21v3h26v-3z M11 28v3h16v-3z" transform="translate(0 -1) scale(1 0.96)"/>
+</svg>

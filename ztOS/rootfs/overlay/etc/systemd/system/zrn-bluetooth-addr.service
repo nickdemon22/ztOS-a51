@@ -1,0 +1,10 @@
+[Unit]
+Description=Galaxy S9 Bluetooth: the phone's own address
+After=zrn-bluetooth.service
+Requires=zrn-bluetooth.service
+Before=bluetooth.service
+
+[Service]
+Type=oneshot
+TimeoutStartSec=150
+ExecStart=/usr/local/sbin/zrn-bluetooth-addr

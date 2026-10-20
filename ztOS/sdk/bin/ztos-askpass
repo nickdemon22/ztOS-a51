@@ -1,0 +1,3 @@
+#!/bin/sh
+# ssh's password, for ztos-sdk: from $ZTOS_PASSWORD, never from a file
+printf '%s\n' "$ZTOS_PASSWORD"

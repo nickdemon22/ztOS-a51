@@ -1,0 +1,2864 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+/*
+ * ztsettings: the comprehensive settings application of ztMETRO, built on
+ * ZrnMetroCore (../core), which owns the window, the motion and the widgets.
+ *
+ * Designed in the authentic Windows Phone 8.1 Metro aesthetic.
+ * All settings pages feature 60 FPS turnstile/slide page transitions,
+ * animated toggle switches, interactive sliders, and live hardware telemetry
+ * for the Samsung Galaxy S9 (SM-G960N starlte, Exynos 9810, Mali-G72).
+ */
+#define _GNU_SOURCE
+#include <errno.h>
+#include <fcntl.h>
+#include <linux/input-event-codes.h>
+#include <math.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/statvfs.h>
+#include <sys/utsname.h>
+#include <sys/sysinfo.h>
+#include <time.h>
+#include <unistd.h>
+
+#include <cairo.h>
+#include <dirent.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <pango/pangocairo.h>
+#include <wayland-client.h>
+
+#include "zrnmetrocore.h"
+
+#define MAX_NETWORKS	24
+enum page {
+	PAGE_MAIN,
+	PAGE_THEME,
+	PAGE_DISPLAY,
+	PAGE_WIFI,
+	PAGE_MOBILE,
+	PAGE_AUDIO,
+	PAGE_BATTERY,
+	PAGE_CPU,
+	PAGE_VM,
+	PAGE_GPU,
+	PAGE_KEYBOARD,
+	PAGE_ABOUT,
+	PAGE_PERF,
+	PAGE_DEV,
+	PAGE_APPS,	/* the second tab of the hub */
+	PAGE_HAPTICS,
+	PAGE_QUICK,
+	PAGE_APN,
+	PAGE_WIFI_JOIN,	/* a network's password, the first time */
+	PAGE_WIFI_NET,	/* one network: its state, its address, forgetting it */
+	PAGE_DATE,
+	PAGE_BLUETOOTH,
+	PAGE_ACCENTS,	/* the accent picker, full screen */
+};
+
+enum action {
+	ACT_DATE_AUTO = 500, ACT_DATE_FIELD, ACT_DATE_REGION, ACT_DATE_SAVE, ACT_DATE_SYNC, ACT_DATE_LANG,
+	ACT_NONE = 0,
+	ACT_OPEN_PAGE,
+	ACT_BACK,
+	ACT_ACCENT,
+	ACT_WALL,		/* arg: 0 none, else the photo walls[arg - 1] */
+	ACT_WALL_TARGET,	/* arg: 0 start and lock, 1 start, 2 lock */
+	ACT_BT_POWER,
+	ACT_BT_DEVICE,		/* arg: which device: pair, connect or disconnect it */
+	ACT_BT_FORGET,		/* arg: which device */
+	ACT_BT_SCAN,
+	ACT_BT_MENU,		/* an item of a held device's menu */
+	ACT_BT_MENU_CLOSE,
+	ACT_COLUMNS,
+	ACT_HAPTICS,
+	ACT_WIFI_RADIO,
+	ACT_WIFI_SUSPEND,
+	ACT_WIFI_CONNECT,
+	ACT_WIFI_RESCAN,
+	ACT_WIFI_PASSWORD,	/* the box */
+	ACT_WIFI_SHOW,		/* show what is typed */
+	ACT_WIFI_JOIN,
+	ACT_WIFI_MENU,		/* an item of the menu a held network opens */
+	ACT_WIFI_MENU_CLOSE,
+	ACT_WIFI_DETAILS,	/* arg: which network */
+	ACT_WIFI_FORGET,
+	ACT_WIFI_DISCONNECT,
+	ACT_WIFI_AUTO,
+	ACT_BRIGHTNESS_STEP,
+	ACT_AUTOBRIGHTNESS,
+	ACT_OPENTONE,
+	ACT_TIMEOUT_CYCLE,
+	ACT_SCALE_CYCLE,
+	ACT_NAV_SIZE_CYCLE,
+	ACT_KEY_HEIGHT,
+	ACT_KEY_SOUND,
+	ACT_MOBILE_DATA,
+	ACT_ROAMING,
+	ACT_NETWORK_MODE,
+	ACT_MEDIA_VOL_STEP,
+	ACT_RING_VOL_STEP,
+	ACT_VIBRATE_RING,
+	ACT_VIBRATE_SILENT,
+	ACT_BATTERY_SAVER,
+	ACT_CPU_GOVERNOR,
+	ACT_ZRAM_TOGGLE,
+	ACT_SWAPPINESS_STEP,
+	ACT_COMP_ALGO_CYCLE,
+	ACT_GPU_GOVERNOR,
+	ACT_PERF_PROFILE,
+	ACT_PERF_DEEPSLEEP,
+	ACT_TICKLE_BATTERY,	/* then _CHARGING, _SAVER, in that order */
+	ACT_TICKLE_CHARGING,
+	ACT_TICKLE_SAVER,
+	ACT_DEV_DEMO_TILES,
+	ACT_DEV_SLOW,
+	ACT_DEV_MENU_SPEED,
+	ACT_DEV_TOUCHES,
+	ACT_DEV_LOCK,
+	ACT_DEV_OPEN_TEST,
+	ACT_HAPTIC_STRENGTH,
+	ACT_HAPTIC_GROUP,	/* a slider each: this + 1000 * its index into HAPTIC_GROUPS */
+	ACT_HAPTIC_TRY,		/* arg: which pulse */
+	ACT_APN_FIELD,		/* arg: which box */
+	ACT_APN_AUTH,
+	ACT_APN_SAVE,
+	ACT_ABOUT_REPO,
+	ACT_QUICK_SLOT,		/* then one for each of the eight places */
+	ACT_QUICK_LAST = ACT_QUICK_SLOT + 7,
+};
+
+/* The kinds of touch that can be felt, each with a switch of its own; the
+ * shell reads the same keys. */
+static const struct { const char *key, *title, *about; } HAPTIC_GROUPS[] = {
+	{ "haptic_system", "System", "Quick actions, volume, notifications, the status bar held" },
+	{ "haptic_nav", "Navigation bar", "Back, Start and search; the app switcher" },
+	{ "haptic_tiles", "Tiles and lists", "Opening, moving, resizing and pinning" },
+	{ "haptic_slide", "Sliders and unlocking", "A notch every tenth of a slider, and the lock screen letting go" },
+	{ "haptic_apps", "Inside apps", "Rows, switches and pickers in ztMETRO's own apps" },
+	{ "haptic_keys", "Keyboard", "A short, light tick for every key" },
+};
+#define N_HAPTIC_GROUPS 6
+
+/* The quick actions there are, as the shell names them in `quick`. */
+static const char *const QUICK_IDS[] = { "wifi", "data", "bluetooth", "airplane", "rotation",
+	"flashlight", "location", "brightness", "settings", "vibrate", "none" };
+static const char *const QUICK_NAMES[] = { "Wi-Fi", "Mobile data", "Bluetooth", "Airplane mode",
+	"Rotation lock", "Flashlight", "Location", "Brightness", "All settings", "Vibration", "(empty)" };
+#define N_QUICK 11
+
+struct network {
+	char ssid[64];
+	int signal;
+	bool secured, in_use, known;
+	char security[24];
+};
+
+static const struct { const char *name; unsigned color; } ACCENTS[] = {
+	{ "lime", 0xa4c400 }, { "green", 0x60a917 }, { "emerald", 0x008a00 },
+	{ "teal", 0x00aba9 }, { "cyan", 0x1ba1e2 }, { "cobalt", 0x0050ef },
+	{ "indigo", 0x6a00ff }, { "violet", 0xaa00ff }, { "pink", 0xf472d0 },
+	{ "magenta", 0xd80073 }, { "crimson", 0xa20025 }, { "red", 0xe51400 },
+	{ "orange", 0xfa6800 }, { "amber", 0xf0a30a }, { "yellow", 0xe3c800 },
+	{ "brown", 0x825a2c }, { "olive", 0x6d8764 }, { "steel", 0x647687 },
+	{ "mauve", 0x76608a }, { "taupe", 0x87794e },
+};
+#define N_ACCENTS (int)(sizeof(ACCENTS) / sizeof(ACCENTS[0]))
+
+#define MARGIN ZMC_MARGIN
+
+static struct {
+	/* Settings state */
+	int accent;
+	char start_wall[256], lock_wall[256];	/* the photos, or "" */
+	int wall_target;			/* 0 both, 1 Start, 2 lock screen */
+	int columns;
+	bool haptics;
+	char scale_text[16];
+
+	int brightness;
+	bool autobrightness;
+	bool opentone;
+	int timeout_idx;
+	int nav_size_idx;
+	int scale_idx;
+
+	bool wifi_on, wifi_loading;
+	bool wifi_suspend;
+	struct network networks[MAX_NETWORKS];
+	int n_networks;
+	char wifi_status[96];
+
+	bool mobile_data;
+	bool roaming;
+	int network_mode;
+
+	int key_height;
+	bool key_sound;
+	int media_vol;
+	int ring_vol;
+	bool vibrate_ring;
+	bool vibrate_silent;
+
+	bool battery_saver;
+	char cpu_gov[32];
+	bool zram_enabled;
+	int swappiness;
+	int comp_algo_idx;
+	char gpu_gov[32];
+
+	int perf_profile;	/* 0 power saver, 1 balanced, 2 performance */
+	bool perf_deepsleep;
+	int tickle[3];		/* mode on battery, plugged in, power saver: 0 none .. 3 high */
+	char tickle_now[96];	/* what zrnperfd says it is doing */
+	bool dev_demo_tiles, dev_slow, dev_touches, dev_lock;
+	bool about_show_repo;
+	int menu_speed_idx;	/* the UI's animation speed: an index into menu_speeds */
+	int haptic_strength;	/* percent */
+	int haptic_group[N_HAPTIC_GROUPS];	/* percent of the strength; 0 off */
+	int quick[8];		/* indexes into QUICK_IDS */
+} app = {
+	.haptic_strength = 80,
+	.haptic_group = { 100, 100, 100, 100, 100, 100 },
+	.quick = { 0, 1, 2, 3, 4, 5, 7, 8 },
+	.accent = 5,
+	.columns = 3,
+	.haptics = true,
+	.brightness = 50,
+	.autobrightness = true,
+	.timeout_idx = 1,
+	.nav_size_idx = 0,
+	.scale_idx = 1,
+	.mobile_data = true,
+	.roaming = false,
+	.network_mode = 0,
+	.key_height = 56,
+	.key_sound = true,
+	.media_vol = 80,
+	.ring_vol = 70,
+	.vibrate_ring = true,
+	.vibrate_silent = true,
+	.battery_saver = false,
+	.swappiness = 60,
+	.comp_algo_idx = 0,
+	.perf_profile = 1,
+	.perf_deepsleep = true,
+	.menu_speed_idx = 1,
+	.tickle = { 2, 1, 3 },
+	.dev_lock = true,
+};
+
+
+static void config_path(char *path, size_t size) {
+	const char *home = getenv("HOME");
+	snprintf(path, size, "%s/.config/ztmetro/config", home ? home : "");
+}
+
+static char *trim(char *s) {
+	while (*s == ' ' || *s == '\t') s++;
+	for (char *e = s + strlen(s) - 1; e >= s && (*e == ' ' || *e == '\t' || *e == '\n'); e--) *e = 0;
+	return s;
+}
+
+static void read_sys_file(const char *path, char *out, size_t size) {
+	out[0] = 0;
+	FILE *f = fopen(path, "r");
+	if (f) {
+		if (fgets(out, (int)size, f)) {
+			out[strcspn(out, "\n\r")] = 0;
+		}
+		fclose(f);
+	}
+}
+
+/* The whole UI's animation speed, percent of what was measured on the Lumia */
+static const int menu_speeds[] = { 50, 75, 100, 125, 150, 200 };
+#define N_MENU_SPEEDS 6
+
+static void perf_load(void);
+static void auto_load(void);
+
+/* The hub tab last shown: PAGE_MAIN (system) or PAGE_APPS (applications). */
+static int hub_tab;
+
+/* The list picker that is open, by its action; 0 when none is. */
+static int open_picker;
+
+static double picker(cairo_t *cr, double y, const char *caption, const char *const *options,
+		int count, int selected, int action) {
+	return zmc_picker(cr, y, caption, options, count, selected, open_picker == action, action);
+}
+
+static void config_load(void) {
+	char path[512], line[256];
+	config_path(path, sizeof(path));
+	FILE *f = fopen(path, "r");
+	while (f && fgets(line, sizeof(line), f)) {
+		char *eq = strchr(line, '=');
+		if (line[0] == '#' || !eq) continue;
+		*eq = 0;
+		char *key = trim(line), *val = trim(eq + 1);
+		if (strcmp(key, "start_wallpaper") == 0) {
+			snprintf(app.start_wall, sizeof(app.start_wall), "%s", val);
+		} else if (strcmp(key, "lock_wallpaper") == 0) {
+			snprintf(app.lock_wall, sizeof(app.lock_wall), "%s", val);
+		} else if (strcmp(key, "accent") == 0) {
+			for (int i = 0; i < N_ACCENTS; i++) {
+				if (strcmp(ACCENTS[i].name, val) == 0) {
+					app.accent = i;
+					break;
+				}
+			}
+		} else if (strcmp(key, "key_height") == 0) {
+            int n = atoi(val);
+            app.key_height = n < 42 ? 42 : n > 72 ? 72 : n;
+        } else if (strcmp(key, "key_sound") == 0) {
+            app.key_sound = strcmp(val, "off") != 0 && strcmp(val, "0") != 0;
+        } else if (strcmp(key, "ring_volume") == 0) {
+            app.ring_vol = atoi(val) < 0 ? 0 : atoi(val) > 100 ? 100 : atoi(val);
+        } else if (strcmp(key, "media_volume") == 0) {
+            app.media_vol = atoi(val) < 0 ? 0 : atoi(val) > 100 ? 100 : atoi(val);
+        } else if (strcmp(key, "columns") == 0) {
+			app.columns = atoi(val);
+		} else if (strcmp(key, "haptics") == 0) {
+			app.haptics = strcmp(val, "off") != 0 && strcmp(val, "0") != 0;
+		} else if (strcmp(key, "haptic_strength") == 0) {
+			app.haptic_strength = atoi(val) < 10 ? 10 : atoi(val) > 100 ? 100 : atoi(val);
+		} else if (strncmp(key, "haptic_", 7) == 0) {
+			for (int g = 0; g < N_HAPTIC_GROUPS; g++) {
+				if (strcmp(key, HAPTIC_GROUPS[g].key) == 0) {
+					int level = strcmp(val, "off") == 0 ? 0 : strcmp(val, "on") == 0 ? 100 : atoi(val);
+					app.haptic_group[g] = level < 0 ? 0 : level > 100 ? 100 : level;
+				}
+			}
+		} else if (strcmp(key, "quick") == 0) {
+			char *save = NULL;
+			int n = 0;
+			for (char *word = strtok_r(val, ", ", &save); word && n < 8; word = strtok_r(NULL, ", ", &save)) {
+				for (int q = 0; q < N_QUICK; q++) {
+					if (strcmp(word, QUICK_IDS[q]) == 0) {
+						app.quick[n++] = q;
+						break;
+					}
+				}
+			}
+		} else if (strcmp(key, "scale") == 0) {
+			snprintf(app.scale_text, sizeof(app.scale_text), "%s", val);
+		} else if (strcmp(key, "brightness") == 0) {
+			app.brightness = atoi(val);
+		} else if (strcmp(key, "demo_tiles") == 0) {
+			app.dev_demo_tiles = strcmp(val, "on") == 0;
+		} else if (strcmp(key, "slow_motion") == 0) {
+			app.dev_slow = strcmp(val, "on") == 0;
+		} else if (strcmp(key, "menu_speed") == 0) {
+			app.menu_speed_idx = 1;
+			for (int i = 0; i < N_MENU_SPEEDS; i++) {
+				if (menu_speeds[i] == atoi(val)) app.menu_speed_idx = i;
+			}
+		} else if (strcmp(key, "show_touches") == 0) {
+			app.dev_touches = strcmp(val, "on") == 0;
+		} else if (strcmp(key, "lock") == 0) {
+			app.dev_lock = strcmp(val, "off") != 0;
+		} else if (strcmp(key, "timeout") == 0) {
+			int t = atoi(val);
+			if (t <= 30) app.timeout_idx = 0;
+			else if (t <= 60) app.timeout_idx = 1;
+			else if (t <= 180) app.timeout_idx = 2;
+			else if (t <= 300) app.timeout_idx = 3;
+			else app.timeout_idx = 4;
+		} else if (strcmp(key, "wifi_suspend") == 0) {
+			app.wifi_suspend = strcmp(val, "on") == 0 || strcmp(val, "1") == 0;
+		}
+	}
+	if (f) fclose(f);
+	zmc.accent = ACCENTS[app.accent].color;
+
+	char buf[64];
+	read_sys_file("/sys/devices/system/cpu/cpufreq/policy0/scaling_governor", buf, sizeof(buf));
+	if (buf[0]) snprintf(app.cpu_gov, sizeof(app.cpu_gov), "%s", buf);
+	else snprintf(app.cpu_gov, sizeof(app.cpu_gov), "schedutil");
+
+	read_sys_file("/sys/class/devfreq/17500000.gpu/governor", buf, sizeof(buf));
+	if (buf[0]) snprintf(app.gpu_gov, sizeof(app.gpu_gov), "%s", buf);
+	else snprintf(app.gpu_gov, sizeof(app.gpu_gov), "simple_ondemand");
+
+	read_sys_file("/proc/sys/vm/swappiness", buf, sizeof(buf));
+	if (buf[0]) app.swappiness = atoi(buf);
+	perf_load();
+	auto_load();
+}
+
+/* What zrnperfd is set to: it keeps its state where anyone can read it. */
+static void perf_load(void) {
+	char line[64], tickle_mode[32] = "", tickle_cond[32] = "";
+	int apps = 0, paused = 0, audio = 0;
+	FILE *f = fopen("/run/zrnperfd.status", "r");
+	while (f && fgets(line, sizeof(line), f)) {
+		char value[32];
+		if (sscanf(line, "profile=%31s", value) == 1) {
+			app.perf_profile = strcmp(value, "powersave") == 0 ? 0 :
+				strcmp(value, "performance") == 0 ? 2 : 1;
+		} else if (sscanf(line, "deepsleep=%31s", value) == 1) {
+			app.perf_deepsleep = strcmp(value, "on") == 0;
+		}
+		static const char *const conditions[] = { "battery", "charging", "saver" };
+		static const char *const modes[] = { "none", "nominal", "moderate", "high" };
+		for (int c = 0; c < 3; c++) {
+			char key[32];
+			snprintf(key, sizeof(key), "tickle_%s=", conditions[c]);
+			if (strncmp(line, key, strlen(key)) == 0) {
+				for (int m = 0; m < 4; m++) {
+					if (strncmp(line + strlen(key), modes[m], strlen(modes[m])) == 0) {
+						app.tickle[c] = m;
+					}
+				}
+			}
+		}
+		if (sscanf(line, "tickle=%31s", value) == 1) {
+			snprintf(tickle_mode, sizeof(tickle_mode), "%s", value);
+		} else if (sscanf(line, "condition=%31s", value) == 1) {
+			snprintf(tickle_cond, sizeof(tickle_cond), "%s", value);
+		} else if (strncmp(line, "tickle_apps=", 12) == 0) {
+			apps = atoi(line + 12);
+		} else if (strncmp(line, "tickle_paused=", 14) == 0) {
+			paused = atoi(line + 14);
+		} else if (strncmp(line, "tickle_audio=", 13) == 0) {
+			audio = atoi(line + 13);
+		}
+	}
+	if (f) fclose(f);
+	if (tickle_mode[0]) {
+		static const char *const said[] = { "on battery", "plugged in", "power saver" };
+		const char *cond = strcmp(tickle_cond, "charging") == 0 ? said[1] :
+			strcmp(tickle_cond, "saver") == 0 ? said[2] : said[0];
+		snprintf(app.tickle_now, sizeof(app.tickle_now), "%c%s (%s): %d app%s paused, %d playing audio",
+			toupper((unsigned char)tickle_mode[0]), tickle_mode + 1, cond, paused,
+			paused == 1 ? "" : "s", audio);
+		(void)apps;
+	} else {
+		snprintf(app.tickle_now, sizeof(app.tickle_now), "zrnperfd is not running");
+	}
+}
+
+/* `text` as one word of a shell command, whatever is in it: in single quotes,
+ * a quote inside written as '\''. */
+static void shell_quote(char *out, size_t size, const char *text) {
+	size_t o = 0;
+	if (size < 4) return;
+	out[o++] = '\'';
+	for (; *text && o + 6 < size; text++) {
+		if (*text == '\'') {
+			memcpy(out + o, "'\\''", 4);
+			o += 4;
+		} else {
+			out[o++] = *text;
+		}
+	}
+	out[o++] = '\'';
+	out[o] = 0;
+}
+
+/* Tell a daemon something, through the pipe it listens on. */
+static void pipe_tell(const char *pipe, const char *command) {
+	int fd = open(pipe, O_WRONLY | O_NONBLOCK | O_CLOEXEC);
+	if (fd >= 0) {
+		if (write(fd, command, strlen(command)) < 0) {}
+		close(fd);
+	}
+}
+
+static void perf_tell(const char *command) {
+	pipe_tell("/run/zrnperfd.ctl", command);
+}
+
+/* Auto brightness is sensord's: it has the light sensor. */
+static void auto_load(void) {
+	char line[64];
+	FILE *f = fopen("/run/ztoscsf-sensors/status", "r");
+	if (!f) f = fopen("/run/zrn-sensors/status", "r");
+	app.autobrightness = false;	/* no daemon, no sensor */
+	while (f && fgets(line, sizeof(line), f)) {
+		if (strncmp(line, "auto=", 5) == 0) {
+			app.autobrightness = strncmp(line + 5, "on", 2) == 0;
+		} else if (strncmp(line, "opentone=", 9) == 0) {
+			app.opentone = strncmp(line + 9, "on", 2) == 0;
+		}
+	}
+	if (f) fclose(f);
+}
+
+static void config_save(void) {
+	static const int timeouts[] = { 30, 60, 180, 300, 0 };
+	enum { N_KEYS = 19 + N_HAPTIC_GROUPS };
+	struct { const char *key; char value[300]; bool written; } keys[N_KEYS] = {
+		{ .key = "accent" }, { .key = "columns" }, { .key = "haptics" },
+		{ .key = "brightness" }, { .key = "timeout" }, { .key = "demo_tiles" },
+		{ .key = "slow_motion" }, { .key = "show_touches" }, { .key = "lock" },
+		{ .key = "menu_speed" }, { .key = "haptic_strength" }, { .key = "quick" },
+		{ .key = "wifi_suspend" },
+		{ .key = "key_height" }, { .key = "key_sound" },
+		{ .key = "ring_volume" }, { .key = "media_volume" },
+	};
+	snprintf(keys[13].value, 32, "%d", app.key_height);
+    snprintf(keys[14].value, 32, "%s", app.key_sound ? "on" : "off");
+    snprintf(keys[15].value, 32, "%d", app.ring_vol);
+    snprintf(keys[16].value, 32, "%d", app.media_vol);
+    snprintf(keys[10].value, 32, "%d", app.haptic_strength);
+	for (int i = 0; i < 8; i++) {
+		size_t at = strlen(keys[11].value);
+		snprintf(keys[11].value + at, sizeof(keys[11].value) - at, "%s%s", i ? "," : "", QUICK_IDS[app.quick[i]]);
+	}
+	snprintf(keys[12].value, 32, "%s", app.wifi_suspend ? "on" : "off");
+	for (int g = 0; g < N_HAPTIC_GROUPS; g++) {
+		keys[17 + g].key = HAPTIC_GROUPS[g].key;
+		snprintf(keys[17 + g].value, 32, "%d", app.haptic_group[g]);
+	}
+	keys[17 + N_HAPTIC_GROUPS].key = "start_wallpaper";
+	snprintf(keys[17 + N_HAPTIC_GROUPS].value, sizeof(keys[0].value), "%s", app.start_wall);
+	keys[18 + N_HAPTIC_GROUPS].key = "lock_wallpaper";
+	snprintf(keys[18 + N_HAPTIC_GROUPS].value, sizeof(keys[0].value), "%s", app.lock_wall);
+	snprintf(keys[0].value, 32, "%s", ACCENTS[app.accent].name);
+	snprintf(keys[1].value, 32, "%d", app.columns);
+	snprintf(keys[2].value, 32, "%s", app.haptics ? "on" : "off");
+	snprintf(keys[3].value, 32, "%d", app.brightness);
+	snprintf(keys[4].value, 32, "%d", timeouts[app.timeout_idx]);
+	snprintf(keys[5].value, 32, "%s", app.dev_demo_tiles ? "on" : "off");
+	snprintf(keys[6].value, 32, "%s", app.dev_slow ? "on" : "off");
+	snprintf(keys[7].value, 32, "%s", app.dev_touches ? "on" : "off");
+	snprintf(keys[8].value, 32, "%s", app.dev_lock ? "on" : "off");
+	snprintf(keys[9].value, 32, "%d", menu_speeds[app.menu_speed_idx]);
+	zmc.accent = ACCENTS[app.accent].color;
+
+	char path[512], tmp[512], line[256];
+	config_path(path, sizeof(path));
+	snprintf(tmp, sizeof(tmp), "%s.tmp", path);
+	FILE *in = fopen(path, "r"), *out = fopen(tmp, "w");
+	if (!out) {
+		if (in) fclose(in);
+		return;
+	}
+	/* lines we do not know are kept as they are */
+	while (in && fgets(line, sizeof(line), in)) {
+		char copy[256];
+		snprintf(copy, sizeof(copy), "%s", line);
+		char *eq = strchr(copy, '=');
+		bool ours = false;
+		if (copy[0] != '#' && eq) {
+			*eq = 0;
+			char *key = trim(copy);
+			for (int i = 0; i < N_KEYS; i++) {
+				if (strcmp(key, keys[i].key) == 0) {
+					if (!keys[i].written) {
+						fprintf(out, "%s = %s\n", keys[i].key, keys[i].value);
+					}
+					keys[i].written = ours = true;
+				}
+			}
+		}
+		if (!ours) fputs(line, out);
+	}
+	if (in) fclose(in);
+	for (int i = 0; i < N_KEYS; i++) {
+		if (!keys[i].written) fprintf(out, "%s = %s\n", keys[i].key, keys[i].value);
+	}
+	fclose(out);
+	rename(tmp, path);
+
+	if (system("pkill -HUP -x ztmetro 2>/dev/null") != 0) {}
+}
+
+static char *nm_field(char **cursor) {
+	char *start = *cursor, *out = start, *in = start;
+	if (!start) return "";
+	while (*in && *in != ':' && *in != '\n') {
+		if (*in == '\\' && in[1]) in++;
+		*out++ = *in++;
+	}
+	*cursor = *in == ':' ? in + 1 : NULL;
+	*out = 0;
+	return start;
+}
+
+/*
+ * The Wi-Fi page. NetworkManager takes a second or two to answer, so it is
+ * asked in the background: one shell pipeline prints the radio state, the
+ * networks in range and the saved connections, and the main loop collects
+ * what it prints while the loading dots run. Nothing waits on it.
+ */
+#define WIFI_QUERY "nmcli radio wifi 2>/dev/null; echo @list; " \
+	"nmcli -t -f IN-USE,SSID,SIGNAL,SECURITY device wifi list 2>/dev/null; echo @known; " \
+	"nmcli -t -f NAME connection show 2>/dev/null"
+
+static void bt_summary(char *out, size_t size);	/* Bluetooth, below */
+static FILE *wifi_pipe;
+static char wifi_buf[16384];
+static size_t wifi_len;
+
+static void wifi_parse(char *text) {
+	int section = 0, n_known = 0;
+	static char known[48][64];
+	app.n_networks = 0;
+	app.wifi_on = false;
+	for (char *line = strtok(text, "\n"); line; line = strtok(NULL, "\n")) {
+		if (strcmp(line, "@list") == 0 || strcmp(line, "@known") == 0) {
+			section++;
+		} else if (section == 0) {
+			app.wifi_on = strncmp(line, "enabled", 7) == 0;
+		} else if (section == 1 && app.n_networks < MAX_NETWORKS) {
+			char *cursor = line;
+			char *in_use = nm_field(&cursor), *ssid = nm_field(&cursor);
+			char *signal = nm_field(&cursor), *security = nm_field(&cursor);
+			bool seen = !ssid[0];
+			for (int i = 0; i < app.n_networks; i++) {
+				if (strcmp(app.networks[i].ssid, ssid) == 0) seen = true;
+			}
+			if (seen) continue;
+			struct network *n = &app.networks[app.n_networks++];
+			snprintf(n->ssid, sizeof(n->ssid), "%s", ssid);
+			n->signal = atoi(signal);
+			n->secured = security[0] && strcmp(security, "--") != 0;
+			snprintf(n->security, sizeof(n->security), "%s", n->secured ? security : "open");
+			n->in_use = in_use[0] == '*';
+		} else if (section == 2 && n_known < 48) {
+			char *cursor = line;
+			snprintf(known[n_known++], 64, "%s", nm_field(&cursor));
+		}
+	}
+	for (int i = 0; i < app.n_networks; i++) {
+		struct network *n = &app.networks[i];
+		n->known = n->in_use;
+		for (int k = 0; k < n_known; k++) {
+			if (strcmp(known[k], n->ssid) == 0) n->known = true;
+		}
+	}
+	if (!app.wifi_on) app.n_networks = 0;
+}
+
+/* The network being joined with a password just typed, and that password. */
+static char wifi_joining[64], wifi_join_ssid[64], wifi_password[80];
+static bool wifi_show_password, wifi_typing;
+
+static void wifi_ready(int fd, void *data) {
+	ssize_t n = read(fd, wifi_buf + wifi_len, sizeof(wifi_buf) - 1 - wifi_len);
+	if (n > 0) {
+		wifi_len += (size_t)n;
+		if (wifi_len < sizeof(wifi_buf) - 1) return;	/* more to come */
+	}
+	zmc_watch_fd(fd, NULL, NULL);
+	pclose(wifi_pipe);
+	wifi_pipe = NULL;
+	wifi_buf[wifi_len] = 0;
+	wifi_parse(wifi_buf);
+	app.wifi_loading = false;
+	app.wifi_status[0] = 0;
+	if (wifi_joining[0]) {
+		/* a network was being joined: did it take? */
+		bool joined = false;
+		for (int i = 0; i < app.n_networks; i++) {
+			joined |= app.networks[i].in_use && strcmp(app.networks[i].ssid, wifi_joining) == 0;
+		}
+		snprintf(app.wifi_status, sizeof(app.wifi_status), joined ? "connected to %.40s" :
+			"could not connect to %.40s: check the password", wifi_joining);
+		wifi_joining[0] = 0;
+	}
+	zmc_busy(false);
+	zmc_redraw();
+}
+
+/* Ask again, after running `first` (a shell command, or NULL). */
+static void wifi_refresh(const char *first) {
+	if (wifi_pipe) return;	/* an answer is already on its way */
+	char command[1024];
+	snprintf(command, sizeof(command), "%s%s" WIFI_QUERY, first ? first : "", first ? "; " : "");
+	wifi_pipe = popen(command, "r");
+	if (!wifi_pipe) return;
+	wifi_len = 0;
+	app.wifi_loading = true;
+	zmc_watch_fd(fileno(wifi_pipe), wifi_ready, NULL);
+	zmc_busy(true);
+}
+
+/* The same, waiting for the answer: only for drawing a page into a file. */
+static void wifi_load(void) {
+	FILE *p = popen(WIFI_QUERY, "r");
+	if (!p) return;
+	wifi_len = fread(wifi_buf, 1, sizeof(wifi_buf) - 1, p);
+	pclose(p);
+	wifi_buf[wifi_len] = 0;
+	wifi_parse(wifi_buf);
+}
+
+
+/* The hub shows the connection under "Wi-Fi". Asking NetworkManager takes a
+ * tenth of a second or more, and a page is drawn on the same thread as every
+ * frame, so it is asked in the background: the hub shows what it said last,
+ * and is drawn again when a different answer arrives. */
+static char summary_now[96];
+static uint32_t summary_at;
+static FILE *summary_pipe;
+static char summary_buf[1024];
+static size_t summary_len;
+
+static void summary_parse(const char *text, char *out, size_t size) {
+	char line[160];
+	snprintf(out, size, "off");
+	while (*text) {
+		size_t n = strcspn(text, "\n");
+		snprintf(line, sizeof(line), "%.*s", (int)(n < sizeof(line) - 1 ? n : sizeof(line) - 1), text);
+		text += n + (text[n] ? 1 : 0);
+		char *cursor = line;
+		char *type = nm_field(&cursor), *state = nm_field(&cursor), *name = nm_field(&cursor);
+		if (strcmp(type, "wifi") == 0) {
+			if (strcmp(state, "connected") == 0) {
+				snprintf(out, size, "%s", name);
+			} else if (strcmp(state, "unavailable") != 0) {
+				snprintf(out, size, "not connected");
+			}
+			break;
+		}
+	}
+}
+
+static void summary_ready(int fd, void *data) {
+	ssize_t n = read(fd, summary_buf + summary_len, sizeof(summary_buf) - 1 - summary_len);
+	if (n > 0) {
+		summary_len += (size_t)n;
+		if (summary_len < sizeof(summary_buf) - 1) return;	/* more to come */
+	}
+	zmc_watch_fd(fd, NULL, NULL);
+	pclose(summary_pipe);
+	summary_pipe = NULL;
+	summary_buf[summary_len] = 0;
+	char fresh[96];
+	summary_parse(summary_buf, fresh, sizeof(fresh));
+	if (strcmp(fresh, summary_now) != 0) {
+		snprintf(summary_now, sizeof(summary_now), "%s", fresh);
+		zmc_redraw();	/* only when it says something new */
+	}
+}
+
+static void wifi_summary(char *out, size_t size) {
+	uint32_t now = zmc_now_ms();
+	if (!zmc.configured) {
+		/* drawing a page into a file: wait for the answer */
+		FILE *p = popen("nmcli -t -f TYPE,STATE,CONNECTION device 2>/dev/null", "r");
+		size_t len = p ? fread(summary_buf, 1, sizeof(summary_buf) - 1, p) : 0;
+		if (p) pclose(p);
+		summary_buf[len] = 0;
+		summary_parse(summary_buf, summary_now, sizeof(summary_now));
+	} else if (!summary_pipe && (!summary_at || now - summary_at > 5000)) {
+		summary_at = now;
+		summary_pipe = popen("nmcli -t -f TYPE,STATE,CONNECTION device 2>/dev/null", "r");
+		if (summary_pipe) {
+			summary_len = 0;
+			zmc_watch_fd(fileno(summary_pipe), summary_ready, NULL);
+		}
+	}
+	snprintf(out, size, "%s", summary_now[0] ? summary_now : "\u2026");
+}
+
+/* ---- the mobile network: what ztoscorenetworkingd reports, and the access point ---- */
+
+#define APN_FILE "/etc/ztoscorenetworking/apn"
+
+static struct {
+	char sim[16], operator[48], registered[16], tech[8];
+	bool data, data_on, known;
+} cell;
+static char apn_field[3][102] = { "dialogbb", "", "" };	/* apn, user, password */
+static int apn_auth, apn_focus = -1;
+static char apn_note[96];
+
+static void cell_load(void) {
+	char line[128];
+	FILE *f = fopen("/run/ztoscorenetworking/status", "r");
+	if (!f) f = fopen("/run/zrn-modem/status", "r");
+	memset(&cell, 0, sizeof(cell));
+	cell.known = f != NULL;
+	while (f && fgets(line, sizeof(line), f)) {
+		char *eq = strchr(line, '=');
+		if (!eq) continue;
+		*eq = 0;
+		char *v = eq + 1;
+		v[strcspn(v, "\n")] = 0;
+		if (!strcmp(line, "sim")) snprintf(cell.sim, sizeof(cell.sim), "%s", v);
+		else if (!strcmp(line, "operator")) snprintf(cell.operator, sizeof(cell.operator), "%s", v);
+		else if (!strcmp(line, "registered")) snprintf(cell.registered, sizeof(cell.registered), "%s", v);
+		else if (!strcmp(line, "tech")) snprintf(cell.tech, sizeof(cell.tech), "%s", v);
+		else if (!strcmp(line, "data")) cell.data = atoi(v) > 0;
+		else if (!strcmp(line, "data_on")) cell.data_on = atoi(v) > 0;
+	}
+	if (f) fclose(f);
+	app.mobile_data = cell.data_on;
+}
+
+static double draw_main(cairo_t *cr) {
+	double y = zmc_pivot_next(cr, "system", "applications", ACT_OPEN_PAGE, PAGE_APPS);
+	char detail[128], wifi[96];
+
+	snprintf(detail, sizeof(detail), "accent: %s, %d columns",
+		ACCENTS[app.accent].name, app.columns);
+	y = zmc_entry(cr, y, "theme", detail, ACT_OPEN_PAGE, PAGE_THEME);
+
+	snprintf(detail, sizeof(detail), "%d%% brightness, %s timeout",
+		app.brightness, app.timeout_idx == 4 ? "Never" : "1 min");
+	y = zmc_entry(cr, y, "display", detail, ACT_OPEN_PAGE, PAGE_DISPLAY);
+
+	wifi_summary(wifi, sizeof(wifi));
+	y = zmc_entry(cr, y, "Wi-Fi", wifi, ACT_OPEN_PAGE, PAGE_WIFI);
+
+	bt_summary(detail, sizeof(detail));
+	y = zmc_entry(cr, y, "Bluetooth", detail, ACT_OPEN_PAGE, PAGE_BLUETOOTH);
+
+	cell_load();
+	snprintf(detail, sizeof(detail), "%s%s%s%s", cell.operator[0] ? cell.operator : "no service",
+		cell.tech[0] ? ", " : "", cell.tech, !cell.data_on ? ", data off" : cell.data ?
+		", data connected" : ", data on");
+	y = zmc_entry(cr, y, "cellular + SIM", detail, ACT_OPEN_PAGE, PAGE_MOBILE);
+
+	snprintf(detail, sizeof(detail), "media %d%%, ring %d%%", app.media_vol, app.ring_vol);
+	y = zmc_entry(cr, y, "ringtones + sounds", detail, ACT_OPEN_PAGE, PAGE_AUDIO);
+
+	if (!app.haptics) {
+		snprintf(detail, sizeof(detail), "off");
+	} else {
+		int on = 0;
+		for (int g = 0; g < N_HAPTIC_GROUPS; g++) on += app.haptic_group[g] > 0;
+		snprintf(detail, sizeof(detail), "on, strength %d%%, %d of %d kinds", app.haptic_strength,
+			on, N_HAPTIC_GROUPS);
+	}
+	y = zmc_entry(cr, y, "haptics", detail, ACT_OPEN_PAGE, PAGE_HAPTICS);
+
+	snprintf(detail, sizeof(detail), "%s, %s, %s, %s\u2026", QUICK_NAMES[app.quick[0]],
+		QUICK_NAMES[app.quick[1]], QUICK_NAMES[app.quick[2]], QUICK_NAMES[app.quick[3]]);
+	y = zmc_entry(cr, y, "notifications + actions", detail, ACT_OPEN_PAGE, PAGE_QUICK);
+
+	char bat_buf[32];
+	read_sys_file("/sys/class/power_supply/max170xx_battery/capacity", bat_buf, sizeof(bat_buf));
+	int bat = bat_buf[0] ? atoi(bat_buf) : 51;
+	snprintf(detail, sizeof(detail), "%d%%, %s", bat, app.battery_saver ? "battery saver on" : "discharging");
+	y = zmc_entry(cr, y, "battery saver", detail, ACT_OPEN_PAGE, PAGE_BATTERY);
+
+	snprintf(detail, sizeof(detail), "Exynos 9810 (8 cores), %s", app.cpu_gov);
+	y = zmc_entry(cr, y, "processor", detail, ACT_OPEN_PAGE, PAGE_CPU);
+
+	snprintf(detail, sizeof(detail), "3.5 GB RAM, swappiness %d", app.swappiness);
+	y = zmc_entry(cr, y, "virtual memory", detail, ACT_OPEN_PAGE, PAGE_VM);
+
+	snprintf(detail, sizeof(detail), "Mali-G72 MP18 (%s), 60 FPS", app.gpu_gov);
+	y = zmc_entry(cr, y, "graphics", detail, ACT_OPEN_PAGE, PAGE_GPU);
+
+	y = zmc_entry(cr, y, "date + region", "date, time zone and regional formats", ACT_OPEN_PAGE, PAGE_DATE);
+
+	y = zmc_entry(cr, y, "about", "Samsung Galaxy S9, ztOS Mobile", ACT_OPEN_PAGE, PAGE_ABOUT);
+
+	return y + 20;
+}
+
+/* The hub's second tab: what belongs to the system's own programs. */
+static double draw_apps(cairo_t *cr) {
+	double y = zmc_pivot_next(cr, "applications", "system", ACT_OPEN_PAGE, PAGE_MAIN);
+	char detail[128];
+	y = zmc_entry(cr, y, "keyboard", app.haptics ? "vibrate on touch: on" : "vibrate on touch: off",
+		ACT_OPEN_PAGE, PAGE_KEYBOARD);
+
+	static const char *const profiles[] = { "Power saver", "Balanced", "Performance" };
+	snprintf(detail, sizeof(detail), "%s, low power when off: %s", profiles[app.perf_profile],
+		app.perf_deepsleep ? "on" : "off");
+	y = zmc_entry(cr, y, "performance", detail, ACT_OPEN_PAGE, PAGE_PERF);
+
+	y = zmc_entry(cr, y, "developer tests", "demo tiles, slow motion, ZrnDevTest", ACT_OPEN_PAGE, PAGE_DEV);
+
+	y = zmc_entry(cr, y, "ZrnDevTest", "logs, sensors and system state", ACT_DEV_OPEN_TEST, 0);
+	return y + 20;
+}
+
+/* ---- wallpapers: the photos to choose from ---------------------------------- */
+
+#define MAX_WALLS 30
+static char walls[MAX_WALLS][256];
+static cairo_surface_t *wall_thumbs[MAX_WALLS];
+static int n_walls = -1;	/* -1: not looked for yet */
+
+/* A photo scaled to cover pw x ph pixels, cropped about its middle. */
+static cairo_surface_t *thumb_cover(const char *path, int pw, int ph) {
+	GdkPixbuf *src = gdk_pixbuf_new_from_file_at_scale(path, pw * 3, ph * 3, TRUE, NULL);
+	if (!src) return NULL;
+	GdkPixbuf *up = gdk_pixbuf_apply_embedded_orientation(src);
+	g_object_unref(src);
+	int sw = gdk_pixbuf_get_width(up), sh = gdk_pixbuf_get_height(up);
+	double k = fmax((double)pw / sw, (double)ph / sh);
+	int cw = (int)ceil(sw * k), ch = (int)ceil(sh * k);
+	GdkPixbuf *sc = gdk_pixbuf_scale_simple(up, cw, ch, GDK_INTERP_BILINEAR);
+	g_object_unref(up);
+	if (!sc) return NULL;
+	cairo_surface_t *out = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, pw, ph);
+	cairo_surface_flush(out);
+	int ox = (cw - pw) / 2, oy = (ch - ph) / 2, n = gdk_pixbuf_get_n_channels(sc);
+	int ss = gdk_pixbuf_get_rowstride(sc), ds = cairo_image_surface_get_stride(out);
+	const guchar *sp = gdk_pixbuf_read_pixels(sc);
+	unsigned char *dp = cairo_image_surface_get_data(out);
+	for (int y = 0; y < ph; y++) {
+		const guchar *row = sp + (size_t)(y + oy) * ss + (size_t)ox * n;
+		uint32_t *d = (uint32_t *)(dp + (size_t)y * ds);
+		for (int x = 0; x < pw; x++, row += n) {
+			uint32_t a = n == 4 ? row[3] : 255;
+			d[x] = a << 24 | (uint32_t)(row[0] * a / 255) << 16 |
+				(uint32_t)(row[1] * a / 255) << 8 | (uint32_t)(row[2] * a / 255);
+		}
+	}
+	cairo_surface_mark_dirty(out);
+	g_object_unref(sc);
+	return out;
+}
+
+/* Photos in ~/Pictures, ~/Pictures/Wallpapers and the system's backgrounds. */
+static void walls_scan(void) {
+	char dirs[3][300];
+	const char *home = getenv("HOME");
+	snprintf(dirs[0], sizeof(dirs[0]), "%s/Pictures", home ? home : "");
+	snprintf(dirs[1], sizeof(dirs[1]), "%s/Pictures/Wallpapers", home ? home : "");
+	snprintf(dirs[2], sizeof(dirs[2]), "/usr/local/share/backgrounds/ztos");
+	n_walls = 0;
+	for (int d = 0; d < 3; d++) {
+		DIR *dir = opendir(dirs[d]);
+		struct dirent *e;
+		while (dir && (e = readdir(dir)) && n_walls < MAX_WALLS) {
+			const char *dot = strrchr(e->d_name, '.');
+			if (!dot || (strcasecmp(dot, ".jpg") && strcasecmp(dot, ".jpeg") &&
+					strcasecmp(dot, ".png") && strcasecmp(dot, ".webp"))) continue;
+			snprintf(walls[n_walls++], sizeof(walls[0]), "%s/%s", dirs[d], e->d_name);
+		}
+		if (dir) closedir(dir);
+	}
+}
+
+static double draw_walls(cairo_t *cr, double y) {
+	static const char *targets[] = { "start + lock", "start", "lock screen" };
+	double gap = 8;
+	cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+	zmc_text(cr, "Background photo", FONT_REGULAR, 13.5, MARGIN, y, 0);
+	y += 24;
+	double btn_w = (zmc.width - 2 * MARGIN - 2 * gap) / 3.0;
+	for (int i = 0; i < 3; i++) {
+		double bx = MARGIN + i * (btn_w + gap);
+		if (app.wall_target == i) zmc_set_rgb(cr, ACCENTS[app.accent].color);
+		else cairo_set_source_rgb(cr, 0.18, 0.18, 0.18);
+		cairo_rectangle(cr, bx, y, btn_w, 36);
+		cairo_fill(cr);
+		cairo_set_source_rgb(cr, 1, 1, 1);
+		zmc_text(cr, targets[i], FONT_REGULAR, 13, bx + 10, y + 9, 0);
+		zmc_add_hit(bx, y, btn_w, 36, ACT_WALL_TARGET, i);
+	}
+	y += 36 + 12;
+	if (n_walls < 0) walls_scan();
+	const char *current = app.wall_target == 2 ? app.lock_wall : app.start_wall;
+	/* three across, the screen's own shape; "none" first */
+	double tw = (zmc.width - 2 * MARGIN - 2 * gap) / 3.0, th = tw * 16.0 / 9.0;
+	for (int i = 0; i <= n_walls; i++) {
+		double x = MARGIN + (i % 3) * (tw + gap), ty = y + (i / 3) * (th + gap);
+		bool chosen;
+		if (i == 0) {
+			cairo_set_source_rgb(cr, 0.12, 0.12, 0.12);
+			cairo_rectangle(cr, x, ty, tw, th);
+			cairo_fill(cr);
+			cairo_set_source_rgb(cr, 0.75, 0.75, 0.75);
+			zmc_text(cr, "none", FONT_SEMILIGHT, 18, x + 10, ty + th - 32, 0);
+			chosen = !current[0];
+		} else {
+			int k = i - 1;
+			if (!wall_thumbs[k]) wall_thumbs[k] = thumb_cover(walls[k], (int)(tw * 2), (int)(th * 2));
+			if (wall_thumbs[k]) {
+				cairo_save(cr);
+				cairo_rectangle(cr, x, ty, tw, th);
+				cairo_clip(cr);
+				cairo_translate(cr, x, ty);
+				cairo_scale(cr, 0.5, 0.5);
+				cairo_set_source_surface(cr, wall_thumbs[k], 0, 0);
+				cairo_paint(cr);
+				cairo_restore(cr);
+			} else {
+				cairo_set_source_rgb(cr, 0.2, 0.2, 0.2);
+				cairo_rectangle(cr, x, ty, tw, th);
+				cairo_fill(cr);
+			}
+			chosen = strcmp(current, walls[k]) == 0;
+		}
+		if (chosen) {
+			zmc_set_rgb(cr, ACCENTS[app.accent].color);
+			cairo_set_line_width(cr, 4);
+			cairo_rectangle(cr, x + 2, ty + 2, tw - 4, th - 4);
+			cairo_stroke(cr);
+		}
+		zmc_add_hit(x, ty, tw, th, ACT_WALL, i);
+	}
+	y += ((n_walls + 1 + 2) / 3) * (th + gap);
+	if (n_walls == 0) {
+		cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+		zmc_text(cr, "No photos in Pictures.", FONT_REGULAR, 13, MARGIN, y, 0);
+		y += 24;
+	}
+	return y;
+}
+
+/* The accent picker, as the phone's: four swatches a row, each row a strip
+ * that the page change turns in on its own, 33 ms after the one above
+ * (TurnstileFeatherList in UIXMobile; the core's ROW_STAGGER_MS). */
+static double draw_accents(cairo_t *cr) {
+	double y = zmc_header(cr, "accents");
+	double gap = 10, side = (zmc.width - 2 * MARGIN - 3 * gap) / 4;
+	int rows = (N_ACCENTS + 3) / 4;
+	for (int row = 0; row < rows; row++) {
+		double sy = y + row * (side + gap);
+		for (int i = row * 4; i < N_ACCENTS && i < row * 4 + 4; i++) {
+			double x = MARGIN + (i % 4) * (side + gap);
+			zmc_set_rgb(cr, ACCENTS[i].color);
+			cairo_rectangle(cr, x, sy, side, side);
+			cairo_fill(cr);
+			if (i == app.accent) {
+				cairo_set_source_rgb(cr, 1, 1, 1);
+				cairo_set_line_width(cr, 3);
+				cairo_rectangle(cr, x + 1.5, sy + 1.5, side - 3, side - 3);
+				cairo_stroke(cr);
+			}
+			zmc_add_hit(x, sy, side, side, ACT_ACCENT, i);
+		}
+		/* the row itself, after its swatches (the first hit under a finger
+		 * wins): it is what makes the row one strip of the turnstile */
+		zmc_add_hit(0, sy, zmc.width, side, 0, 0);
+	}
+	return y + rows * (side + gap) + 20;
+}
+
+static double draw_theme(cairo_t *cr) {
+	double y = zmc_header(cr, "theme");
+	cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+	zmc_text(cr, "Accent colour", FONT_REGULAR, 13.5, MARGIN, y, 0);
+	/* Windows Phone's list picker, collapsed: the box shows the choice and
+	 * opens the full-screen picker (UIXMobile!ListPicker in full mode) */
+	y += 20;
+	cairo_set_source_rgb(cr, 1, 1, 1);
+	cairo_set_line_width(cr, 2);
+	cairo_rectangle(cr, MARGIN + 1, y + 1, zmc.width - 2 * MARGIN - 2, 40);
+	cairo_stroke(cr);
+	zmc_set_rgb(cr, ACCENTS[app.accent].color);
+	cairo_rectangle(cr, MARGIN + 10, y + 10, 22, 22);
+	cairo_fill(cr);
+	cairo_set_source_rgb(cr, 1, 1, 1);
+	zmc_text(cr, ACCENTS[app.accent].name, FONT_REGULAR, 16, MARGIN + 42, y + 10, 0);
+	zmc_add_hit(0, y - 4, zmc.width, 50, ACT_OPEN_PAGE, PAGE_ACCENTS);
+	y += 62;
+	double gap = 8;
+
+	cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+	zmc_text(cr, "Start screen columns", FONT_REGULAR, 13.5, MARGIN, y, 0);
+	y += 24;
+	for (int c = 2; c <= 4; c++) {
+		double btn_w = (zmc.width - 2 * MARGIN - 2 * gap) / 3.0;
+		double bx = MARGIN + (c - 2) * (btn_w + gap);
+		if (app.columns == c) {
+			zmc_set_rgb(cr, ACCENTS[app.accent].color);
+			cairo_rectangle(cr, bx, y, btn_w, 36);
+			cairo_fill(cr);
+		} else {
+			cairo_set_source_rgb(cr, 0.18, 0.18, 0.18);
+			cairo_rectangle(cr, bx, y, btn_w, 36);
+			cairo_fill(cr);
+		}
+		cairo_set_source_rgb(cr, 1, 1, 1);
+		char label[16];
+		snprintf(label, sizeof(label), "%d columns", c);
+		zmc_text(cr, label, FONT_REGULAR, 13, bx + 10, y + 9, 0);
+		zmc_add_hit(bx, y, btn_w, 36, ACT_COLUMNS, c);
+	}
+	return draw_walls(cr, y + 60) + 24;
+}
+
+/* The brightness as it is now, in percent (the shell or sensord may have
+ * changed it); -1 when it cannot be told. The shell publishes its effective
+ * brightness to $XDG_RUNTIME_DIR/ztmetro.brightness: on the S9 the panel sits
+ * at a band level (20/40/70/100 %) with the rest done in software, so reading
+ * /sys would make the slider snap to the band. The file is the real value;
+ * /sys is only the fallback when the shell has not written it. */
+static int brightness_now(void) {
+	const char *runtime = getenv("XDG_RUNTIME_DIR");
+	if (runtime) {
+		char path[256], v[16] = "";
+		snprintf(path, sizeof(path), "%s/ztmetro.brightness", runtime);
+		read_sys_file(path, v, sizeof(v));
+		if (v[0]) {
+			int p = atoi(v);
+			if (p > 0) return p;
+		}
+	}
+	char a[16], b[16];
+	read_sys_file("/sys/class/backlight/s9p-panel/brightness", a, sizeof(a));
+	read_sys_file("/sys/class/backlight/s9p-panel/max_brightness", b, sizeof(b));
+	int level = atoi(a), max = atoi(b);
+	return a[0] && max > 0 ? (level * 100 + max / 2) / max : -1;
+}
+
+/* While the display page is open the slider follows the screen, except
+ * under the finger. */
+static void display_tick(void) {
+	int now = brightness_now();
+	if (zmc.page == PAGE_DISPLAY && !zmc.sliding && now > 0 && now != app.brightness) {
+		app.brightness = now < 1 ? 1 : now;
+		zmc_redraw();
+	}
+}
+
+static double draw_display(cairo_t *cr) {
+	auto_load();
+	double y = zmc_header(cr, "display");
+
+	zmc_slider(cr, MARGIN, y, zmc.width - 2 * MARGIN, app.brightness, "Screen brightness", ACT_BRIGHTNESS_STEP);
+	y += 62;
+
+	cairo_set_source_rgb(cr, 1, 1, 1);
+	zmc_text(cr, "Automatically adjust brightness", FONT_SEMILIGHT, 20, MARGIN, y, 0);
+	cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+	zmc_text(cr, app.autobrightness ? "On" : "Off", FONT_REGULAR, 13, MARGIN, y + 26, 0);
+	zmc_toggle(cr, zmc.width - MARGIN - 54, y + 6, app.autobrightness);
+	zmc_add_hit(0, y - 4, zmc.width, 50, ACT_AUTOBRIGHTNESS, 0);
+	y += 66;
+
+	cairo_set_source_rgb(cr, 1, 1, 1);
+	zmc_text(cr, "OpenTone", FONT_SEMILIGHT, 20, MARGIN, y, 0);
+	cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+	zmc_text(cr, app.opentone ? "On" : "Off", FONT_REGULAR, 13, MARGIN, y + 26, 0);
+	zmc_toggle(cr, zmc.width - MARGIN - 54, y + 6, app.opentone);
+	zmc_add_hit(0, y - 4, zmc.width, 50, ACT_OPENTONE, 0);
+	y += 66;
+
+	static const char *const timeouts[] = { "30 seconds", "1 minute", "3 minutes", "5 minutes", "Never" };
+	y = picker(cr, y, "Screen times out after", timeouts, 5, app.timeout_idx, ACT_TIMEOUT_CYCLE);
+	static const char *const scales[] = { "3.5x (Compact)", "4.0x (Standard S9)", "4.5x (Large)" };
+	y = picker(cr, y, "Display scaling", scales, 3, app.scale_idx, ACT_SCALE_CYCLE);
+	static const char *const nav_sizes[] = { "Standard (48 pt)", "Compact (40 pt)", "Expanded (56 pt)" };
+	y = picker(cr, y, "Navigation bar widget size", nav_sizes, 3, app.nav_size_idx, ACT_NAV_SIZE_CYCLE);
+
+	return y + 20;
+}
+
+/* The network a held row's menu is for (-1: none), and the one the details
+ * page shows. */
+static int wifi_menu = -1;
+static char wifi_net[64], wifi_net_info[400];
+static bool wifi_net_auto = true;
+static FILE *wifi_net_pipe;
+static size_t wifi_net_len;
+
+static int wifi_bars_of(int signal) {
+	return signal >= 75 ? 4 : signal >= 55 ? 3 : signal >= 35 ? 2 : signal > 0 ? 1 : 0;
+}
+
+/* What a held network offers: by what is known of it. */
+static int wifi_menu_items(const struct network *n, const char *items[3]) {
+	int count = 0;
+	items[count++] = n->in_use ? "disconnect" : "connect";
+	if (n->known) {
+		items[count++] = "details";
+		items[count++] = "delete";
+	}
+	return count;
+}
+
+/* ---- Bluetooth (bluetoothctl; the controller is bluetooth/README.md's) ------ */
+
+#define MAX_BT 24
+struct bt_device {
+	char mac[18], name[64], icon[32];
+	bool paired, connected;
+};
+static struct {
+	bool on, loading;
+	struct bt_device dev[MAX_BT];
+	int n;
+	char status[120];
+} bt;
+
+/* "yes|no", then "@devices" and one "MAC|name|paired|connected|icon" each */
+#define BT_QUERY "p=$(bluetoothctl show 2>/dev/null | sed -n 's/.*Powered: //p'); echo \"${p:-no}\"; " \
+	"echo @devices; bluetoothctl devices 2>/dev/null | while read -r _ mac name; do " \
+	"i=$(bluetoothctl info \"$mac\" 2>/dev/null); " \
+	"echo \"$mac|$name|$(echo \"$i\" | sed -n 's/.*Paired: //p')|$(echo \"$i\" | sed -n 's/.*Connected: //p')|" \
+	"$(echo \"$i\" | sed -n 's/.*Icon: //p')\"; done"
+static FILE *bt_pipe;
+static char bt_buf[8192];
+static size_t bt_len;
+
+static void bt_parse(char *text) {
+	bool devices = false;
+	bt.n = 0;
+	for (char *line = strtok(text, "\n"); line; line = strtok(NULL, "\n")) {
+		if (strcmp(line, "@devices") == 0) {
+			devices = true;
+		} else if (!devices) {
+			bt.on = strncmp(line, "yes", 3) == 0;
+		} else if (bt.n < MAX_BT) {
+			char *f[5] = { line, "", "", "", "" };
+			for (int i = 1; i < 5; i++) {
+				char *bar = strchr(f[i - 1], '|');
+				if (!bar) break;
+				*bar = 0;
+				f[i] = bar + 1;
+			}
+			struct bt_device *d = &bt.dev[bt.n++];
+			snprintf(d->mac, sizeof(d->mac), "%s", f[0]);
+			snprintf(d->name, sizeof(d->name), "%s", f[1][0] ? f[1] : f[0]);
+			d->paired = strncmp(f[2], "yes", 3) == 0;
+			d->connected = strncmp(f[3], "yes", 3) == 0;
+			snprintf(d->icon, sizeof(d->icon), "%s", f[4]);
+		}
+	}
+	/* connected first, then paired, then the rest */
+	for (int i = 1; i < bt.n; i++) {
+		struct bt_device d = bt.dev[i];
+		int rank = d.connected * 2 + d.paired, j = i;
+		while (j > 0 && bt.dev[j - 1].connected * 2 + bt.dev[j - 1].paired < rank) {
+			bt.dev[j] = bt.dev[j - 1];
+			j--;
+		}
+		bt.dev[j] = d;
+	}
+}
+
+static void bt_ready(int fd, void *data) {
+	ssize_t n = read(fd, bt_buf + bt_len, sizeof(bt_buf) - 1 - bt_len);
+	if (n > 0) {
+		bt_len += (size_t)n;
+		if (bt_len < sizeof(bt_buf) - 1) return;
+	}
+	zmc_watch_fd(fd, NULL, NULL);
+	pclose(bt_pipe);
+	bt_pipe = NULL;
+	bt_buf[bt_len] = 0;
+	bt_parse(bt_buf);
+	bt.loading = false;
+	zmc_busy(false);
+	zmc_redraw();
+}
+
+/* Ask again, after running `first` (a shell command, or NULL). */
+static void bt_refresh(const char *first) {
+	if (bt_pipe) return;
+	char command[2048];
+	snprintf(command, sizeof(command), "%s%s" BT_QUERY, first ? first : "", first ? "; " : "");
+	bt_pipe = popen(command, "r");
+	if (!bt_pipe) return;
+	bt_len = 0;
+	bt.loading = true;
+	zmc_watch_fd(fileno(bt_pipe), bt_ready, NULL);
+	if (zmc.page == PAGE_BLUETOOTH) {
+		zmc_busy(true);	/* (the hub's line fills in by itself) */
+	}
+}
+
+/* A MAC address, as bluetoothctl prints it, is safe in a command: checked. */
+static bool bt_mac_ok(const char *mac) {
+	if (strlen(mac) != 17) return false;
+	for (int i = 0; i < 17; i++) {
+		if (i % 3 == 2 ? mac[i] != ':' : !isxdigit((unsigned char)mac[i])) return false;
+	}
+	return true;
+}
+
+static void bt_summary(char *out, size_t size) {
+	if (!bt.on) {
+		snprintf(out, size, "off");
+		return;
+	}
+	for (int i = 0; i < bt.n; i++) {
+		if (bt.dev[i].connected) {
+			snprintf(out, size, "connected to %s", bt.dev[i].name);
+			return;
+		}
+	}
+	snprintf(out, size, "on");
+}
+
+/* The connected device's battery, as ztos-bt-state has it (-1: not said). */
+static int bt_battery(void) {
+	char path[256], line[64];
+	const char *runtime = getenv("XDG_RUNTIME_DIR");
+	snprintf(path, sizeof(path), "%s/ztos-bt", runtime ? runtime : "/tmp");
+	FILE *f = fopen(path, "r");
+	int battery = -1;
+	while (f && fgets(line, sizeof(line), f)) {
+		if (strncmp(line, "battery=", 8) == 0 && line[8] >= '0' && line[8] <= '9') battery = atoi(line + 8);
+	}
+	if (f) fclose(f);
+	return battery;
+}
+
+static int bt_menu = -1;	/* the device whose menu is open, or -1 */
+
+/* As Windows Phone 8.1 has it: "Status" with its switch, the line that says
+ * the phone can be found, then the devices in one flat list, the name large
+ * and its state under it. The page looks for devices by itself while it is
+ * open. Tap: pair, connect or disconnect; tap and hold: a menu. */
+static double draw_bluetooth(cairo_t *cr) {
+	double y = zmc_header(cr, "bluetooth");
+	y = zmc_switch(cr, y, "Status", bt.on, ACT_BT_POWER);
+	cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+	if (!bt.on) {
+		return y;
+	}
+	y += zmc_text(cr, "Now discoverable as \"ztOS Bluetooth Device\". Your phone is searching for "
+		"Bluetooth devices.", FONT_REGULAR, 14, MARGIN, y, zmc.width - 2 * MARGIN) + 18;
+	if (bt.status[0]) {
+		zmc_set_rgb(cr, ACCENTS[app.accent].color);
+		y += zmc_text(cr, bt.status, FONT_REGULAR, 14, MARGIN, y, zmc.width - 2 * MARGIN) + 14;
+	}
+	int battery = bt_battery();
+	double menu_at = -1;
+	for (int i = 0; i < bt.n; i++) {
+		struct bt_device *d = &bt.dev[i];
+		cairo_set_source_rgb(cr, 1, 1, 1);
+		zmc_text_line(cr, d->name, FONT_SEMILIGHT, 26, MARGIN, y, zmc.width - 2 * MARGIN);
+		char line[64];
+		if (d->connected && battery >= 0) {
+			snprintf(line, sizeof(line), "Connected, battery %d%%", battery);
+		} else {
+			snprintf(line, sizeof(line), "%s", d->connected ? "Connected" : d->paired ? "Not connected" :
+				"Tap to pair");
+		}
+		if (d->connected) {
+			zmc_set_rgb(cr, ACCENTS[app.accent].color);
+		} else {
+			cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+		}
+		zmc_text(cr, line, FONT_REGULAR, 14, MARGIN, y + 34, 0);
+		zmc_add_hit(0, y - 4, zmc.width, 64, ACT_BT_DEVICE, i);
+		if (i == bt_menu) {
+			menu_at = y + 60;
+		}
+		y += 70;
+	}
+	if (bt.n == 0) {
+		cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+		y += zmc_text(cr, "No devices.", FONT_REGULAR,
+			14, MARGIN, y, zmc.width - 2 * MARGIN) + 20;
+	}
+	if (bt_menu >= 0 && bt_menu < bt.n && menu_at >= 0) {
+		struct bt_device *d = &bt.dev[bt_menu];
+		const char *items[2] = { d->connected ? "disconnect" : d->paired ? "connect" : "pair", "delete" };
+		zmc_menu(cr, menu_at, items, d->paired ? 2 : 1, ACT_BT_MENU, ACT_BT_MENU_CLOSE);
+	}
+	return y + 20;
+}
+
+/* While the page is open: look again every 15 s (8 s of searching). */
+static void bt_tick(void) {
+	if (zmc.page == PAGE_BLUETOOTH && bt.on && bt_menu < 0) {
+		bt_refresh("bluetoothctl --timeout 8 scan on >/dev/null 2>&1");
+	}
+}
+
+static double draw_wifi(cairo_t *cr) {
+	double y = zmc_header(cr, "Wi-Fi");
+	y = zmc_switch(cr, y, "Wi-Fi networking", app.wifi_on, ACT_WIFI_RADIO);
+	y = zmc_switch(cr, y, "Suspend Wi-Fi on sleep", app.wifi_suspend, ACT_WIFI_SUSPEND);
+
+	if (app.wifi_status[0]) {
+		zmc_set_rgb(cr, ACCENTS[app.accent].color);
+		y += zmc_text(cr, app.wifi_status, FONT_REGULAR, 13.5, MARGIN, y - 6, zmc.width - 2 * MARGIN) + 10;
+	}
+	if (!app.wifi_on) {
+		return y;
+	}
+	if (app.wifi_loading && app.n_networks == 0) {
+		cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+		zmc_text(cr, "looking for networks…", FONT_REGULAR, 13.5, MARGIN, y, 0);
+		return y + 40;
+	}
+
+	double menu_at = -1;
+	for (int i = 0; i < app.n_networks; i++) {
+		struct network *n = &app.networks[i];
+		char detail[96];
+		snprintf(detail, sizeof(detail), "%s", n->in_use ? "connected" :
+			n->known ? (n->secured ? "saved, secured" : "saved, open") :
+			n->secured ? "secured" : "open");
+		/* the fan, as many of its arcs lit as the signal has */
+		if (n->in_use) {
+			zmc_set_rgb(cr, ACCENTS[app.accent].color);
+		} else {
+			cairo_set_source_rgb(cr, 1, 1, 1);
+		}
+		zmc_wifi_glyph(cr, MARGIN - 2, y + 8, 30, wifi_bars_of(n->signal));
+		zmc_text_line(cr, n->ssid, FONT_SEMILIGHT, 22, MARGIN + 42, y, zmc.width - MARGIN - 42 - 12);
+		if (n->in_use) {
+			zmc_set_rgb(cr, ACCENTS[app.accent].color);
+		} else {
+			cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+		}
+		zmc_text(cr, detail, FONT_REGULAR, 12.5, MARGIN + 42, y + 29, 0);
+		if (n->secured) {
+			/* a small padlock at the fan's foot */
+			cairo_set_source_rgb(cr, 0.75, 0.75, 0.75);
+			cairo_rectangle(cr, MARGIN + 19, y + 30, 9, 7);
+			cairo_fill(cr);
+			cairo_set_line_width(cr, 1.5);
+			cairo_arc(cr, MARGIN + 23.5, y + 30, 3, M_PI, 2 * M_PI);
+			cairo_stroke(cr);
+		}
+		zmc_add_hit(0, y - 4, zmc.width, 56, ACT_WIFI_CONNECT, i);
+		if (i == wifi_menu) {
+			menu_at = y + 52;
+		}
+		y += 60;
+	}
+
+	zmc_set_rgb(cr, ACCENTS[app.accent].color);
+	zmc_text(cr, "search again", FONT_SEMILIGHT, 19, MARGIN, y + 8, 0);
+	zmc_add_hit(0, y, zmc.width, 46, ACT_WIFI_RESCAN, 0);
+	y += 72;
+
+	if (wifi_menu >= 0 && wifi_menu < app.n_networks && menu_at >= 0) {
+		const char *items[3];
+		int count = wifi_menu_items(&app.networks[wifi_menu], items);
+		zmc_menu(cr, menu_at, items, count, ACT_WIFI_MENU, ACT_WIFI_MENU_CLOSE);
+	}
+	return y;
+}
+
+/* One network: what the phone knows of it. */
+static double draw_wifi_net(cairo_t *cr) {
+	double y = zmc_header(cr, "network");
+	const struct network *n = NULL;
+	for (int i = 0; i < app.n_networks; i++) {
+		if (strcmp(app.networks[i].ssid, wifi_net) == 0) n = &app.networks[i];
+	}
+	cairo_set_source_rgb(cr, 1, 1, 1);
+	if (n) {
+		zmc_wifi_glyph(cr, MARGIN - 2, y + 2, 34, wifi_bars_of(n->signal));
+	}
+	y += zmc_text(cr, wifi_net, FONT_SEMILIGHT, 26, MARGIN + (n ? 46 : 0), y, zmc.width - 2 * MARGIN - 46) + 22;
+	char value[64];
+	y = zmc_field(cr, y, "Status", !n ? "not in range" : n->in_use ? "Connected" : "Not connected");
+	if (n) {
+		snprintf(value, sizeof(value), "%d %%", n->signal);
+		y = zmc_field(cr, y, "Signal", value);
+		y = zmc_field(cr, y, "Security", n->security);
+	}
+	if (wifi_net_info[0]) {
+		/* "IP address|x", one to a line, as the question below returns them */
+		char copy[400], *save = NULL;
+		snprintf(copy, sizeof(copy), "%s", wifi_net_info);
+		for (char *line = strtok_r(copy, "\n", &save); line; line = strtok_r(NULL, "\n", &save)) {
+			char *bar = strchr(line, '|');
+			if (bar && bar[1]) {
+				*bar = 0;
+				y = zmc_field(cr, y, line, bar + 1);
+			}
+		}
+	}
+	y = zmc_switch(cr, y + 6, "Connect automatically", wifi_net_auto, ACT_WIFI_AUTO);
+	if (n && n->in_use) {
+		y = zmc_entry(cr, y, "disconnect", "", ACT_WIFI_DISCONNECT, 0);
+	} else if (n) {
+		y = zmc_entry(cr, y, "connect", "", ACT_WIFI_CONNECT, (int)(n - app.networks));
+	}
+	y = zmc_entry(cr, y, "delete", "", ACT_WIFI_FORGET, 0);
+	return y + 20;
+}
+
+/* A network met for the first time: its password. */
+static double draw_wifi_join(cairo_t *cr) {
+	double y = zmc_header(cr, "sign in");
+	char shown[80];
+	cairo_set_source_rgb(cr, 1, 1, 1);
+	y += zmc_text(cr, wifi_join_ssid, FONT_SEMILIGHT, 24, MARGIN, y, zmc.width - 2 * MARGIN) + 14;
+	if (wifi_show_password) {
+		snprintf(shown, sizeof(shown), "%s", wifi_password);
+	} else {
+		size_t n = strlen(wifi_password);
+		shown[0] = 0;
+		for (size_t i = 0; i < n && i < 25; i++) strcat(shown, "\u2022");
+	}
+	y = zmc_textbox(cr, y, "Password", shown, wifi_typing, ACT_WIFI_PASSWORD, 0);
+	y = zmc_switch(cr, y, "Show password", wifi_show_password, ACT_WIFI_SHOW);
+	bool enough = strlen(wifi_password) >= 8;
+	y = zmc_entry(cr, y, "done", enough ? "connect to this network" : "at least 8 characters",
+		enough ? ACT_WIFI_JOIN : ACT_NONE, 0);
+	return y + 20;
+}
+
+static void apn_load(void) {
+	char line[200];
+	FILE *f = fopen(APN_FILE, "r");
+	while (f && fgets(line, sizeof(line), f)) {
+		char *eq = strchr(line, '=');
+		if (line[0] == '#' || !eq) continue;
+		*eq = 0;
+		char *key = trim(line), *val = trim(eq + 1);
+		if (!strcmp(key, "apn")) snprintf(apn_field[0], sizeof(apn_field[0]), "%s", val);
+		else if (!strcmp(key, "user")) snprintf(apn_field[1], sizeof(apn_field[1]), "%s", val);
+		else if (!strcmp(key, "password")) snprintf(apn_field[2], sizeof(apn_field[2]), "%s", val);
+		else if (!strcmp(key, "auth")) apn_auth = !strcmp(val, "pap") ? 1 : !strcmp(val, "chap") ? 2 : 0;
+	}
+	if (f) fclose(f);
+}
+
+/* ztoscorenetworkingd reads the file when it next connects, and is told to do that now. */
+static void apn_save(void) {
+	static const char *const auths[] = { "none", "pap", "chap" };
+	FILE *f = fopen(APN_FILE, "w");
+	if (!f) {
+		snprintf(apn_note, sizeof(apn_note), "could not be saved (%s)", strerror(errno));
+		return;
+	}
+	fprintf(f, "# the mobile data access point (Settings > cellular + SIM)\napn = %s\nuser = %s\n"
+		"password = %s\nauth = %s\n", apn_field[0], apn_field[1], apn_field[2], auths[apn_auth]);
+	fclose(f);
+	pipe_tell("/run/ztoscorenetworking.ctl", "apn\n");
+	pipe_tell("/run/zrn-modem.ctl", "apn\n");
+	snprintf(apn_note, sizeof(apn_note), "saved; reconnecting with it");
+}
+
+static double draw_mobile(cairo_t *cr) {
+	cell_load();
+	double y = zmc_header(cr, "cellular + SIM");
+	char value[128];
+	if (!cell.known) {
+		cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+		y += zmc_text(cr, "The modem's daemon (ztoscorenetworkingd) is not running.", FONT_REGULAR, 13.5, MARGIN, y,
+			zmc.width - 2 * MARGIN) + 20;
+		return y;
+	}
+	y = zmc_switch(cr, y, "Data connection", app.mobile_data, ACT_MOBILE_DATA);
+	snprintf(value, sizeof(value), "%s", !app.mobile_data ? "Off" : cell.data ? "Connected" :
+		"Connecting, or no connection yet");
+	y = zmc_field(cr, y, "Mobile data", value);
+
+	snprintf(value, sizeof(value), "%s%s%s", strcmp(cell.sim, "ready") ? "No SIM" :
+		cell.operator[0] ? cell.operator : "No service", cell.tech[0] ? ", " : "", cell.tech);
+	y = zmc_field(cr, y, "Network", value);
+	y = zmc_field(cr, y, "Registration", !strcmp(cell.registered, "home") ? "Registered, home network" :
+		!strcmp(cell.registered, "roaming") ? "Registered, roaming" :
+		!strcmp(cell.registered, "searching") ? "Searching" :
+		!strcmp(cell.registered, "denied") ? "Refused by the network" : "Not registered");
+
+	snprintf(value, sizeof(value), "%s%s", apn_field[0], apn_field[1][0] ? ", with a user name" : "");
+	y = zmc_entry(cr, y, "access point", value, ACT_OPEN_PAGE, PAGE_APN);
+	return y + 20;
+}
+
+/* The access point mobile data connects through: its name, and a user name
+ * and password where the network wants them. */
+static double draw_apn(cairo_t *cr) {
+	static const char *const captions[] = { "APN", "User name", "Password" };
+	static const char *const auths[] = { "None", "PAP", "CHAP" };
+	double y = zmc_header(cr, "access point");
+	for (int i = 0; i < 3; i++) {
+		y = zmc_textbox(cr, y, captions[i], apn_field[i], apn_focus == i, ACT_APN_FIELD, i);
+	}
+	y = picker(cr, y, "Authentication", auths, 3, apn_auth, ACT_APN_AUTH);
+	y = zmc_entry(cr, y, "save", apn_note[0] ? apn_note : "write it and connect again", ACT_APN_SAVE, 0);
+	return y + 20;
+}
+
+/* A key of the keyboard, for the box that has it. */
+static void wifi_join(void);
+static void wifi_net_set(const char *ssid);
+
+/* Date and region jobs run off the drawing thread. */
+static const char *const DATE_REGIONS[] = { "United States", "United Kingdom",
+    "Sri Lanka (Sinhala)", "Sri Lanka (Tamil)", "India (English)", "Germany",
+    "France", "Japan", "Australia", "China", "International" };
+static const char *const DATE_LOCALES[] = { "en_US.UTF-8", "en_GB.UTF-8",
+    "si_LK.UTF-8", "ta_LK.UTF-8", "en_IN.UTF-8", "de_DE.UTF-8",
+    "fr_FR.UTF-8", "ja_JP.UTF-8", "en_AU.UTF-8", "zh_CN.UTF-8", "C.UTF-8" };
+/* the display language: LANG, for the programs that are translated */
+static const char *const LANG_NAMES[] = { "English (United States)", "English (United Kingdom)",
+    "සිංහල", "தமிழ்", "English (India)", "Deutsch", "Français", "日本語", "English (Australia)", "中文",
+    "English (plain)" };
+static int date_lang = 0;
+static char date_fields[4][256]; /* date, time, IANA zone, NTP servers */
+static bool date_synced;
+static char date_region[96] = "C.UTF-8", date_note[384];
+static int date_focus = -1, date_selected = 10;
+static bool date_auto = true;
+static FILE *date_pipe;
+static char date_result[4096];
+static size_t date_result_len;
+
+static void date_ready(int fd, void *data) {
+    ssize_t n = read(fd, date_result + date_result_len, sizeof(date_result)-1-date_result_len);
+    if (n > 0) {
+        date_result_len += n;
+        if (date_result_len < sizeof(date_result)-1) return;
+    } else if (n < 0 && (errno == EAGAIN || errno == EINTR)) return;
+    zmc_watch_fd(fd, NULL, NULL);
+    int result = pclose(date_pipe); date_pipe = NULL;
+    date_result[date_result_len] = 0;
+    char *save;
+    for (char *line = strtok_r(date_result, "\n", &save); line; line = strtok_r(NULL, "\n", &save)) {
+        char *eq = strchr(line, '=');
+        if (!eq) continue;
+        *eq++ = 0;
+        if (!strcmp(line, "Timezone")) snprintf(date_fields[2], sizeof(date_fields[2]), "%s", eq);
+        else if (!strcmp(line, "Date")) snprintf(date_fields[0], sizeof(date_fields[0]), "%s", eq);
+        else if (!strcmp(line, "Time")) snprintf(date_fields[1], sizeof(date_fields[1]), "%s", eq);
+        else if (!strcmp(line, "NTP")) date_auto = !strcmp(eq, "yes");
+        else if (!strcmp(line, "NTPSynchronized")) date_synced = !strcmp(eq, "yes");
+        else if (!strcmp(line, "Servers")) snprintf(date_fields[3], sizeof(date_fields[3]), "%s", eq);
+        else if (!strcmp(line, "Region")) {
+            snprintf(date_region, sizeof(date_region), "%s", eq);
+            date_selected = -1;
+            for (int i=0; i<11; i++) if (!strcmp(eq, DATE_LOCALES[i])) date_selected = i;
+        } else if (!strcmp(line, "Language")) {
+            for (int i=0; i<11; i++) if (!strcmp(eq, DATE_LOCALES[i])) date_lang = i;
+        } else if (!strcmp(line, "Note")) snprintf(date_note, sizeof(date_note), "%s", eq);
+    }
+    if (result && !date_note[0]) snprintf(date_note, sizeof(date_note), "Could not update date and region. Try again.");
+    if (!result) {
+        const char *runtime = getenv("XDG_RUNTIME_DIR");
+        char path[300];
+        if (runtime) {
+            snprintf(path, sizeof(path), "%s/ztmetro.ctl", runtime);
+            pipe_tell(path, "clock\n");
+        }
+    }
+    zmc_redraw();
+}
+
+static void date_job(int operation) {
+    if (date_pipe) return;
+    char command[8192];
+    if (operation) {
+        char zone[1600], region[600], date[1600], clock[1600], servers[1600];
+        shell_quote(zone, sizeof(zone), date_fields[2]);
+        shell_quote(region, sizeof(region), date_region);
+        shell_quote(date, sizeof(date), date_fields[0]);
+        shell_quote(clock, sizeof(clock), date_fields[1]);
+        shell_quote(servers, sizeof(servers), date_fields[3]);
+        if (operation == 3)
+            snprintf(command, sizeof(command), "ztos-auth /usr/local/libexec/ztos-date-region language %s 2>&1",
+                DATE_LOCALES[date_lang]);
+        else if (operation == 2)
+            snprintf(command, sizeof(command), "ztos-auth /usr/local/libexec/ztos-date-region sync %s 2>&1", servers);
+        else
+            snprintf(command, sizeof(command), "ztos-auth /usr/local/libexec/ztos-date-region apply %s %s %s %s %s %s 2>&1",
+                zone, region, date_auto ? "yes" : "no", date, clock, servers);
+        snprintf(date_note, sizeof(date_note), "Saving...");
+    } else {
+        snprintf(command, sizeof(command), "/usr/local/libexec/ztos-date-region status 2>&1");
+        date_note[0] = 0;
+    }
+    date_result_len = 0;
+    date_pipe = popen(command, "r");
+    if (!date_pipe) { snprintf(date_note, sizeof(date_note), "Unable to open date settings."); return; }
+    int fd = fileno(date_pipe);
+    fcntl(fd, F_SETFL, fcntl(fd, F_GETFL) | O_NONBLOCK);
+    zmc_watch_fd(fd, date_ready, NULL);
+}
+
+static double draw_date(cairo_t *cr) {
+    double y = zmc_header(cr, "date + region");
+    y = zmc_switch(cr, y, "Set time automatically", date_auto, ACT_DATE_AUTO);
+    if (!date_auto) {
+        y = zmc_textbox(cr, y, "Date (YYYY-MM-DD)", date_fields[0], date_focus == 0, ACT_DATE_FIELD, 0);
+        y = zmc_textbox(cr, y, "Time (HH:MM)", date_fields[1], date_focus == 1, ACT_DATE_FIELD, 1);
+    }
+    y = zmc_textbox(cr, y, "Time zone", date_fields[2], date_focus == 2, ACT_DATE_FIELD, 2);
+    y = picker(cr, y, "Display language", LANG_NAMES, 11, date_lang, ACT_DATE_LANG);
+    y = picker(cr, y, "Regional formats", DATE_REGIONS, 11, date_selected, ACT_DATE_REGION);
+    y = zmc_textbox(cr, y, "NTP servers", date_fields[3], date_focus == 3, ACT_DATE_FIELD, 3);
+    y = zmc_entry(cr, y, "sync now", date_synced ? "Time synchronized" : "Request time from your NTP server",
+        ACT_DATE_SYNC, 0);
+    y = zmc_entry(cr, y, date_pipe ? "please wait" : "save",
+        date_note[0] ? date_note : "Apply date, time zone and regional formats", ACT_DATE_SAVE, 0);
+    return y+20;
+}
+
+static void typed(const char *text) {
+    if (zmc.page == PAGE_DATE && date_focus >= 0 && !date_pipe) {
+        char *field = date_fields[date_focus]; size_t len = strlen(field);
+        if (text[0] == '\b') { if (len) field[len-1] = 0; }
+        else if (text[0] == '\n') { date_focus = -1; zmc_keyboard(false); }
+        else if (text[0] >= ' ' && text[0] < 127 && len+1 < sizeof(date_fields[0])) {
+            field[len] = text[0]; field[len+1] = 0;
+        }
+        date_note[0] = 0;
+        return;
+    }
+	if (zmc.page == PAGE_WIFI_JOIN && wifi_typing) {
+		size_t len = strlen(wifi_password);
+		if (text[0] == '\b') {
+			if (len) wifi_password[len - 1] = 0;
+		} else if (text[0] == '\n') {
+			if (len >= 8) wifi_join();
+		} else if (len < 63 && text[0] >= ' ') {
+			wifi_password[len] = text[0];
+			wifi_password[len + 1] = 0;
+		}
+		return;
+	}
+	if (zmc.page != PAGE_APN || apn_focus < 0) return;
+	char *field = apn_field[apn_focus];
+	size_t len = strlen(field), max = apn_focus == 0 ? 100 : 32;
+	apn_note[0] = 0;
+	if (text[0] == '\b') {
+		if (len) field[len - 1] = 0;
+	} else if (text[0] == '\n') {
+		apn_focus = apn_focus < 2 ? apn_focus + 1 : -1;	/* on to the next box */
+		if (apn_focus < 0) zmc_keyboard(false);
+	} else if (len < max && text[0] > ' ') {
+		field[len] = text[0];
+		field[len + 1] = 0;
+	}
+}
+
+static double draw_audio(cairo_t *cr) {
+	double y = zmc_header(cr, "ringtones + sounds");
+
+	zmc_slider(cr, MARGIN, y, zmc.width - 2 * MARGIN, app.media_vol, "Media + Apps", ACT_MEDIA_VOL_STEP);
+	y += 62;
+
+	zmc_slider(cr, MARGIN, y, zmc.width - 2 * MARGIN, app.ring_vol, "Ringer + Notifications", ACT_RING_VOL_STEP);
+	y += 62;
+
+	cairo_set_source_rgb(cr, 1, 1, 1);
+	zmc_text(cr, "Vibrate on ring", FONT_SEMILIGHT, 21, MARGIN, y, 0);
+	cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+	zmc_text(cr, app.vibrate_ring ? "On" : "Off", FONT_REGULAR, 13, MARGIN, y + 26, 0);
+	zmc_toggle(cr, zmc.width - MARGIN - 54, y + 4, app.vibrate_ring);
+	zmc_add_hit(0, y - 4, zmc.width, 52, ACT_VIBRATE_RING, 0);
+	y += 66;
+
+	cairo_set_source_rgb(cr, 1, 1, 1);
+	zmc_text(cr, "Vibrate on silent", FONT_SEMILIGHT, 21, MARGIN, y, 0);
+	cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+	zmc_text(cr, app.vibrate_silent ? "On" : "Off", FONT_REGULAR, 13, MARGIN, y + 26, 0);
+	zmc_toggle(cr, zmc.width - MARGIN - 54, y + 4, app.vibrate_silent);
+	zmc_add_hit(0, y - 4, zmc.width, 52, ACT_VIBRATE_SILENT, 0);
+	y += 66;
+
+	cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+	zmc_text(cr, "Sound engine", FONT_REGULAR, 13, MARGIN, y, 0);
+	cairo_set_source_rgb(cr, 1, 1, 1);
+	zmc_text(cr, "PipeWire 1.6.9 / PulseAudio Server", FONT_REGULAR, 15, MARGIN, y + 20, 0);
+
+	return y + 60;
+}
+
+static double draw_battery(cairo_t *cr) {
+	double y = zmc_header(cr, "battery saver");
+
+	char cap[32], stat[32], volt[32];
+	read_sys_file("/sys/class/power_supply/max170xx_battery/capacity", cap, sizeof(cap));
+	read_sys_file("/sys/class/power_supply/max170xx_battery/status", stat, sizeof(stat));
+	read_sys_file("/sys/class/power_supply/max170xx_battery/voltage_now", volt, sizeof(volt));
+	int pct = cap[0] ? atoi(cap) : 51;
+	double v = volt[0] ? atoi(volt) / 1000000.0 : 3.80;
+
+	char big_str[16];
+	snprintf(big_str, sizeof(big_str), "%d%%", pct);
+	cairo_set_source_rgb(cr, 1, 1, 1);
+	zmc_text(cr, big_str, FONT_LIGHT, 56, MARGIN, y, 0);
+	y += 64;
+
+	cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+	char est[64];
+	snprintf(est, sizeof(est), "%s, %.2f V, Maxim MAX17055", stat[0] ? stat : "Discharging", v);
+	zmc_text(cr, est, FONT_REGULAR, 14, MARGIN, y, 0);
+	y += 36;
+
+	cairo_set_source_rgb(cr, 1, 1, 1);
+	zmc_text(cr, "Battery Saver mode", FONT_SEMILIGHT, 21, MARGIN, y, 0);
+	cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+	zmc_text(cr, app.battery_saver ? "Conserving power" : "Standard performance", FONT_REGULAR, 13, MARGIN, y + 26, 0);
+	zmc_toggle(cr, zmc.width - MARGIN - 54, y + 4, app.battery_saver);
+	zmc_add_hit(0, y - 4, zmc.width, 52, ACT_BATTERY_SAVER, 0);
+	y += 72;
+
+	cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+	zmc_text(cr, "Battery information", FONT_REGULAR, 13, MARGIN, y, 0);
+	cairo_set_source_rgb(cr, 1, 1, 1);
+	zmc_text(cr, "3000 mAh Li-Ion, Health Good", FONT_REGULAR, 15, MARGIN, y + 20, 0);
+
+	return y + 60;
+}
+
+static double draw_cpu(cairo_t *cr) {
+	double y = zmc_header(cr, "processor");
+
+	char p0_f[32], p4_f[32], load[64];
+	read_sys_file("/sys/devices/system/cpu/cpufreq/policy0/scaling_cur_freq", p0_f, sizeof(p0_f));
+	read_sys_file("/sys/devices/system/cpu/cpufreq/policy4/scaling_cur_freq", p4_f, sizeof(p4_f));
+	read_sys_file("/proc/loadavg", load, sizeof(load));
+	double f0 = p0_f[0] ? atoi(p0_f) / 1000.0 : 1794.0;
+	double f4 = p4_f[0] ? atoi(p4_f) / 1000.0 : 2704.0;
+
+	cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+	zmc_text(cr, "SoC Architecture", FONT_REGULAR, 13, MARGIN, y, 0);
+	cairo_set_source_rgb(cr, 1, 1, 1);
+	zmc_text(cr, "Samsung Exynos 9810 (10nm LPP)", FONT_SEMILIGHT, 20, MARGIN, y + 18, 0);
+	y += 56;
+
+	cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+	zmc_text(cr, "LITTLE Cluster (Cores 0-3, Cortex-A55)", FONT_REGULAR, 13, MARGIN, y, 0);
+	char c0_str[64];
+	snprintf(c0_str, sizeof(c0_str), "%.0f MHz (350 - 1794 MHz)", f0);
+	cairo_set_source_rgb(cr, 1, 1, 1);
+	zmc_text(cr, c0_str, FONT_REGULAR, 16, MARGIN, y + 20, 0);
+	y += 52;
+
+	cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+	zmc_text(cr, "BIG Cluster (Cores 4-7, M3 Cheetah)", FONT_REGULAR, 13, MARGIN, y, 0);
+	char c4_str[64];
+	snprintf(c4_str, sizeof(c4_str), "%.0f MHz (400 - 2704 MHz)", f4);
+	cairo_set_source_rgb(cr, 1, 1, 1);
+	zmc_text(cr, c4_str, FONT_REGULAR, 16, MARGIN, y + 20, 0);
+	y += 52;
+
+	cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+	zmc_text(cr, "CPU Governor (tap to switch)", FONT_REGULAR, 13, MARGIN, y, 0);
+	zmc_set_rgb(cr, ACCENTS[app.accent].color);
+	zmc_text(cr, app.cpu_gov, FONT_SEMILIGHT, 22, MARGIN, y + 20, 0);
+	zmc_add_hit(0, y - 4, zmc.width, 54, ACT_CPU_GOVERNOR, 0);
+	y += 62;
+
+	cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+	zmc_text(cr, "System Load Average", FONT_REGULAR, 13, MARGIN, y, 0);
+	cairo_set_source_rgb(cr, 1, 1, 1);
+	zmc_text(cr, load[0] ? load : "0.05 0.10 0.08", FONT_REGULAR, 14, MARGIN, y + 20, 0);
+
+	return y + 60;
+}
+
+static double draw_vm(cairo_t *cr) {
+	double y = zmc_header(cr, "virtual memory");
+
+	struct sysinfo si;
+	sysinfo(&si);
+	double total_ram = si.totalram * si.mem_unit / 1e9;
+	double free_ram = si.freeram * si.mem_unit / 1e9;
+	double used_ram = total_ram - free_ram;
+
+	cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+	zmc_text(cr, "Physical Memory (LPDDR4X)", FONT_REGULAR, 13, MARGIN, y, 0);
+	char ram_str[64];
+	snprintf(ram_str, sizeof(ram_str), "%.2f GB used of %.2f GB", used_ram, total_ram);
+	cairo_set_source_rgb(cr, 1, 1, 1);
+	zmc_text(cr, ram_str, FONT_SEMILIGHT, 20, MARGIN, y + 20, 0);
+	y += 58;
+
+	zmc_slider(cr, MARGIN, y, zmc.width - 2 * MARGIN, app.swappiness, "Kernel swappiness", ACT_SWAPPINESS_STEP);
+	y += 62;
+
+	static const char *const algos[] = { "lzo-rle (Fastest)", "zstd (High Ratio)", "lz4 (Balanced)" };
+	y = picker(cr, y, "ZRAM compression algorithm", algos, 3, app.comp_algo_idx, ACT_COMP_ALGO_CYCLE);
+
+	struct statvfs fs;
+	if (statvfs("/", &fs) == 0) {
+		double total_disk = (double)fs.f_blocks * fs.f_frsize / 1e9;
+		double free_disk = (double)fs.f_bavail * fs.f_frsize / 1e9;
+		cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+		zmc_text(cr, "UFS 2.1 Storage", FONT_REGULAR, 13, MARGIN, y, 0);
+		char disk_str[64];
+		snprintf(disk_str, sizeof(disk_str), "%.1f GB free of %.1f GB", free_disk, total_disk);
+		cairo_set_source_rgb(cr, 1, 1, 1);
+		zmc_text(cr, disk_str, FONT_REGULAR, 16, MARGIN, y + 20, 0);
+		y += 52;
+	}
+
+	return y + 20;
+}
+
+static double draw_gpu(cairo_t *cr) {
+	double y = zmc_header(cr, "graphics");
+
+	char cur_f[32];
+	read_sys_file("/sys/class/devfreq/17500000.gpu/cur_freq", cur_f, sizeof(cur_f));
+	double mhz = cur_f[0] ? atoi(cur_f) / 1000000.0 : 260.0;
+
+	cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+	zmc_text(cr, "GPU Engine", FONT_REGULAR, 13, MARGIN, y, 0);
+	cairo_set_source_rgb(cr, 1, 1, 1);
+	zmc_text(cr, "ARM Mali-G72 MP18 (Bifrost)", FONT_SEMILIGHT, 21, MARGIN, y + 18, 0);
+	y += 56;
+
+	cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+	zmc_text(cr, "Clock frequency", FONT_REGULAR, 13, MARGIN, y, 0);
+	char f_str[64];
+	snprintf(f_str, sizeof(f_str), "%.0f MHz (260, 455, 572 MHz)", mhz);
+	cairo_set_source_rgb(cr, 1, 1, 1);
+	zmc_text(cr, f_str, FONT_REGULAR, 16, MARGIN, y + 20, 0);
+	y += 52;
+
+	cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+	zmc_text(cr, "Devfreq Governor (tap to switch)", FONT_REGULAR, 13, MARGIN, y, 0);
+	zmc_set_rgb(cr, ACCENTS[app.accent].color);
+	zmc_text(cr, app.gpu_gov, FONT_SEMILIGHT, 22, MARGIN, y + 20, 0);
+	zmc_add_hit(0, y - 4, zmc.width, 54, ACT_GPU_GOVERNOR, 0);
+	y += 62;
+
+	cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+	zmc_text(cr, "Display Hardware", FONT_REGULAR, 13, MARGIN, y, 0);
+	cairo_set_source_rgb(cr, 1, 1, 1);
+	zmc_text(cr, "Super AMOLED 1440x2960 @ 60.00 Hz", FONT_REGULAR, 15, MARGIN, y + 20, 0);
+	y += 52;
+
+	cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+	zmc_text(cr, "Display Compositor", FONT_REGULAR, 13, MARGIN, y, 0);
+	cairo_set_source_rgb(cr, 1, 1, 1);
+	zmc_text(cr, "Wayland / wlroots 0.20 + OpenGL ES 2.0", FONT_REGULAR, 15, MARGIN, y + 20, 0);
+
+	return y + 60;
+}
+
+static double draw_keyboard(cairo_t *cr) {
+	double y = zmc_header(cr, "keyboard");
+    char height[64];
+    snprintf(height, sizeof(height), "Key height: %d", app.key_height);
+    zmc_slider(cr, MARGIN, y, zmc.width - 2 * MARGIN,
+        (app.key_height - 42) * 100 / 30, height, ACT_KEY_HEIGHT);
+    y += 76;
+    y = zmc_switch(cr, y, "Keyboard sounds", app.key_sound, ACT_KEY_SOUND);
+	cairo_set_source_rgb(cr, 1, 1, 1);
+	zmc_text(cr, "Vibrate on touch and typing", FONT_SEMILIGHT, 21, MARGIN, y, 0);
+	cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+	zmc_text(cr, app.haptics ? "On" : "Off", FONT_REGULAR, 13.5, MARGIN, y + 28, 0);
+	zmc_toggle(cr, zmc.width - MARGIN - 54, y + 4, app.haptics);
+	zmc_add_hit(0, y - 4, zmc.width, 56, ACT_HAPTICS, 0);
+	y += 68;
+
+	cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+	zmc_text(cr, "Keyboard layout", FONT_REGULAR, 13, MARGIN, y, 0);
+	cairo_set_source_rgb(cr, 1, 1, 1);
+	zmc_text(cr, "English (United States)", FONT_REGULAR, 15, MARGIN, y + 20, 0);
+
+	return y + 60;
+}
+
+/* What is felt, and how strongly. The shell plays every pulse (it has the
+ * motor) and reads these as soon as they are saved. */
+static double draw_haptics(cairo_t *cr) {
+	double y = zmc_header(cr, "haptics");
+	y = zmc_switch(cr, y, "Vibrate on touch", app.haptics, ACT_HAPTICS);
+	if (!app.haptics) {
+		return y + 20;
+	}
+	zmc_slider(cr, MARGIN, y, zmc.width - 2 * MARGIN, app.haptic_strength, "Overall strength", ACT_HAPTIC_STRENGTH);
+	y += 70;
+	/* a bar for each kind of touch: all the way left is off */
+	for (int g = 0; g < N_HAPTIC_GROUPS; g++) {
+		char caption[64];
+		if (app.haptic_group[g] > 0) {
+			snprintf(caption, sizeof(caption), "%s: %d%%", HAPTIC_GROUPS[g].title, app.haptic_group[g]);
+		} else {
+			snprintf(caption, sizeof(caption), "%s: off", HAPTIC_GROUPS[g].title);
+		}
+		zmc_slider(cr, MARGIN, y, zmc.width - 2 * MARGIN, app.haptic_group[g], caption, ACT_HAPTIC_GROUP + 1000 * g);
+		y += 58;
+		cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+		y += zmc_text(cr, HAPTIC_GROUPS[g].about, FONT_REGULAR, 12.5, MARGIN, y - 6, zmc.width - 2 * MARGIN) + 10;
+	}
+	cairo_set_source_rgb(cr, 1, 1, 1);
+	zmc_text(cr, "Try them", FONT_SEMILIGHT, 26, MARGIN, y + 6, 0);
+	y += 50;
+	static const char *const pulses[] = { "tick", "tap", "click", "heavy" };
+	static const char *const what[] = { "a press, a key, a notch", "something opening",
+		"a switch thrown, a tile resized", "a long press, a notification" };
+	for (int k = 0; k < 4; k++) {
+		y = zmc_entry(cr, y, pulses[k], what[k], ACT_HAPTIC_TRY, k);
+	}
+	return y + 20;
+}
+
+/* The action centre's eight quick actions: which one stands in each place. */
+static double draw_quick(cairo_t *cr) {
+	double y = zmc_header(cr, "notifications + actions");
+	for (int i = 0; i < 8; i++) {
+		char caption[32];
+		snprintf(caption, sizeof(caption), "Row %d, place %d", i / 4 + 1, i % 4 + 1);
+		y = picker(cr, y, caption, QUICK_NAMES, N_QUICK, app.quick[i], ACT_QUICK_SLOT + i);
+	}
+	return y + 20;
+}
+
+static double draw_about(cairo_t *cr) {
+	char value[256];
+	double y = zmc_header(cr, "about");
+
+	cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+	zmc_text(cr, "Phone", FONT_REGULAR, 13, MARGIN, y, 0);
+	cairo_set_source_rgb(cr, 1, 1, 1);
+	y += zmc_text(cr, "Samsung Galaxy S9 (SM-G960N starlte)", FONT_SEMILIGHT, 19, MARGIN, y + 18, zmc.width - 2 * MARGIN) + 30;
+
+	cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+	zmc_text(cr, "Operating System", FONT_REGULAR, 13, MARGIN, y, 0);
+	cairo_set_source_rgb(cr, 1, 1, 1);
+	y += zmc_text(cr, "ztOS Mobile (Arch Linux ARM)", FONT_SEMILIGHT, 19, MARGIN, y + 18, zmc.width - 2 * MARGIN) + 30;
+
+	struct utsname uts;
+	if (uname(&uts) == 0) {
+		snprintf(value, sizeof(value), "Linux %s", uts.release);
+		cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+		zmc_text(cr, "Kernel", FONT_REGULAR, 13, MARGIN, y, 0);
+		cairo_set_source_rgb(cr, 1, 1, 1);
+		y += zmc_text(cr, value, FONT_SEMILIGHT, 19, MARGIN, y + 18, zmc.width - 2 * MARGIN) + 30;
+	}
+
+	cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+	zmc_text(cr, "Shell", FONT_REGULAR, 13, MARGIN, y, 0);
+	cairo_set_source_rgb(cr, 1, 1, 1);
+	y += zmc_text(cr, "ztMETRO (Wayland / wlroots 0.20)", FONT_SEMILIGHT, 19, MARGIN, y + 18, zmc.width - 2 * MARGIN) + 30;
+
+	struct sysinfo si;
+	if (sysinfo(&si) == 0) {
+		long up = si.uptime;
+		snprintf(value, sizeof(value), "%ld hours, %ld mins", up / 3600, (up % 3600) / 60);
+		cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+		zmc_text(cr, "Uptime", FONT_REGULAR, 13, MARGIN, y, 0);
+		cairo_set_source_rgb(cr, 1, 1, 1);
+		y += zmc_text(cr, value, FONT_SEMILIGHT, 19, MARGIN, y + 18, zmc.width - 2 * MARGIN) + 30;
+	}
+
+	double start_y = y;
+	cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+	zmc_text(cr, "a project by", FONT_REGULAR, 13, MARGIN, y, 0);
+	cairo_set_source_rgb(cr, 1, 1, 1);
+	y += zmc_text(cr, "Zerone Brianstorm AKA Ometh Abeyrathne", FONT_SEMILIGHT, 19, MARGIN, y + 18, zmc.width - 2 * MARGIN) + 26;
+
+	if (app.about_show_repo) {
+		zmc_accent(cr);
+		y += zmc_text(cr, "https://github.com/Zerone-Laboratories/ztOS", FONT_REGULAR, 13, MARGIN, y, zmc.width - 2 * MARGIN) + 24;
+	} else {
+		y += 4;
+	}
+	zmc_add_hit(0, start_y - 4, zmc.width, y - start_y + 4, ACT_ABOUT_REPO, 0);
+
+	return y + 10;
+}
+
+/* zrnperfd's settings: it runs as root and does the work; this only asks. */
+static double draw_perf(cairo_t *cr) {
+	static const char *const profiles[] = { "Power saver", "Balanced", "Performance" };
+	double y = zmc_header(cr, "performance");
+	y = picker(cr, y, "Power profile", profiles, 3, app.perf_profile, ACT_PERF_PROFILE);
+	y = zmc_switch(cr, y, "Low power, screen off", app.perf_deepsleep, ACT_PERF_DEEPSLEEP);
+
+	static const char *const tickle_modes[] = { "None", "Nominal", "Moderate", "High" };
+	cairo_set_source_rgb(cr, 1, 1, 1);
+	zmc_text(cr, "Tickle", FONT_SEMILIGHT, 26, MARGIN, y, 0);
+	y += 44;
+	y = picker(cr, y, "On battery", tickle_modes, 4, app.tickle[0], ACT_TICKLE_BATTERY);
+	y = picker(cr, y, "Plugged in", tickle_modes, 4, app.tickle[1], ACT_TICKLE_CHARGING);
+	y = picker(cr, y, "Power saver profile", tickle_modes, 4, app.tickle[2], ACT_TICKLE_SAVER);
+	y = zmc_field(cr, y, "Tickle now", app.tickle_now);
+
+	char value[160], a[32], b[32], online[32];
+	read_sys_file("/sys/devices/system/cpu/cpufreq/policy0/scaling_max_freq", a, sizeof(a));
+	read_sys_file("/sys/devices/system/cpu/cpufreq/policy4/scaling_max_freq", b, sizeof(b));
+	read_sys_file("/sys/devices/system/cpu/online", online, sizeof(online));
+	snprintf(value, sizeof(value), "little %d MHz, big %d MHz, cores %s online",
+		atoi(a) / 1000, atoi(b) / 1000, online);
+	(void)0;
+	y = zmc_field(cr, y, "Limits now", value);
+	read_sys_file("/run/zrnperfd.status", a, sizeof(a));
+	y = zmc_field(cr, y, "Daemon", a[0] ? "zrnperfd running" : "zrnperfd is not running");
+	return y + 20;
+}
+
+static double draw_dev(cairo_t *cr) {
+	double y = zmc_header(cr, "developer tests");
+	y = zmc_switch(cr, y, "Demo tiles on Start", app.dev_demo_tiles, ACT_DEV_DEMO_TILES);
+	y = zmc_switch(cr, y, "Slow motion (5x)", app.dev_slow, ACT_DEV_SLOW);
+	static const char *const speeds[] = { "50 % (slow)", "75 %", "100 % (as on a Lumia)", "125 %",
+		"150 %", "200 % (fast)" };
+	y = picker(cr, y, "Animation speed", speeds, N_MENU_SPEEDS, app.menu_speed_idx, ACT_DEV_MENU_SPEED);
+	y = zmc_switch(cr, y, "Show touches", app.dev_touches, ACT_DEV_TOUCHES);
+	y = zmc_switch(cr, y, "Lock screen on wake", app.dev_lock, ACT_DEV_LOCK);
+	y = zmc_entry(cr, y, "ZrnDevTest", "logs, sensors and system state", ACT_DEV_OPEN_TEST, 0);
+	return y + 20;
+}
+
+static double render_page_content(cairo_t *cr, int p) {
+	switch (p) {
+	case PAGE_DATE: return draw_date(cr);
+	case PAGE_PERF: return draw_perf(cr);
+	case PAGE_DEV: return draw_dev(cr);
+	case PAGE_MAIN: return draw_main(cr);
+	case PAGE_APPS: return draw_apps(cr);
+	case PAGE_THEME: return draw_theme(cr);
+	case PAGE_ACCENTS: return draw_accents(cr);
+	case PAGE_DISPLAY: return draw_display(cr);
+	case PAGE_WIFI: return draw_wifi(cr);
+	case PAGE_BLUETOOTH: return draw_bluetooth(cr);
+	case PAGE_MOBILE: return draw_mobile(cr);
+	case PAGE_AUDIO: return draw_audio(cr);
+	case PAGE_BATTERY: return draw_battery(cr);
+	case PAGE_CPU: return draw_cpu(cr);
+	case PAGE_VM: return draw_vm(cr);
+	case PAGE_GPU: return draw_gpu(cr);
+	case PAGE_KEYBOARD: return draw_keyboard(cr);
+	case PAGE_ABOUT: return draw_about(cr);
+	case PAGE_HAPTICS: return draw_haptics(cr);
+	case PAGE_QUICK: return draw_quick(cr);
+	case PAGE_APN: return draw_apn(cr);
+	case PAGE_WIFI_JOIN: return draw_wifi_join(cr);
+	case PAGE_WIFI_NET: return draw_wifi_net(cr);
+	}
+	return 0;
+}
+
+static bool is_picker(int action) {
+	switch (action) {
+	case ACT_TIMEOUT_CYCLE: case ACT_SCALE_CYCLE: case ACT_NAV_SIZE_CYCLE:
+	case ACT_NETWORK_MODE: case ACT_COMP_ALGO_CYCLE: case ACT_PERF_PROFILE:
+	case ACT_TICKLE_BATTERY: case ACT_TICKLE_CHARGING: case ACT_TICKLE_SAVER:
+	case ACT_DEV_MENU_SPEED: case ACT_APN_AUTH: case ACT_DATE_REGION: case ACT_DATE_LANG:
+		return true;
+	}
+	return action >= ACT_QUICK_SLOT && action <= ACT_QUICK_LAST;
+}
+
+static void activate(int action, int arg) {
+	/* a picker's box opens or closes it; one of its options is the choice */
+	if (is_picker(action) && arg < 0) {
+		open_picker = open_picker == action ? 0 : action;
+		zmc_redraw();
+		return;
+	}
+	open_picker = 0;
+	if (action >= ACT_QUICK_SLOT && action <= ACT_QUICK_LAST) {
+		if (arg >= 0 && arg < N_QUICK) {
+			app.quick[action - ACT_QUICK_SLOT] = arg;
+			config_save();
+		}
+		return;
+	}
+	switch (action) {
+	case ACT_NONE:
+		break;
+	case ACT_APN_FIELD:
+		apn_focus = arg;
+		zmc_keyboard(true);
+		break;
+	case ACT_APN_AUTH:
+		apn_auth = arg;
+		apn_note[0] = 0;
+		break;
+	case ACT_APN_SAVE:
+		apn_focus = -1;
+		zmc_keyboard(false);
+		apn_save();
+		break;
+	case ACT_ABOUT_REPO:
+		app.about_show_repo = !app.about_show_repo;
+		break;
+	case ACT_HAPTIC_TRY: {
+		static const char *const pulses[] = { "tick system", "tap system", "click system", "heavy system" };
+		zmc_haptic(pulses[arg & 3]);
+		break;
+	}
+    case ACT_DATE_AUTO:
+        if (!date_pipe) { date_auto = !date_auto; date_focus = -1; zmc_keyboard(false); }
+        break;
+    case ACT_DATE_FIELD:
+        if (!date_pipe && arg >= 0 && arg < 4) { date_focus = arg; zmc_keyboard(true); }
+        break;
+    case ACT_DATE_REGION:
+        if (!date_pipe && arg >= 0 && arg < 11) {
+            date_selected = arg;
+            snprintf(date_region, sizeof(date_region), "%s", DATE_LOCALES[arg]);
+            static const char *const pools[] = { "us", "uk", "lk", "lk", "in", "de", "fr", "jp", "au", "cn", "" };
+            snprintf(date_fields[3], sizeof(date_fields[3]), "%s%spool.ntp.org", pools[arg], pools[arg][0] ? "." : "");
+        }
+        break;
+    case ACT_DATE_LANG:
+        if (!date_pipe && arg >= 0 && arg < 11 && arg != date_lang) {
+            date_lang = arg;
+            date_job(3);	/* applied at once, not with save */
+        }
+        break;
+    case ACT_DATE_SYNC:
+        date_focus = -1; zmc_keyboard(false); date_job(2);
+        break;
+    case ACT_DATE_SAVE:
+        date_focus = -1; zmc_keyboard(false); date_job(true);
+        break;
+	case ACT_OPEN_PAGE:
+		if (arg == PAGE_MAIN || arg == PAGE_APPS) {
+			hub_tab = arg;	/* where back returns to from a page under it */
+		}
+		zmc_go(arg, 1);
+		break;
+	case ACT_ACCENT:
+		app.accent = arg;
+		config_save();
+		if (zmc.page == PAGE_ACCENTS) {
+			zmc_go(PAGE_THEME, -1);	/* chosen: the picker turns away */
+		}
+		break;
+	case ACT_WALL_TARGET:
+		app.wall_target = arg;
+		break;
+	case ACT_WALL: {
+		const char *path = arg > 0 && arg <= n_walls ? walls[arg - 1] : "";
+		if (app.wall_target != 2) snprintf(app.start_wall, sizeof(app.start_wall), "%s", path);
+		if (app.wall_target != 1) snprintf(app.lock_wall, sizeof(app.lock_wall), "%s", path);
+		config_save();
+		break;
+	}
+	case ACT_COLUMNS:
+		app.columns = arg;
+		config_save();
+		break;
+	case ACT_HAPTICS:
+		app.haptics = !app.haptics;
+		config_save();
+		break;
+	case ACT_BT_POWER:
+		bt.on = !bt.on;
+		bt.status[0] = 0;
+		bt_refresh(bt.on ? "bluetoothctl power on >/dev/null 2>&1; bluetoothctl discoverable on >/dev/null 2>&1; "
+			"bluetoothctl --timeout 8 scan on >/dev/null 2>&1" :
+			"bluetoothctl power off >/dev/null 2>&1");
+		break;
+	case ACT_BT_MENU_CLOSE:
+		bt_menu = -1;
+		break;
+	case ACT_BT_MENU: {
+		int which = bt_menu;
+		bt_menu = -1;
+		if (which < 0 || which >= bt.n) break;
+		activate(arg == 1 ? ACT_BT_FORGET : ACT_BT_DEVICE, which);
+		return;
+	}
+	case ACT_BT_SCAN:
+		snprintf(bt.status, sizeof(bt.status), "searching for 10 seconds…");
+		bt_refresh("bluetoothctl --timeout 10 scan on >/dev/null 2>&1");
+		zmc_redraw();
+		break;
+	case ACT_BT_DEVICE:
+	case ACT_BT_FORGET: {
+		if (arg < 0 || arg >= bt.n || !bt_mac_ok(bt.dev[arg].mac)) break;
+		struct bt_device *d = &bt.dev[arg];
+		char cmd[400];
+		if (action == ACT_BT_FORGET) {
+			snprintf(cmd, sizeof(cmd), "bluetoothctl remove %s >/dev/null 2>&1", d->mac);
+			snprintf(bt.status, sizeof(bt.status), "forgot %.60s", d->name);
+		} else if (d->connected) {
+			snprintf(cmd, sizeof(cmd), "bluetoothctl disconnect %s >/dev/null 2>&1", d->mac);
+			snprintf(bt.status, sizeof(bt.status), "disconnecting %.60s…", d->name);
+		} else if (d->paired) {
+			snprintf(cmd, sizeof(cmd), "bluetoothctl connect %s >/dev/null 2>&1", d->mac);
+			snprintf(bt.status, sizeof(bt.status), "connecting to %.60s…", d->name);
+		} else {
+			/* headsets pair with "just works": no code to compare */
+			snprintf(cmd, sizeof(cmd), "bluetoothctl --agent NoInputNoOutput pair %s >/dev/null 2>&1 && "
+				"bluetoothctl trust %s >/dev/null 2>&1 && bluetoothctl connect %s >/dev/null 2>&1",
+				d->mac, d->mac, d->mac);
+			snprintf(bt.status, sizeof(bt.status), "pairing with %.60s…", d->name);
+		}
+		bt_refresh(cmd);
+		zmc_redraw();
+		break;
+	}
+	case ACT_WIFI_RADIO:
+		if (app.wifi_on) {
+			if (system("nmcli radio wifi off 2>/dev/null &") != 0) {}
+		} else {
+			if (system("nmcli radio wifi on 2>/dev/null &") != 0) {}
+		}
+		app.wifi_on = !app.wifi_on;
+		wifi_refresh(app.wifi_on ? "sleep 3" : NULL);
+		break;
+	case ACT_WIFI_SUSPEND:
+		app.wifi_suspend = !app.wifi_suspend;
+		config_save();
+		{
+			const char *runtime = getenv("XDG_RUNTIME_DIR");
+			char ctl_path[256];
+			snprintf(ctl_path, sizeof(ctl_path), "%s/ztmetro.ctl", runtime ? runtime : "/tmp");
+			pipe_tell(ctl_path, app.wifi_suspend ? "wifi_suspend on\n" : "wifi_suspend off\n");
+		}
+		break;
+	case ACT_WIFI_MENU_CLOSE:
+		wifi_menu = -1;
+		break;
+	case ACT_WIFI_MENU: {
+		/* an item of the held network's menu: connect or disconnect, details, delete */
+		int which = wifi_menu;
+		wifi_menu = -1;
+		if (which < 0 || which >= app.n_networks) {
+			break;
+		}
+		struct network *n = &app.networks[which];
+		if (arg == 0 && n->in_use) {
+			wifi_net_set(n->ssid);
+			activate(ACT_WIFI_DISCONNECT, 0);
+		} else if (arg == 0) {
+			activate(ACT_WIFI_CONNECT, which);
+		} else if (arg == 1) {
+			activate(ACT_WIFI_DETAILS, which);
+		} else if (arg == 2) {
+			wifi_net_set(n->ssid);
+			activate(ACT_WIFI_FORGET, 0);
+		}
+		return;
+	}
+	case ACT_WIFI_DETAILS:
+		if (arg >= 0 && arg < app.n_networks) {
+			wifi_net_set(app.networks[arg].ssid);
+			zmc_go(PAGE_WIFI_NET, 1);
+		}
+		break;
+	case ACT_WIFI_FORGET: {
+		char first[300], quoted[200];
+		shell_quote(quoted, sizeof(quoted), wifi_net);
+		snprintf(first, sizeof(first), "nmcli connection delete id %s >/dev/null 2>&1", quoted);
+		snprintf(app.wifi_status, sizeof(app.wifi_status), "deleting %.40s...", wifi_net);
+		if (zmc.page == PAGE_WIFI_NET) {
+			zmc_go(PAGE_WIFI, -1);
+		}
+		wifi_refresh(first);
+		break;
+	}
+	case ACT_WIFI_DISCONNECT: {
+		char first[300], quoted[200];
+		shell_quote(quoted, sizeof(quoted), wifi_net);
+		snprintf(first, sizeof(first), "nmcli connection down id %s >/dev/null 2>&1", quoted);
+		snprintf(app.wifi_status, sizeof(app.wifi_status), "disconnecting from %.40s...", wifi_net);
+		if (zmc.page == PAGE_WIFI_NET) {
+			zmc_go(PAGE_WIFI, -1);
+		}
+		wifi_refresh(first);
+		break;
+	}
+	case ACT_WIFI_AUTO: {
+		char command[320], quoted[200];
+		wifi_net_auto = !wifi_net_auto;
+		shell_quote(quoted, sizeof(quoted), wifi_net);
+		snprintf(command, sizeof(command), "nmcli connection modify id %s connection.autoconnect %s "
+			">/dev/null 2>&1 &", quoted, wifi_net_auto ? "yes" : "no");
+		if (system(command) != 0) {}
+		break;
+	}
+	case ACT_WIFI_CONNECT: {
+		if (arg < 0 || arg >= app.n_networks) {
+			break;
+		}
+		struct network *n = &app.networks[arg];
+		if (n->in_use) {
+			/* the one it is on: its details */
+			wifi_net_set(n->ssid);
+			zmc_go(PAGE_WIFI_NET, 1);
+			break;
+		}
+		if (zmc.page == PAGE_WIFI_NET) {
+			zmc_go(PAGE_WIFI, -1);
+		}
+		if (strlen(n->ssid) >= 64) {
+			break;
+		}
+		if (n->known || !n->secured) {
+			/* one it has been on before, or an open one: straight on */
+			char first[400], quoted[200];
+			shell_quote(quoted, sizeof(quoted), n->ssid);
+			snprintf(first, sizeof(first), n->known ? "nmcli -w 15 connection up id %s >/dev/null 2>&1" :
+				"nmcli -w 20 device wifi connect %s >/dev/null 2>&1", quoted);
+			snprintf(app.wifi_status, sizeof(app.wifi_status), "connecting to %.40s...", n->ssid);
+			snprintf(wifi_joining, sizeof(wifi_joining), "%s", n->ssid);
+			wifi_refresh(first);
+		} else {
+			/* a new one with a password: asked for on a page of its own */
+			snprintf(wifi_join_ssid, sizeof(wifi_join_ssid), "%s", n->ssid);
+			wifi_password[0] = 0;
+			wifi_show_password = false;
+			wifi_typing = true;
+			zmc_go(PAGE_WIFI_JOIN, 1);
+			zmc_keyboard(true);
+		}
+		break;
+	}
+	case ACT_WIFI_PASSWORD:
+		wifi_typing = true;
+		zmc_keyboard(true);
+		break;
+	case ACT_WIFI_SHOW:
+		wifi_show_password = !wifi_show_password;
+		break;
+	case ACT_WIFI_JOIN:
+		wifi_join();
+		break;
+	case ACT_WIFI_RESCAN:
+		wifi_refresh("nmcli device wifi rescan 2>/dev/null; sleep 2");
+		break;
+	case ACT_PERF_PROFILE: {
+		static const char *names[] = { "powersave", "balanced", "performance" };
+		char command[48];
+		app.perf_profile = arg;
+		snprintf(command, sizeof(command), "profile %s\n", names[app.perf_profile]);
+		perf_tell(command);
+		break;
+	}
+	case ACT_PERF_DEEPSLEEP:
+		app.perf_deepsleep = !app.perf_deepsleep;
+		perf_tell(app.perf_deepsleep ? "deepsleep on\n" : "deepsleep off\n");
+		break;
+	case ACT_TICKLE_BATTERY:
+	case ACT_TICKLE_CHARGING:
+	case ACT_TICKLE_SAVER: {
+		static const char *const conditions[] = { "battery", "charging", "saver" };
+		static const char *const modes[] = { "none", "nominal", "moderate", "high" };
+		int c = action - ACT_TICKLE_BATTERY;
+		char command[48];
+		app.tickle[c] = arg;
+		snprintf(command, sizeof(command), "tickle %s %s\n", conditions[c], modes[app.tickle[c]]);
+		perf_tell(command);
+		break;
+	}
+	case ACT_DEV_DEMO_TILES:
+		app.dev_demo_tiles = !app.dev_demo_tiles;
+		config_save();
+		break;
+	case ACT_DEV_MENU_SPEED:
+		app.menu_speed_idx = arg;
+		config_save();
+		break;
+	case ACT_DEV_SLOW:
+		app.dev_slow = !app.dev_slow;
+		config_save();
+		break;
+	case ACT_DEV_TOUCHES:
+		app.dev_touches = !app.dev_touches;
+		config_save();
+		break;
+	case ACT_DEV_LOCK:
+		app.dev_lock = !app.dev_lock;
+		config_save();
+		break;
+	case ACT_DEV_OPEN_TEST:
+		if (system("zrndevtest >/dev/null 2>&1 &") != 0) {}
+		break;
+	case ACT_BRIGHTNESS_STEP:
+		app.brightness = (app.brightness >= 100) ? 25 : app.brightness + 25;
+		config_save();
+		break;
+	case ACT_OPENTONE:
+		app.opentone = !app.opentone;
+		pipe_tell("/run/ztoscsf-sensord.ctl", app.opentone ? "opentone on\n" : "opentone off\n");
+		break;
+	case ACT_AUTOBRIGHTNESS:
+		app.autobrightness = !app.autobrightness;
+		pipe_tell("/run/ztoscsf-sensord.ctl", app.autobrightness ? "auto on\n" : "auto off\n");
+		pipe_tell("/run/zrn-sensord.ctl", app.autobrightness ? "auto on\n" : "auto off\n");
+		if (!app.autobrightness) {
+			config_save();	/* back to the level the slider shows */
+		}
+		break;
+	case ACT_TIMEOUT_CYCLE:
+		app.timeout_idx = arg;
+		config_save();
+		break;
+	case ACT_SCALE_CYCLE:
+		app.scale_idx = arg;	/* shown only: the shell's scale is fixed for now */
+		break;
+	case ACT_KEY_SOUND:
+		app.key_sound = !app.key_sound;
+		config_save();
+		break;
+	case ACT_NAV_SIZE_CYCLE:
+		app.nav_size_idx = arg;
+		break;
+	case ACT_MOBILE_DATA:
+		/* ztoscorenetworkingd's: the same thing the action centre's tile asks */
+		app.mobile_data = !app.mobile_data;
+		cell.data_on = app.mobile_data;
+		pipe_tell("/run/ztoscorenetworking.ctl", app.mobile_data ? "data on\n" : "data off\n");
+		pipe_tell("/run/zrn-modem.ctl", app.mobile_data ? "data on\n" : "data off\n");
+		break;
+	case ACT_ROAMING:
+		app.roaming = !app.roaming;
+		break;
+	case ACT_NETWORK_MODE:
+		app.network_mode = arg;
+		break;
+	case ACT_MEDIA_VOL_STEP:
+		app.media_vol = (app.media_vol >= 100) ? 0 : app.media_vol + 20;
+		config_save();
+		{
+			char cmd[64];
+			snprintf(cmd, sizeof(cmd), "pactl set-sink-volume @DEFAULT_SINK@ %d%% 2>/dev/null &", app.media_vol);
+			if (system(cmd) != 0) {}
+		}
+		break;
+	case ACT_RING_VOL_STEP:
+		app.ring_vol = (app.ring_vol >= 100) ? 0 : app.ring_vol + 20;
+		config_save();
+		break;
+	case ACT_VIBRATE_RING:
+		app.vibrate_ring = !app.vibrate_ring;
+		break;
+	case ACT_VIBRATE_SILENT:
+		app.vibrate_silent = !app.vibrate_silent;
+		break;
+	case ACT_BATTERY_SAVER:
+		app.battery_saver = !app.battery_saver;
+		break;
+	case ACT_CPU_GOVERNOR:
+		if (strcmp(app.cpu_gov, "schedutil") == 0) {
+			snprintf(app.cpu_gov, sizeof(app.cpu_gov), "performance");
+		} else {
+			snprintf(app.cpu_gov, sizeof(app.cpu_gov), "schedutil");
+		}
+		{
+			char cmd[256];
+			snprintf(cmd, sizeof(cmd),
+				"ztos-auth sh -c 'echo %s > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor && echo %s > /sys/devices/system/cpu/cpufreq/policy4/scaling_governor' 2>/dev/null &",
+				app.cpu_gov, app.cpu_gov);
+			if (system(cmd) != 0) {}
+		}
+		break;
+	case ACT_ZRAM_TOGGLE:
+		app.zram_enabled = !app.zram_enabled;
+		break;
+	case ACT_SWAPPINESS_STEP:
+		app.swappiness = (app.swappiness >= 100) ? 10 : app.swappiness + 20;
+		{
+			char cmd[128];
+			snprintf(cmd, sizeof(cmd), "ztos-auth sh -c 'echo %d > /proc/sys/vm/swappiness' 2>/dev/null &", app.swappiness);
+			if (system(cmd) != 0) {}
+		}
+		break;
+	case ACT_COMP_ALGO_CYCLE:
+		app.comp_algo_idx = arg;
+		break;
+	case ACT_GPU_GOVERNOR:
+		if (strcmp(app.gpu_gov, "simple_ondemand") == 0) {
+			snprintf(app.gpu_gov, sizeof(app.gpu_gov), "userspace");
+		} else {
+			snprintf(app.gpu_gov, sizeof(app.gpu_gov), "simple_ondemand");
+		}
+		{
+			char cmd[128];
+			snprintf(cmd, sizeof(cmd), "ztos-auth sh -c 'echo %s > /sys/class/devfreq/17500000.gpu/governor' 2>/dev/null &", app.gpu_gov);
+			if (system(cmd) != 0) {}
+		}
+		break;
+	}
+}
+
+/* Where a point on the screen is on the page: the title does not scroll. */
+
+/* A slider is being dragged, or has just been let go. */
+static void slide(int action, int value, bool done) {
+	static uint32_t saved;
+	char cmd[160];
+	if (action >= ACT_HAPTIC_GROUP && action % 1000 == ACT_HAPTIC_GROUP && action / 1000 < N_HAPTIC_GROUPS) {
+		/* one kind of touch's own strength; under 5 % is off */
+		int g = action / 1000;
+		app.haptic_group[g] = value < 5 ? 0 : value;
+		if (done) {
+			static const char *const sample[] = { "tap system", "tap nav", "tap tiles", "tick slide",
+				"tap apps", "key keys" };
+			config_save();
+			zmc_haptic(sample[g]);	/* how it feels now */
+		}
+		return;
+	}
+	switch (action) {
+	case ACT_BRIGHTNESS_STEP:
+		app.brightness = value < 1 ? 1 : value;
+		if (app.autobrightness) {
+			/* a hand on the slider takes over from the light sensor */
+			app.autobrightness = false;
+			pipe_tell("/run/ztoscsf-sensord.ctl", "auto off\n");
+		}
+		/* send live brightness to the shell without reloading config/textures */
+		if (done || zmc_now_ms() - saved > 40) {
+			saved = zmc_now_ms();
+			char ctl_cmd[32];
+			snprintf(ctl_cmd, sizeof(ctl_cmd), "brightness %d\n", app.brightness);
+			const char *runtime = getenv("XDG_RUNTIME_DIR");
+			char ctl_path[256];
+			snprintf(ctl_path, sizeof(ctl_path), "%s/ztmetro.ctl", runtime ? runtime : "/tmp");
+			pipe_tell(ctl_path, ctl_cmd);
+		}
+		if (done) {
+			config_save();
+		}
+		break;
+	case ACT_HAPTIC_STRENGTH:
+		app.haptic_strength = value < 10 ? 10 : value;
+		if (done) {
+			config_save();	/* the shell plays a click at the new strength */
+		}
+		break;
+	case ACT_KEY_HEIGHT:
+        app.key_height = 42 + value * 30 / 100;
+        if (done) config_save();
+        break;
+    case ACT_MEDIA_VOL_STEP:
+        app.media_vol = value;
+		if (done) {
+			config_save();
+			snprintf(cmd, sizeof(cmd), "pactl set-sink-volume @DEFAULT_SINK@ %d%% 2>/dev/null &", value);
+			if (system(cmd) != 0) {}
+		}
+		break;
+	case ACT_RING_VOL_STEP:
+		app.ring_vol = value;
+		if (done) config_save();
+		break;
+	case ACT_SWAPPINESS_STEP:
+		app.swappiness = value;
+		if (done) {
+			snprintf(cmd, sizeof(cmd), "ztos-auth sh -c 'echo %d > /proc/sys/vm/swappiness' 2>/dev/null &", value);
+			if (system(cmd) != 0) {}
+		}
+		break;
+	}
+}
+
+static void cell_tick(void) {
+	cell_load();
+	zmc_redraw();
+}
+
+/* What NetworkManager knows of the network on the details page: its address
+ * and the rest while it is connected, and whether it joins by itself. Asked in
+ * the background, drawn when the answer is here. */
+static void wifi_net_ready(int fd, void *data) {
+	static char buf[1200];
+	ssize_t n = read(fd, buf + wifi_net_len, sizeof(buf) - 1 - wifi_net_len);
+	if (n > 0) {
+		wifi_net_len += (size_t)n;
+		if (wifi_net_len < sizeof(buf) - 1) return;
+	}
+	zmc_watch_fd(fd, NULL, NULL);
+	pclose(wifi_net_pipe);
+	wifi_net_pipe = NULL;
+	buf[wifi_net_len] = 0;
+	wifi_net_info[0] = 0;
+	char *save = NULL;
+	for (char *line = strtok_r(buf, "\n", &save); line; line = strtok_r(NULL, "\n", &save)) {
+		char *colon = strchr(line, ':');
+		if (!colon || !colon[1]) continue;
+		*colon = 0;
+		const char *name = !strncmp(line, "IP4.ADDRESS", 11) ? "IP address" :
+			!strncmp(line, "IP4.GATEWAY", 11) ? "Gateway" : !strncmp(line, "IP4.DNS", 7) ? "DNS server" :
+			!strcmp(line, "GENERAL.HWADDR") ? "MAC address" : NULL;
+		if (!strcmp(line, "connection.autoconnect")) {
+			wifi_net_auto = strcmp(colon + 1, "no") != 0;
+		} else if (name && !strstr(wifi_net_info, name)) {
+			size_t at = strlen(wifi_net_info);
+			char value[80];
+			/* (nmcli writes a colon inside a value as "\:") */
+			size_t o = 0;
+			for (const char *c = colon + 1; *c && o + 1 < sizeof(value); c++) {
+				if (*c != '\\') value[o++] = *c;
+			}
+			value[o] = 0;
+			snprintf(wifi_net_info + at, sizeof(wifi_net_info) - at, "%s|%s\n", name, value);
+		}
+	}
+	zmc_redraw();
+}
+
+static void wifi_net_set(const char *ssid) {
+	char command[700], quoted[200];
+	snprintf(wifi_net, sizeof(wifi_net), "%s", ssid);
+	wifi_net_info[0] = 0;
+	wifi_net_auto = true;
+	if (wifi_net_pipe) return;
+	shell_quote(quoted, sizeof(quoted), ssid);
+	/* the profile's own setting; and the device's addresses if it is the one in use */
+	snprintf(command, sizeof(command), "nmcli -t -f connection.autoconnect connection show id %s 2>/dev/null; "
+		"D=$(nmcli -t -f DEVICE,TYPE device | sed -n 's/:wifi$//p' | head -1); "
+		"[ \"$(nmcli -t -f GENERAL.CONNECTION device show \"$D\" 2>/dev/null | cut -d: -f2-)\" = %s ] && "
+		"nmcli -t -f GENERAL.HWADDR,IP4.ADDRESS,IP4.GATEWAY,IP4.DNS device show \"$D\" 2>/dev/null",
+		quoted, quoted);
+	wifi_net_pipe = popen(command, "r");
+	if (!wifi_net_pipe) return;
+	wifi_net_len = 0;
+	zmc_watch_fd(fileno(wifi_net_pipe), wifi_net_ready, NULL);
+}
+
+/* Join the network on the sign-in page with what was typed, and go back to
+ * the list to see what comes of it. */
+static void wifi_join(void) {
+	char first[600], ssid[200], password[260];
+	shell_quote(ssid, sizeof(ssid), wifi_join_ssid);
+	shell_quote(password, sizeof(password), wifi_password);
+	/* a failed try leaves a profile with the wrong password behind: removed,
+	 * so that the next tap asks again */
+	snprintf(first, sizeof(first), "nmcli -w 25 device wifi connect %s password %s >/dev/null 2>&1 || "
+		"nmcli connection delete id %s >/dev/null 2>&1", ssid, password, ssid);
+	snprintf(app.wifi_status, sizeof(app.wifi_status), "connecting to %.40s...", wifi_join_ssid);
+	snprintf(wifi_joining, sizeof(wifi_joining), "%s", wifi_join_ssid);
+	wifi_typing = false;
+	wifi_password[0] = 0;
+	zmc_keyboard(false);
+	zmc_go(PAGE_WIFI, -1);
+	wifi_refresh(first);
+}
+
+static void perf_tick(void) {
+	perf_load();
+	zmc_redraw();
+}
+
+static bool back(void) {
+	if (open_picker) {	/* back closes an open picker first, as on the phone */
+		open_picker = 0;
+		zmc_redraw();
+		return true;
+	}
+	if (zmc.page == PAGE_MAIN || zmc.page == PAGE_APPS) {
+		return false;	/* either tab of the hub: back leaves the app */
+	}
+	zmc_every(0, NULL);	/* the performance page's refresh, if it was running */
+	if (zmc.page == PAGE_WIFI && wifi_menu >= 0) {
+		wifi_menu = -1;	/* back puts the menu away first */
+		zmc_redraw();
+		return true;
+	}
+	if (zmc.page == PAGE_WIFI_NET) {
+		zmc_go(PAGE_WIFI, -1);
+		return true;
+	}
+	if (zmc.page == PAGE_WIFI_JOIN) {
+		wifi_typing = false;
+		wifi_password[0] = 0;
+		zmc_keyboard(false);
+		zmc_go(PAGE_WIFI, -1);
+		return true;
+	}
+	if (zmc.page == PAGE_ACCENTS) {
+		zmc_go(PAGE_THEME, -1);	/* the picker is under the theme page */
+		return true;
+	}
+	if (zmc.page == PAGE_DATE) { date_focus = -1; zmc_keyboard(false); }
+	if (zmc.page == PAGE_APN) {
+		apn_focus = -1;
+		zmc_keyboard(false);
+		zmc_go(PAGE_MOBILE, -1);	/* it is under the cellular page */
+		return true;
+	}
+	zmc_go(hub_tab, -1);
+	return true;
+}
+
+static void arrived(int page) {
+    if (page == PAGE_DATE) { date_focus = -1; date_job(false); }
+	if (page == PAGE_MAIN || page == PAGE_APPS) {
+		hub_tab = page;	/* swiped to: where back returns to from under it */
+	}
+	if (page == PAGE_MOBILE) {
+		cell_load();
+		zmc_every(3000, cell_tick);	/* "connecting" becomes "connected" by itself */
+	} else if (page == PAGE_APN) {
+		zmc_every(0, NULL);
+		apn_load();
+	}
+	if (page == PAGE_BLUETOOTH) {
+		/* found by others while it is open, and looking for them */
+		bt.status[0] = 0;
+		bt_menu = -1;
+		bt_refresh("bluetoothctl discoverable on >/dev/null 2>&1; bluetoothctl --timeout 8 scan on >/dev/null 2>&1");
+		zmc_every(15000, bt_tick);
+	} else if (page == PAGE_MAIN) {
+		bt_refresh(NULL);	/* the hub's line says whether it is on */
+	}
+	if (page == PAGE_WIFI) {
+		wifi_refresh(NULL);
+	} else if (page == PAGE_PERF) {
+		perf_load();
+		zmc_every(2000, perf_tick);	/* "Tickle now", while this page is open */
+	} else if (page == PAGE_DISPLAY) {
+		display_tick();
+		zmc_every(700, display_tick);
+	}
+}
+
+/* A finger held on something: a network's menu. */
+static bool held(int action, int arg) {
+	if (zmc.page == PAGE_BLUETOOTH && action == ACT_BT_DEVICE && arg >= 0 && arg < bt.n && bt_menu < 0) {
+		bt_menu = arg;
+		return true;
+	}
+	if (zmc.page == PAGE_WIFI && action == ACT_WIFI_CONNECT && arg >= 0 && arg < app.n_networks &&
+			wifi_menu < 0) {
+		wifi_menu = arg;
+		return true;
+	}
+	return false;
+}
+
+static const struct zmc_app settings = {
+	.app_id = "ztsettings", .title = "Settings", .caps = "SETTINGS",
+	.render = render_page_content, .activate = activate, .slide = slide,
+	.back = back, .arrived = arrived, .text = typed, .hold = held,
+};
+
+/* --render PAGE FILE: draw one page into a PNG and leave, touching no display.
+ * That is how the look is checked without opening the app on the phone. */
+/* Pages by name: --render PAGE, and `ztsettings PAGE` (Hyperscan opens one). */
+static const struct { const char *name; enum page page; } pages[] = {
+	{ "date", PAGE_DATE }, { "main", PAGE_MAIN }, { "apps", PAGE_APPS }, { "theme", PAGE_THEME }, { "accents", PAGE_ACCENTS }, { "display", PAGE_DISPLAY },
+	{ "wifi", PAGE_WIFI }, { "bluetooth", PAGE_BLUETOOTH }, { "mobile", PAGE_MOBILE }, { "audio", PAGE_AUDIO },
+	{ "battery", PAGE_BATTERY }, { "cpu", PAGE_CPU }, { "vm", PAGE_VM },
+	{ "gpu", PAGE_GPU }, { "keyboard", PAGE_KEYBOARD }, { "about", PAGE_ABOUT },
+	{ "perf", PAGE_PERF }, { "dev", PAGE_DEV }, { "haptics", PAGE_HAPTICS }, { "quick", PAGE_QUICK }, { "apn", PAGE_APN }, { "wifijoin", PAGE_WIFI_JOIN }, { "wifinet", PAGE_WIFI_NET },
+};
+
+static int page_named(const char *name) {
+	for (size_t i = 0; i < sizeof(pages) / sizeof(pages[0]); i++) {
+		if (strcmp(pages[i].name, name) == 0) return pages[i].page;
+	}
+	return -1;
+}
+
+static int render_to_file(const char *name, const char *path) {
+	for (size_t i = 0; i < sizeof(pages) / sizeof(pages[0]); i++) {
+		if (strcmp(pages[i].name, name) == 0) {
+			if (pages[i].page == PAGE_WIFI) {
+				wifi_load();
+			}
+			/* 664 points: the app area on the phone */
+			return zmc_render_png(&settings, pages[i].page, 664, path);
+		}
+	}
+	fprintf(stderr, "ztsettings: no page called %s\n", name);
+	return 2;
+}
+
+int main(int argc, char **argv) {
+	signal(SIGCHLD, SIG_DFL);
+	config_load();
+	if (argc == 4 && strcmp(argv[1], "--render") == 0) {
+		/* ZT_OPEN_PICKER=ACTION draws that list picker open, for reviews */
+		if (getenv("ZT_OPEN_PICKER")) {
+			open_picker = atoi(getenv("ZT_OPEN_PICKER"));
+		}
+		if (getenv("ZT_ABOUT_REPO")) {
+			app.about_show_repo = true;
+		}
+		return render_to_file(argv[2], argv[3]);
+	}
+	if (argc == 2 && page_named(argv[1]) >= 0) {
+		int page = page_named(argv[1]);
+		if (page == PAGE_WIFI) wifi_load();
+		return zmc_run(&settings, page);
+	}
+	if (argc > 1) {
+		fprintf(stderr, "usage: ztsettings [PAGE] [--render PAGE FILE]\n");
+		return 2;
+	}
+	return zmc_run(&settings, PAGE_MAIN);
+}

@@ -1,0 +1,14 @@
+[Unit]
+Description=ztoscsf-sensord: light and motion sensors from the Galaxy S9's sensor hub
+Requires=ztoscsf-sensorhub.service
+After=ztoscsf-sensorhub.service
+
+[Service]
+# the hub takes a few seconds to take its firmware patch after the daemon starts
+ExecStartPre=/bin/sh -c 'for i in $(seq 60); do [ "$(cat /sys/class/sec/sensorhub/ready 2>/dev/null)" = 1 ] && exit 0; sleep 1; done; exit 1'
+ExecStart=/usr/local/sbin/ztoscsf-sensord
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=graphical.target

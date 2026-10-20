@@ -1,0 +1,9 @@
+[app]
+id = "os.ztos.welcome"
+name = "Welcome"
+caps = "ZTOS"
+version = "1.0.0"
+entry = "main.py"
+icon = "icon.svg"
+description = "Getting started with ztOS"
+performance = "eco"

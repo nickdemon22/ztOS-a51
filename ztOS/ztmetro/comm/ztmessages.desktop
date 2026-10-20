@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Messaging
+Comment=SMS and chat messaging
+Exec=ztmessages %u
+Terminal=false
+Type=Application
+Icon=ztmessages
+Categories=Utility;Telephony;
+MimeType=x-scheme-handler/sms;

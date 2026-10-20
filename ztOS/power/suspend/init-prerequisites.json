@@ -1,0 +1,846 @@
+{
+  "source_sha256": "2c8472b494893e6bf503bf45f734673120ee0e2fae5b913d870e07d1a08ccd8e",
+  "table": "pmucal_lpm_init",
+  "entries": [
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "CPU_QCH_CLUSTER1_NONCPU_SYS_PWR_REG",
+      "base": 335937536,
+      "offset": 4232,
+      "mask": 4278190080,
+      "value": 2365587456
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MEMORY_HOSTIRAM_OPTION",
+      "base": 335937536,
+      "offset": 12040,
+      "mask": 3,
+      "value": 2
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MEMORY_PCM_VTS_OPTION",
+      "base": 335937536,
+      "offset": 20488,
+      "mask": 3,
+      "value": 2
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MEMORY_CODE_VTS_OPTION",
+      "base": 335937536,
+      "offset": 20504,
+      "mask": 3,
+      "value": 2
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MEMORY_DATA_VTS_OPTION",
+      "base": 335937536,
+      "offset": 20520,
+      "mask": 3,
+      "value": 2
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MEMORY_DCF_OPTION",
+      "base": 335937536,
+      "offset": 16932,
+      "mask": 3,
+      "value": 2
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MEMORY_DCPOST_OPTION",
+      "base": 335937536,
+      "offset": 17092,
+      "mask": 3,
+      "value": 2
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MEMORY_DCRD_OPTION",
+      "base": 335937536,
+      "offset": 17252,
+      "mask": 3,
+      "value": 2
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MEMORY_DPU_OPTION",
+      "base": 335937536,
+      "offset": 17412,
+      "mask": 3,
+      "value": 2
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MEMORY_DSPM_OPTION",
+      "base": 335937536,
+      "offset": 17572,
+      "mask": 3,
+      "value": 2
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MEMORY_DSPS_OPTION",
+      "base": 335937536,
+      "offset": 17732,
+      "mask": 3,
+      "value": 2
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MEMORY_G2D_OPTION",
+      "base": 335937536,
+      "offset": 17892,
+      "mask": 3,
+      "value": 2
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MEMORY_EMBEDDED_G3D_OPTION",
+      "base": 335937536,
+      "offset": 18064,
+      "mask": 3,
+      "value": 2
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MEMORY_ISPPRE_OPTION",
+      "base": 335937536,
+      "offset": 18224,
+      "mask": 3,
+      "value": 2
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MEMORY_ISPHQ_OPTION",
+      "base": 335937536,
+      "offset": 18384,
+      "mask": 3,
+      "value": 2
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MEMORY_ISPLP_OPTION",
+      "base": 335937536,
+      "offset": 18544,
+      "mask": 3,
+      "value": 2
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MEMORY_IVA_OPTION",
+      "base": 335937536,
+      "offset": 18704,
+      "mask": 3,
+      "value": 2
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MEMORY_MFC_OPTION",
+      "base": 335937536,
+      "offset": 18864,
+      "mask": 3,
+      "value": 2
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MEMORY_VTS_OPTION",
+      "base": 335937536,
+      "offset": 19188,
+      "mask": 3,
+      "value": 2
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MEMORY_2_CHUB_OPTION",
+      "base": 335937536,
+      "offset": 19328,
+      "mask": 3,
+      "value": 2
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MEMORY_4_CHUB_OPTION",
+      "base": 335937536,
+      "offset": 19344,
+      "mask": 3,
+      "value": 2
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MEMORY_5_CHUB_OPTION",
+      "base": 335937536,
+      "offset": 19372,
+      "mask": 3,
+      "value": 2
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MEMORY_1_CHUB_OPTION",
+      "base": 335937536,
+      "offset": 19388,
+      "mask": 3,
+      "value": 2
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MEMORY_CHUB_OPTION",
+      "base": 335937536,
+      "offset": 19404,
+      "mask": 3,
+      "value": 2
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MEMORY_3_CHUB_OPTION",
+      "base": 335937536,
+      "offset": 19496,
+      "mask": 3,
+      "value": 2
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MEMORY_CLUSTER1_CPU0_OPTION",
+      "base": 335937536,
+      "offset": 8468,
+      "mask": 3,
+      "value": 2
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MEMORY_CLUSTER1_CPU1_OPTION",
+      "base": 335937536,
+      "offset": 8576,
+      "mask": 3,
+      "value": 2
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MEMORY_CLUSTER1_CPU2_OPTION",
+      "base": 335937536,
+      "offset": 8684,
+      "mask": 3,
+      "value": 2
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MEMORY_CLUSTER1_CPU3_OPTION",
+      "base": 335937536,
+      "offset": 8792,
+      "mask": 3,
+      "value": 2
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MEMORY_CLUSTER1_NONCPU_OPTION",
+      "base": 335937536,
+      "offset": 9092,
+      "mask": 3,
+      "value": 2
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MEMORY_CLUSTER0_CPU0_OPTION",
+      "base": 335937536,
+      "offset": 9160,
+      "mask": 3,
+      "value": 2
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MEMORY_CLUSTER0_CPU1_OPTION",
+      "base": 335937536,
+      "offset": 9240,
+      "mask": 3,
+      "value": 2
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MEMORY_CLUSTER0_CPU2_OPTION",
+      "base": 335937536,
+      "offset": 9320,
+      "mask": 3,
+      "value": 2
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MEMORY_CLUSTER0_CPU3_OPTION",
+      "base": 335937536,
+      "offset": 9400,
+      "mask": 3,
+      "value": 2
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MEMORY_CLUSTER0_NONCPU_OPTION",
+      "base": 335937536,
+      "offset": 9632,
+      "mask": 3,
+      "value": 2
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "PS_HOLD_CONTROL",
+      "base": 335937536,
+      "offset": 13068,
+      "mask": 2147483648,
+      "value": 2147483648
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "PS_HOLD_CONTROL",
+      "base": 335937536,
+      "offset": 13068,
+      "mask": 256,
+      "value": 256
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "TCXO_DURATION3",
+      "base": 335937536,
+      "offset": 33532,
+      "mask": 1048575,
+      "value": 1644
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "EXT_REGULATOR_MIF_DURATION3",
+      "base": 335937536,
+      "offset": 13884,
+      "mask": 1048575,
+      "value": 2960
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "EXT_REGULATOR_DURATION3",
+      "base": 335937536,
+      "offset": 13852,
+      "mask": 1048575,
+      "value": 2550
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "RESET_LPI_TIMEOUT",
+      "base": 335937536,
+      "offset": 1056,
+      "mask": 1,
+      "value": 1
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "RESET_LPI_TIMEOUT",
+      "base": 335937536,
+      "offset": 1056,
+      "mask": 4294901760,
+      "value": 2097152
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "CMU_HCHGEN_CLKMUX",
+      "base": 438566912,
+      "offset": 2128,
+      "mask": 1,
+      "value": 1
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "CORE_HCHGEN_CLKMUX",
+      "base": 436338688,
+      "offset": 2128,
+      "mask": 1,
+      "value": 1
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "CPUCL0_HCHGEN_CLKMUX",
+      "base": 486539264,
+      "offset": 2128,
+      "mask": 127,
+      "value": 1
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "CPUCL0_CLKDIV2PH",
+      "base": 486539264,
+      "offset": 2112,
+      "mask": 1,
+      "value": 1
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "CPUCL1_HCHGEN_CLKMUX",
+      "base": 487587840,
+      "offset": 2128,
+      "mask": 127,
+      "value": 0
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "CPUCL1_CTRL_EXT_EVENT",
+      "base": 487587840,
+      "offset": 2104,
+      "mask": 1023,
+      "value": 513
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "G3D_CLKDIV2PH",
+      "base": 390070272,
+      "offset": 2084,
+      "mask": 1,
+      "value": 16711681
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MIF0_HCHGEN_CLKMUX",
+      "base": 461373440,
+      "offset": 2128,
+      "mask": 1,
+      "value": 1
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MIF1_HCHGEN_CLKMUX",
+      "base": 462422016,
+      "offset": 2128,
+      "mask": 1,
+      "value": 1
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MIF2_HCHGEN_CLKMUX",
+      "base": 463470592,
+      "offset": 2128,
+      "mask": 1,
+      "value": 1
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "MIF3_HCHGEN_CLKMUX",
+      "base": 464519168,
+      "offset": 2128,
+      "mask": 1,
+      "value": 1
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "PERIS_HCHGEN_CLKMUX",
+      "base": 268566528,
+      "offset": 2128,
+      "mask": 31,
+      "value": 0
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "AUD_HCHGEN_CLKMUX",
+      "base": 398458880,
+      "offset": 2128,
+      "mask": 31,
+      "value": 1
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "G3D_SHORTSTOP",
+      "base": 390070272,
+      "offset": 2080,
+      "mask": 4294967295,
+      "value": 1
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "CPUCL0_SHORTSTOP_DBG",
+      "base": 486539264,
+      "offset": 2100,
+      "mask": 4294967295,
+      "value": 1
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "CPUCL1_SHORTSTOP",
+      "base": 487587840,
+      "offset": 2080,
+      "mask": 4294967295,
+      "value": 4294967295
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "CPUCL0_SHORTSTOP",
+      "base": 486539264,
+      "offset": 2080,
+      "mask": 4294967295,
+      "value": 4294967295
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "CORE_SHORTSTOP",
+      "base": 436338688,
+      "offset": 2080,
+      "mask": 4294967295,
+      "value": 1
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "BUS_COMPONENT_DRCG_EN",
+      "base": 335609856,
+      "offset": 260,
+      "mask": 4294967295,
+      "value": 4294967295
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "BUS_COMPONENT_DRCG_EN",
+      "base": 398524416,
+      "offset": 260,
+      "mask": 4294967295,
+      "value": 4294967295
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "BUS_COMPONENT_DRCG_EN",
+      "base": 440467456,
+      "offset": 260,
+      "mask": 4294967295,
+      "value": 4294967295
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "BUS_COMPONENT_DRCG_EN",
+      "base": 438370304,
+      "offset": 260,
+      "mask": 4294967295,
+      "value": 4294967295
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "BUS_COMPONENT_DRCG_EN",
+      "base": 329318400,
+      "offset": 260,
+      "mask": 4294967295,
+      "value": 4294967295
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "BUS_COMPONENT_DRCG_EN",
+      "base": 337707008,
+      "offset": 260,
+      "mask": 4294967295,
+      "value": 4294967295
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "BUS_COMPONENT_DRCG_EN",
+      "base": 436273152,
+      "offset": 260,
+      "mask": 4294967295,
+      "value": 4294967280
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "BUS_COMPONENT_DRCG_EN",
+      "base": 486604800,
+      "offset": 260,
+      "mask": 4294967295,
+      "value": 4294967295
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "BUS_COMPONENT_DRCG_EN",
+      "base": 487653376,
+      "offset": 260,
+      "mask": 4294967295,
+      "value": 4294967295
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "BUS_COMPONENT_DRCG_EN",
+      "base": 379650048,
+      "offset": 260,
+      "mask": 4294967295,
+      "value": 4294967295
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "BUS_COMPONENT_DRCG_EN",
+      "base": 380698624,
+      "offset": 260,
+      "mask": 4294967295,
+      "value": 4294967295
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "BUS_COMPONENT_DRCG_EN",
+      "base": 377552896,
+      "offset": 260,
+      "mask": 4294967295,
+      "value": 4294967295
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "BUS_COMPONENT_DRCG_EN",
+      "base": 369164288,
+      "offset": 260,
+      "mask": 4294967295,
+      "value": 4294967295
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "BUS_COMPONENT_DRCG_EN",
+      "base": 381747200,
+      "offset": 260,
+      "mask": 4294967295,
+      "value": 4294967295
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "BUS_COMPONENT_DRCG_EN",
+      "base": 384892928,
+      "offset": 260,
+      "mask": 4294967295,
+      "value": 4294967295
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "BUS_COMPONENT_DRCG_EN",
+      "base": 285278208,
+      "offset": 260,
+      "mask": 4294967295,
+      "value": 4294967295
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "BUS_COMPONENT_DRCG_EN",
+      "base": 289472512,
+      "offset": 260,
+      "mask": 4294967295,
+      "value": 4294967295
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "BUS_COMPONENT_DRCG_EN",
+      "base": 392167424,
+      "offset": 260,
+      "mask": 4294967295,
+      "value": 4294967295
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "BUS_COMPONENT_DRCG_EN",
+      "base": 375455744,
+      "offset": 260,
+      "mask": 4294967295,
+      "value": 4294967295
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "BUS_COMPONENT_DRCG_EN",
+      "base": 373358592,
+      "offset": 260,
+      "mask": 4294967295,
+      "value": 4294967295
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "BUS_COMPONENT_DRCG_EN",
+      "base": 371261440,
+      "offset": 260,
+      "mask": 4294967295,
+      "value": 4294967295
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "BUS_COMPONENT_DRCG_EN",
+      "base": 385941504,
+      "offset": 260,
+      "mask": 4294967295,
+      "value": 4294967295
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "BUS_COMPONENT_DRCG_EN",
+      "base": 394264576,
+      "offset": 260,
+      "mask": 4294967295,
+      "value": 4294967295
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "BUS_COMPONENT_DRCG_EN",
+      "base": 461438976,
+      "offset": 260,
+      "mask": 4294967295,
+      "value": 4294963199
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "BUS_COMPONENT_DRCG_EN",
+      "base": 462487552,
+      "offset": 260,
+      "mask": 4294967295,
+      "value": 4294963199
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "BUS_COMPONENT_DRCG_EN",
+      "base": 463536128,
+      "offset": 260,
+      "mask": 4294967295,
+      "value": 4294963199
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "BUS_COMPONENT_DRCG_EN",
+      "base": 464584704,
+      "offset": 260,
+      "mask": 4294967295,
+      "value": 4294963199
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "BUS_COMPONENT_DRCG_EN",
+      "base": 272695296,
+      "offset": 260,
+      "mask": 4294967295,
+      "value": 4294967295
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "BUS_COMPONENT_DRCG_EN",
+      "base": 276889600,
+      "offset": 260,
+      "mask": 4294967295,
+      "value": 4294967295
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "BUS_COMPONENT_DRCG_EN",
+      "base": 268500992,
+      "offset": 264,
+      "mask": 4294967295,
+      "value": 4294967295
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "BUS_COMPONENT_DRCG_EN",
+      "base": 390135808,
+      "offset": 260,
+      "mask": 4294967295,
+      "value": 4294967295
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "RESET_OTP_CHUB_SYS_PWR_REG",
+      "base": 335937536,
+      "offset": 6008,
+      "mask": 1,
+      "value": 0
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "BURNIN_CTRL",
+      "base": 335937536,
+      "offset": 2568,
+      "mask": 3,
+      "value": 2
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "PWR_EMBEDDED_G3D_OPTION",
+      "base": 335937536,
+      "offset": 18048,
+      "mask": 2,
+      "value": 0
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "PWR_EMBEDDED_G3D_DURATION",
+      "base": 335937536,
+      "offset": 18052,
+      "mask": 4095,
+      "value": 867
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "WDTRESET_LPI",
+      "base": 335937536,
+      "offset": 1048,
+      "mask": 1,
+      "value": 1
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "SCI_CRPPORTPWRDN_EMBEDDED_G3D_SYS_PWR_REG",
+      "base": 335937536,
+      "offset": 5544,
+      "mask": 1,
+      "value": 1
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "AUD_CPU_OPTION",
+      "base": 335937536,
+      "offset": 14344,
+      "mask": 65536,
+      "value": 65536
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "PWR_EMBEDDED_G3D_SYS_PWR_REG",
+      "base": 335937536,
+      "offset": 5548,
+      "mask": 1,
+      "value": 1
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "DCRD_CONFIGURATION",
+      "base": 335937536,
+      "offset": 16408,
+      "mask": 15,
+      "value": 0
+    },
+    {
+      "operation": "PMUCAL_WAIT",
+      "name": "DCRD_STATUS",
+      "base": 335937536,
+      "offset": 16412,
+      "mask": 15,
+      "value": 0
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "DCPOST_CONFIGURATION",
+      "base": 335937536,
+      "offset": 16400,
+      "mask": 15,
+      "value": 0
+    },
+    {
+      "operation": "PMUCAL_WAIT",
+      "name": "DCPOST_STATUS",
+      "base": 335937536,
+      "offset": 16404,
+      "mask": 15,
+      "value": 0
+    },
+    {
+      "operation": "PMUCAL_WRITE",
+      "name": "DCF_CONFIGURATION",
+      "base": 335937536,
+      "offset": 16392,
+      "mask": 15,
+      "value": 0
+    },
+    {
+      "operation": "PMUCAL_WAIT",
+      "name": "DCF_STATUS",
+      "base": 335937536,
+      "offset": 16396,
+      "mask": 15,
+      "value": 0
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+// ztOS: the person at the phone (and any administrator: the wheel group, who
+// can sudo anyway) may check for and install updates without a password; the
+// Updates app starts these two services.
+polkit.addRule(function (action, subject) {
+	if (action.id == "org.freedesktop.systemd1.manage-units" &&
+			((subject.local && subject.active) || subject.isInGroup("wheel"))) {
+		var unit = action.lookup("unit");
+		if ((unit == "ztos-update-check.service" || unit == "ztos-update-apply.service") &&
+				action.lookup("verb") == "start") {
+			return polkit.Result.YES;
+		}
+	}
+});

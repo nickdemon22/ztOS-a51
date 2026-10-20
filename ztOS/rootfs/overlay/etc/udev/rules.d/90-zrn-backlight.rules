@@ -1,0 +1,3 @@
+# the panel's brightness (s9p-panel, kernel/s9p-decon-backlight.patch): the shell, in group
+# video, sets it; without this it is root's alone and the screen stays at full brightness
+ACTION=="add", SUBSYSTEM=="backlight", KERNEL=="s9p-panel", RUN+="/usr/bin/chgrp video /sys%p/brightness", RUN+="/usr/bin/chmod g+w /sys%p/brightness"

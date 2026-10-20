@@ -1,0 +1,103 @@
+#!/bin/sh
+# ztstore-helper: the App Store's hands as root (run only by its services).
+#
+#   ztstore-helper install USER   repo NAME...   packages from the repos
+#                                 deps NAME...   the same, marked as dependencies
+#   ztstore-helper admin USER     file PATH      a package the person built from
+#                                                the AUR (asks their password:
+#                                                see 50-ztstore.rules)
+#                                 remove NAME    take an app off the phone
+#
+# What to do is in /run/user/UID/ztstore/request, written by the app:
+#   id N
+#   repo firefox
+# How it stands goes to /run/ztstore/USER/status, one line, for the app:
+#   N working | N done | N failed WHAT
+# and everything pacman says to /run/ztstore/USER/log.
+set -u
+export LC_ALL=C
+mode=${1:-} user=${2:-}
+
+uid=$(id -u -- "$user" 2>/dev/null) || exit 1
+home=$(getent passwd "$user" | cut -d: -f6)
+state=/run/ztstore/$user
+mkdir -p "$state"
+chmod 755 /run/ztstore "$state"
+log=$state/log
+: > "$log"
+
+id=0
+status() { printf '%s %s\n' "$id" "$*" > "$state/status.new" && mv -f "$state/status.new" "$state/status"; }
+fail() { status "failed $*"; exit 1; }
+
+# a word to the person's shell (a notification), if it is running
+tell() {
+	ctl=/run/user/$uid/ztmetro.ctl
+	[ -p "$ctl" ] && timeout 2 sh -c 'printf "%s\n" "$2" > "$1"' _ "$ctl" "notify App Store|$1|$2"
+}
+
+# The request: a plain file the person owns, in their own runtime folder. Read
+# it only through checks: never follow a link someone left there.
+req=/run/user/$uid/ztstore/request
+[ -f "$req" ] && [ ! -L "$req" ] && [ "$(stat -c %u "$req")" = "$uid" ] || fail "no request"
+id=$(sed -n '1s/^id \([0-9]\{1,18\}\)$/\1/p' "$req")
+[ -n "$id" ] || { id=0; fail "bad request"; }
+set -- $(sed -n '2p' "$req")
+what=${1:-}
+[ $# -gt 0 ] && shift
+
+exec 9> "$state/lock"
+flock -n 9 || fail "already busy"
+status working
+
+valid_name() {
+	case $1 in
+	''|-*|*[!a-z0-9@._+-]*) return 1 ;;
+	esac
+}
+
+pacman_run() {
+	if [ -e /var/lib/pacman/db.lck ]; then
+		fail "another install or update is running"
+	fi
+	if pacman --noconfirm --noprogressbar "$@" >> "$log" 2>&1; then
+		return 0
+	fi
+	if grep -q -e 'failed retrieving file' -e 'error 404' "$log"; then
+		fail "the package lists are out of date: update the phone first"
+	fi
+	fail "$(grep '^error:' "$log" | tail -1 | cut -c8- | tr -d '\n' | cut -c1-120)"
+}
+
+case $mode/$what in
+install/repo|install/deps)
+	[ $# -gt 0 ] || fail "nothing to install"
+	for n in "$@"; do valid_name "$n" || fail "bad name"; done
+	if [ "$what" = deps ]; then
+		pacman_run -S --needed --asdeps -- "$@"
+	else
+		pacman_run -S --needed -- "$@"
+		tell "Installed" "$*"
+	fi
+	;;
+admin/file)
+	[ $# -eq 1 ] || fail "one package at a time"
+	path=$(realpath -e -- "$1" 2>/dev/null) || fail "no such file"
+	case $path in
+	"$home"/.cache/ztstore/build/*/*.pkg.tar.*) ;;
+	*) fail "not a package the App Store built" ;;
+	esac
+	[ -f "$path" ] && [ "$(stat -c %u "$path")" = "$uid" ] || fail "not a package the App Store built"
+	pacman_run -U -- "$path"
+	tell "Installed" "$(basename "$path" | sed 's/-[^-]*-[^-]*-[^-]*$//')"
+	;;
+admin/remove)
+	[ $# -eq 1 ] && valid_name "$1" || fail "bad name"
+	pacman_run -Rs -- "$1"
+	tell "Removed" "$1"
+	;;
+*)
+	fail "not allowed"
+	;;
+esac
+status done

@@ -1,0 +1,16 @@
+[Unit]
+Description=Keep this boot's pstore records (the kernel log of a crash or hang) in a folder of their own
+# systemd-pstore archives under fixed names, so the next boot overwrites the
+# record: after a hang the S9 boots ztOS, then TWRP (which reuses the region),
+# then ztOS again, and only the first of those still holds the hang.
+DefaultDependencies=no
+After=local-fs.target
+Before=systemd-pstore.service sysinit.target
+ConditionDirectoryNotEmpty=/sys/fs/pstore
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'd=/var/lib/ztos-pstore/$(date +%%Y%%m%%dT%%H%%M%%S)-$(cut -c1-8 /proc/sys/kernel/random/boot_id); mkdir -p "$d" && cp /sys/fs/pstore/* "$d"/; ls -1t /var/lib/ztos-pstore | tail -n +21 | sed "s|^|/var/lib/ztos-pstore/|" | xargs -r rm -rf'
+
+[Install]
+WantedBy=sysinit.target

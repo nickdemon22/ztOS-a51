@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Devices and Services
+Comment=What is running, what has crashed and what is missing
+Exec=ztdevices
+Terminal=false
+Type=Application
+Icon=ztdevices
+Categories=System;Monitor;

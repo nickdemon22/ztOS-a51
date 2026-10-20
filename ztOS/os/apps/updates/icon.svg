@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <!-- two arrows going round -->
+  <path fill="none" stroke="#ffffff" stroke-width="4" d="M36 15a14 14 0 0 0-24 3M12 33a14 14 0 0 0 24-3"/>
+  <path fill="#ffffff" d="M37 6v12H25zM11 42V30h12z"/>
+</svg>

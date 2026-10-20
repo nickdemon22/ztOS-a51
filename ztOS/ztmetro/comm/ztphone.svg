@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <!-- a handset, tilted as one held to the ear -->
+  <path fill="#ffffff" transform="rotate(-135 24 24) translate(0 6.500)"
+    d="M4 21C4 12.500 13 7 24 7s20 5.500 20 14v4.500c0 1.900-1.600 3.500-3.500 3.500h-6c-1.900 0-3.500-1.600-3.500-3.500v-4.800c-4.600-1.300-9.400-1.300-14 0v4.800c0 1.900-1.600 3.500-3.500 3.500h-6C5.600 29 4 27.400 4 25.500z"/>
+</svg>

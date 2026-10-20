@@ -1,0 +1,11 @@
+* { font-family: sans-serif; font-size: 16px; min-height: 0; }
+window#waybar { background: #16181d; color: #e6e6e6; }
+#custom-launcher, #custom-osk, #custom-close, #workspaces button, #clock, #network, #battery {
+    padding: 0 12px;
+    margin: 4px 3px;
+    border-radius: 8px;
+    background: #262a33;
+    color: #e6e6e6;
+}
+#workspaces button.active { background: #3a7bd5; }
+#custom-close { background: #7a2e2e; }

@@ -1,0 +1,11 @@
+[Unit]
+Description=Modem: load its driver and run Samsung's boot daemon (cbd)
+After=multi-user.target
+
+[Service]
+ExecStart=/usr/local/sbin/ztoscorenetworking-modem
+Restart=on-failure
+RestartSec=20
+
+[Install]
+WantedBy=graphical.target

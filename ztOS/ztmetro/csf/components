@@ -1,0 +1,17 @@
+# ztOSCoreSensorFramework: every piece of hardware support this system brings
+# itself. kind|id|argument|title, in the order they are started.
+#
+#   module   a kernel module with no service of its own (id: its name in
+#            /sys/module; argument: what modprobe is given)
+#   unit     a systemd unit that keeps its own process alive
+#   session  a program of the user's session: watched, not started
+module|zrn_led|zrn-led|Notification light
+module|zrn_haptic|zrn-haptic|Vibration motor
+module|zrn_hotplug|zrn-hotplug|Core power
+unit|ztoscirrusaudio.service||ztOSCirrusAudio
+unit|ztoscsf-sensorhub.service||ztOSCoreSensorFramework: sensor hub
+unit|ztoscsf-sensord.service||ztOSCoreSensorFramework: sensors
+unit|ztoscorenetworking-modem.service||ztOSCoreNetworking: modem
+unit|ztoscorenetworking.service||ztOSCoreNetworking: calls, messages, data
+unit|zrnperfd.service||Performance
+session|ztapps||App list

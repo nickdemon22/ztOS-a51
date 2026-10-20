@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=App Store
+Comment=Apps from your repos and the AUR
+Exec=ztstore
+Terminal=false
+Type=Application
+Icon=ztstore
+Categories=System;PackageManager;

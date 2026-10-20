@@ -1,0 +1,9 @@
+[app]
+id = "os.ztos.updates"
+name = "Updates"
+caps = "ZTOS"
+version = "1.0.0"
+entry = "main.py"
+icon = "icon.svg"
+description = "Keeps ztOS up to date"
+performance = "eco"

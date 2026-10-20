@@ -1,0 +1,5 @@
+#!/bin/sh
+# Stock GNOME Shell on Wayland, started by greetd. The mobile fork
+# (gnome-shell-mobile / mutter-mobile) is not packaged for Arch Linux ARM.
+export XDG_SESSION_TYPE=wayland XDG_CURRENT_DESKTOP=GNOME XDG_SESSION_DESKTOP=gnome
+exec /usr/bin/gnome-session

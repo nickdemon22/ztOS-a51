@@ -1,0 +1,151 @@
+#!/usr/bin/python3
+"""Narrow privileged backend for Settings date and regional formats."""
+import datetime
+import ipaddress
+import time
+import os
+from pathlib import Path
+import re
+import subprocess
+import sys
+
+REGIONS = {'en_US.UTF-8', 'en_GB.UTF-8', 'si_LK.UTF-8', 'ta_LK.UTF-8',
+           'en_IN.UTF-8', 'de_DE.UTF-8', 'fr_FR.UTF-8', 'ja_JP.UTF-8',
+           'en_AU.UTF-8', 'zh_CN.UTF-8', 'C.UTF-8'}
+
+LANGUAGES = REGIONS
+
+def locale_values():
+    config = Path('/etc/locale.conf')
+    values = {}
+    for line in config.read_text().splitlines() if config.exists() else []:
+        key, sep, value = line.partition('=')
+        if sep:
+            values[key] = value.strip('"\'')
+    return values
+
+def ensure_locale(name):
+    installed = {value.lower().replace('-', '') for value in run('locale', '-a').splitlines()}
+    if name != 'C.UTF-8' and name.lower().replace('-', '') not in installed:
+        run('localedef', '-i', name.split('.')[0], '-f', 'UTF-8', name)
+
+def set_locale(values):
+    # localectl replaces the whole set: always pass every key we keep
+    run('localectl', 'set-locale', *[key + '=' + value for key, value in values.items() if value])
+
+def run(*args):
+    return subprocess.check_output(args, text=True, stderr=subprocess.STDOUT, timeout=60).strip()
+
+def validate(zone, region, automatic, stamp):
+    if not re.fullmatch(r'[A-Za-z0-9_+/-]+', zone) or '..' in zone.split('/'):
+        raise ValueError('Choose a valid time zone, such as Asia/Colombo.')
+    root = Path('/usr/share/zoneinfo').resolve()
+    path = (root / zone).resolve()
+    if not path.is_relative_to(root) or not path.is_file() or path.read_bytes()[:4] != b'TZif':
+        raise ValueError('That time zone is not installed.')
+    if region not in REGIONS or automatic not in ('yes', 'no'):
+        raise ValueError('Choose a supported region and time setting.')
+    if automatic == 'no':
+        value = datetime.datetime.strptime(stamp, '%Y-%m-%d %H:%M')
+        if value.strftime('%Y-%m-%d %H:%M') != stamp or not 1970 <= value.year <= 9999:
+            raise ValueError('Enter a valid date as YYYY-MM-DD and time as HH:MM.')
+
+NTP_CONFIG = Path('/etc/systemd/timesyncd.conf.d/50-ztos.conf')
+
+def validate_servers(servers):
+    values = servers.split()
+    if not 1 <= len(values) <= 4 or len(servers) > 240:
+        raise ValueError('Enter one to four NTP server names or IP addresses.')
+    for host in values:
+        try:
+            ipaddress.ip_address(host)
+        except ValueError:
+            if len(host) > 253 or not all(re.fullmatch(r'[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?', part)
+                                         for part in host.rstrip('.').split('.')):
+                raise ValueError('Enter a valid NTP server name or IP address.')
+    return ' '.join(values)
+
+def ntp_servers():
+    for line in NTP_CONFIG.read_text().splitlines() if NTP_CONFIG.exists() else []:
+        if line.startswith('NTP='):
+            return line[4:]
+    return 'pool.ntp.org'
+
+def save_servers(servers):
+    servers = validate_servers(servers)
+    NTP_CONFIG.parent.mkdir(parents=True, exist_ok=True)
+    temp = NTP_CONFIG.with_suffix('.tmp')
+    temp.write_text('[Time]\nNTP=' + servers + '\n')
+    temp.chmod(0o644)
+    temp.replace(NTP_CONFIG)
+
+def status():
+    print(run('timedatectl', 'show', '-p', 'Timezone', '-p', 'NTP', '-p', 'NTPSynchronized'))
+    print('Servers=' + ntp_servers())
+    values = locale_values()
+    print('Region=' + values.get('LC_TIME', values.get('LANG', 'C.UTF-8')))
+    print('Language=' + values.get('LANG', 'C.UTF-8'))
+    now = datetime.datetime.now()
+    print('Date=' + now.strftime('%Y-%m-%d'))
+    print('Time=' + now.strftime('%H:%M'))
+
+if __name__ == '__main__':
+    try:
+        if sys.argv[1:] == ['status']:
+            status()
+        elif len(sys.argv) in (7, 8) and sys.argv[1] == 'apply':
+            zone, region, automatic, stamp = sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5] + ' ' + sys.argv[6]
+            validate(zone, region, automatic, stamp)
+            servers = validate_servers(sys.argv[7] if len(sys.argv) == 8 else ntp_servers())
+            if os.geteuid() != 0:
+                raise ValueError('Administrator access is required to save these settings.')
+            ensure_locale(region)
+            run('timedatectl', 'set-timezone', zone)
+            values = locale_values()
+            values.update({key: region for key in ('LC_TIME', 'LC_NUMERIC', 'LC_MONETARY', 'LC_MEASUREMENT')})
+            set_locale(values)
+            save_servers(servers)
+            run('timedatectl', 'set-ntp', automatic)
+            if automatic == 'yes':
+                run('systemctl', 'restart', 'systemd-timesyncd.service')
+            if automatic == 'no':
+                run('timedatectl', 'set-time', stamp + ':00')
+            status()
+            print('Note=Saved. Regional formats apply to newly opened applications.')
+        elif len(sys.argv) == 3 and sys.argv[1] == 'language':
+            language = sys.argv[2]
+            if language not in LANGUAGES:
+                raise ValueError('Choose a supported language.')
+            if os.geteuid() != 0:
+                raise ValueError('Administrator access is required to change the language.')
+            ensure_locale(language)
+            values = locale_values()
+            values['LANG'] = language
+            set_locale(values)
+            status()
+            print('Note=Applies to apps opened from now on.')
+        elif len(sys.argv) == 3 and sys.argv[1] == 'sync':
+            servers = validate_servers(sys.argv[2])
+            if os.geteuid() != 0:
+                raise ValueError('Administrator access is required to synchronize time.')
+            save_servers(servers)
+            run('timedatectl', 'set-ntp', 'yes')
+            marker = Path('/run/systemd/timesync/synchronized')
+            previous = marker.stat().st_mtime_ns if marker.exists() else 0
+            run('systemctl', 'restart', 'systemd-timesyncd.service')
+            synced = False
+            for attempt in range(20):
+                # Require a fresh synchronization, rather than a stale kernel flag.
+                if marker.exists() and marker.stat().st_mtime_ns > previous:
+                    synced = True
+                    break
+                time.sleep(1)
+            status()
+            print('Note=' + ('Time synchronized.' if synced else
+                'Sync requested. Waiting for an NTP server; check the network connection.'))
+        else:
+            raise ValueError('Invalid date and region request.')
+    except (ValueError, OSError, subprocess.SubprocessError) as error:
+        detail = error.output.strip() if isinstance(error, subprocess.CalledProcessError) else str(error)
+        print('Note=' + detail.replace('\n', ' ')[:300])
+        sys.exit(1)

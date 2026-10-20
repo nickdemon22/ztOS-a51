@@ -1,0 +1,78 @@
+#!/bin/sh
+# ztos-update: ztOS's software updater (run as root, by its services).
+#
+#   ztos-update check    fetch the package lists; what can be updated goes to
+#                        /var/lib/ztos/updates (name old -> new, one a line)
+#   ztos-update apply    install every update (a whole-system upgrade: Arch
+#                        does not do partial ones)
+#
+# How it stands is in /run/ztos-update/status, one line, for the Updates app:
+#   idle | checking | uptodate | available N | downloading | installing K N NAME
+#   | done N | failed WHAT
+# and everything pacman says goes to /var/log/ztos-update.log.
+set -u
+STATE=/run/ztos-update
+LIST=/var/lib/ztos/updates
+LOG=/var/log/ztos-update.log
+mkdir -p "$STATE" /var/lib/ztos
+status() { printf '%s\n' "$*" > "$STATE/status.new" && mv "$STATE/status.new" "$STATE/status"; }
+
+# a word to everyone's shell (a notification), if they are logged in
+tell() {
+	for ctl in /run/user/*/ztmetro.ctl; do
+		[ -p "$ctl" ] && timeout 2 sh -c 'printf "%s\n" "$2" > "$1"' _ "$ctl" "notify Updates|$1|$2"
+	done
+}
+
+exec 9> "$STATE/lock"
+flock -n 9 || { echo "ztos-update: already running" >&2; exit 1; }
+
+case "${1:-}" in
+check)
+	status checking
+	echo "== check $(date)" >> "$LOG"
+	if ! pacman -Sy --noconfirm >> "$LOG" 2>&1; then
+		status "failed check"
+		exit 1
+	fi
+	pacman -Qu > "$LIST.new" 2>> "$LOG"
+	mv "$LIST.new" "$LIST"
+	n=$(grep -c . "$LIST")
+	if [ "$n" -gt 0 ]; then
+		status "available $n"
+		[ "${2:-}" = "--quiet" ] || tell "Updates available" "$n updates for ztOS. Open Updates to install them."
+	else
+		status uptodate
+	fi
+	;;
+apply)
+	echo "== apply $(date)" >> "$LOG"
+	status downloading
+	n=0
+	# pacman says "(  3/120) upgrading name" as it goes: that is the progress
+	pacman -Su --noconfirm 2>&1 | tee -a "$LOG" | while IFS= read -r line; do
+		case "$line" in
+		*"("*/*")"*" upgrading "*|*"("*/*")"*" installing "*)
+			k=$(printf '%s' "$line" | sed -n 's/^ *( *\([0-9]*\)\/\([0-9]*\)).*/\1/p')
+			total=$(printf '%s' "$line" | sed -n 's/^ *( *\([0-9]*\)\/\([0-9]*\)).*/\2/p')
+			name=$(printf '%s' "$line" | sed -n 's/.*\(upgrading\|installing\) \([^ .]*\).*/\2/p')
+			[ -n "$k" ] && status "installing $k $total $name"
+			;;
+		esac
+	done
+	if [ "$(pacman -Qu 2>/dev/null | grep -c .)" -eq 0 ]; then
+		n=$(grep -c . "$LIST" 2>/dev/null || echo 0)
+		: > "$LIST"
+		status "done $n"
+		tell "ztOS is up to date" "$n updates were installed."
+	else
+		status "failed install"
+		tell "Updates did not install" "See /var/log/ztos-update.log."
+		exit 1
+	fi
+	;;
+*)
+	echo "usage: ztos-update check [--quiet] | apply" >&2
+	exit 2
+	;;
+esac

@@ -1,0 +1,72 @@
+#!/bin/sh
+# ztstore-aur: build a package from the AUR, as the person (never as root:
+# makepkg refuses that, and the recipe is not to be trusted with it).
+#
+#   ztstore-aur NAME prepare   fetch or update the recipe, check it builds here,
+#                              and say what it needs
+#   ztstore-aur NAME build     build it
+#
+# Lines starting with @ are for the App Store; everything else is the log.
+#   @stage WHAT        @needs NAME...  (from the repos)
+#   @aur NAME...       (only in the AUR: to be installed first)
+#   @prepared          @built PATH     @failed WHY
+set -u
+export LC_ALL=C
+name=${1:-} step=${2:-}
+case $name in ''|-*|*[!a-z0-9@._+-]*) echo "@failed bad name"; exit 1 ;; esac
+fail() { echo "@failed $*"; exit 1; }
+
+root=${XDG_CACHE_HOME:-$HOME/.cache}/ztstore/build
+mkdir -p "$root" && cd "$root" || fail "no build folder"
+
+case $step in
+prepare)
+	echo "@stage fetching the recipe"
+	if [ -d "$name/.git" ]; then
+		git -C "$name" fetch -q origin && git -C "$name" reset -q --hard origin/HEAD 2>&1 ||
+			fail "could not update the recipe"
+	else
+		rm -rf "$name"
+		git clone -q "https://aur.archlinux.org/$name.git" "$name" 2>&1 || fail "could not fetch the recipe"
+	fi
+	cd "$name" || fail "no recipe"
+	[ -f .SRCINFO ] && [ -f PKGBUILD ] || fail "not an AUR package"
+	machine=$(uname -m)
+	archs=$(sed -n 's/^\tarch = //p' .SRCINFO | tr '\n' ' ')
+	case " $archs " in
+	*" any "*|*" $machine "*) ;;
+	*) fail "made only for: $archs" ;;
+	esac
+	echo "@stage checking what it needs"
+	# what it needs to build and to run, here (depends_aarch64 too)
+	deps=$(sed -n "s/^\t\(make\|check\)\{0,1\}depends\(_$machine\)\{0,1\} = //p" .SRCINFO | sort -u)
+	repo= aur=
+	for d in $(pacman -T $deps); do
+		n=$(pacman -Sp --print-format '%n' -- "$d" 2>/dev/null | tail -1)
+		if [ -n "$n" ]; then
+			repo="$repo $n"
+		else
+			aur="$aur ${d%%[<>=]*}"
+		fi
+	done
+	[ -n "$aur" ] && echo "@aur$aur"
+	[ -n "$repo" ] && echo "@needs$repo"
+	echo "@prepared"
+	;;
+build)
+	cd "$name" || fail "fetch the recipe first"
+	echo "@stage building"
+	rm -f ./*.pkg.tar.*
+	makepkg -f --noconfirm 2>&1 || fail "the build stopped (see the log)"
+	for f in $(makepkg --packagelist); do
+		base=${f##*/}
+		rest=${base#"$name"-}
+		# NAME-VERSION-..., not NAME-debug-... or another package of the split
+		case $rest in [0-9]*) [ -f "$f" ] && { echo "@built $f"; exit 0; } ;; esac
+	done
+	fail "built, but its package is not where makepkg says"
+	;;
+*)
+	fail "prepare or build"
+	;;
+esac

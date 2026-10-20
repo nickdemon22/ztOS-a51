@@ -1,0 +1,24 @@
+#!/bin/sh
+# What greetd starts: the ztMETRO session, the only one ztOS has. The log is
+# kept for one run back.
+[ -f /etc/ztos/session.env ] && . /etc/ztos/session.env
+state=${XDG_STATE_HOME:-$HOME/.local/state}
+mkdir -p "$state/ztos"
+log=$state/ztmetro.log
+[ -f "$log" ] && mv "$log" "$log.1"
+runtime=${XDG_RUNTIME_DIR:-/run/user/$(id -u)}
+
+# The warm runtime of SDK apps (Qt loaded once, apps forked from it), up
+# before the first tap: no app waits for Qt to load.
+z=$HOME/.local/share/ztos/zygote.py
+if [ -f "$z" ]; then
+	(sleep 3; XDG_RUNTIME_DIR=$runtime setsid python3 -I "$z" > "$state/ztos/zygote.log" 2>&1 < /dev/null &) &
+fi
+
+# The first time: the welcome, once Start is up.
+welcome=/usr/local/lib/ztos/apps/os.ztos.welcome
+if [ ! -f "$HOME/.config/ztos/welcomed" ] && [ -x "$welcome" ]; then
+	(sleep 5; [ -p "$runtime/ztmetro.ctl" ] && printf 'launch %s\n' "$welcome" > "$runtime/ztmetro.ctl") &
+fi
+
+exec /usr/local/bin/ztmetro > "$log" 2>&1

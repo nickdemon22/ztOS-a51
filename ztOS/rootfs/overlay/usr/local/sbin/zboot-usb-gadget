@@ -1,0 +1,23 @@
+#!/bin/sh
+# One composite gadget on the phone's only USB controller: an NCM network
+# (the phone is 172.16.42.1 and hands the host 172.16.42.2) and an ACM serial
+# port with a getty on ttyGS0.
+g=/sys/kernel/config/usb_gadget/zboot
+[ -d "$g" ] && exit 0
+udc=$(ls /sys/class/udc 2>/dev/null | head -n1)
+[ -n "$udc" ] || { echo "no UDC" >&2; exit 1; }
+mkdir -p "$g/strings/0x409" "$g/configs/c.1/strings/0x409" \
+	"$g/functions/ncm.usb0" "$g/functions/acm.GS0"
+echo 0x1d6b > "$g/idVendor"
+echo 0x0104 > "$g/idProduct"
+echo "zboot" > "$g/strings/0x409/manufacturer"
+echo "Galaxy S9 Arch Linux ARM" > "$g/strings/0x409/product"
+echo "starlte" > "$g/strings/0x409/serialnumber"
+echo "ncm+acm" > "$g/configs/c.1/strings/0x409/configuration"
+echo 02:5a:42:00:00:01 > "$g/functions/ncm.usb0/dev_addr"
+echo 02:5a:42:00:00:02 > "$g/functions/ncm.usb0/host_addr"
+ln -s "$g/functions/ncm.usb0" "$g/configs/c.1/"
+ln -s "$g/functions/acm.GS0" "$g/configs/c.1/"
+echo "$udc" > "$g/UDC"
+ip link set usb0 up 2>/dev/null || true
+ip addr add 172.16.42.1/24 dev usb0 2>/dev/null || true

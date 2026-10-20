@@ -1,0 +1,38 @@
+#!/bin/sh
+# Bluetooth, as the shell shows it: every 2 s, into $XDG_RUNTIME_DIR/ztos-bt,
+#   on=0|1  connected=NAME  battery=PERCENT  streaming=0|1
+# (the status bar's icon), and the Settings tile's live back while a device
+# is connected ($XDG_RUNTIME_DIR/ztos-live/ztsettings). One of it runs per
+# session; the shell starts it.
+f=${XDG_RUNTIME_DIR:-/tmp}/ztos-bt
+live=${XDG_RUNTIME_DIR:-/tmp}/ztos-live
+mkdir -p "$live"
+while :; do
+	on=0 name= battery= streaming=0
+	if bluetoothctl show 2>/dev/null | grep -q "Powered: yes"; then
+		on=1
+		mac=$(bluetoothctl devices Connected 2>/dev/null | awk 'NR == 1 { print $2 }')
+		if [ -n "$mac" ]; then
+			info=$(bluetoothctl info "$mac" 2>/dev/null)
+			name=$(printf '%s\n' "$info" | sed -n 's/^\tAlias: //p')
+			battery=$(printf '%s\n' "$info" | sed -n 's/.*Battery Percentage: .*(\([0-9]*\)).*/\1/p')
+			pactl list short sinks 2>/dev/null | grep "bluez_output" | grep -q RUNNING && streaming=1
+		fi
+	fi
+	printf 'on=%s\nconnected=%s\nbattery=%s\nstreaming=%s\n' "$on" "$name" "$battery" "$streaming" > "$f.new"
+	mv "$f.new" "$f"
+	if [ -n "$name" ]; then
+		{
+			echo "title=Bluetooth"
+			echo "line=$name"
+			if [ -n "$battery" ]; then echo "line=battery $battery%"; else echo "line=connected"; fi
+			[ "$streaming" = 1 ] && echo "line=playing"
+			echo "count=0"
+		} > "$live/ztsettings.new"
+		cmp -s "$live/ztsettings.new" "$live/ztsettings" && rm -f "$live/ztsettings.new" ||
+			mv "$live/ztsettings.new" "$live/ztsettings"
+	else
+		rm -f "$live/ztsettings"
+	fi
+	sleep 2
+done

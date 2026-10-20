@@ -1,0 +1,58 @@
+# ztOS: the packages every ztOS system carries (Arch Linux ARM names).
+# One per line; '#' starts a comment.
+
+# the system
+base
+e2fsprogs
+sudo
+polkit
+networkmanager
+wpa_supplicant
+iw
+openssh
+xdg-user-dirs
+alsa-utils
+brightnessctl
+pipewire
+rtkit
+pipewire-pulse
+pipewire-alsa
+wireplumber
+
+# the session: greetd starts ztMETRO, the only shell ztOS has
+greetd
+mesa
+wlroots0.20
+libinput
+xkeyboard-config
+libxkbcommon
+cairo
+pango
+librsvg
+pixman
+gdk-pixbuf2
+playerctl
+noto-fonts
+noto-fonts-emoji
+libpulse
+ttf-dejavu
+
+# to build ztMETRO and its apps inside the image (and for developers after)
+base-devel
+wayland-protocols
+git
+
+# the SDK: apps in Python and Qt
+python
+pyside6
+qt6-svg
+
+# prebuilt apps
+yt-dlp
+mpv
+cava
+nodejs
+npm
+firefox
+chromium
+gnome-terminal

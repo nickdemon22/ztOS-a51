@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=People
+Comment=Contacts and address book
+Exec=ztcontacts
+Terminal=false
+Type=Application
+Icon=ztcontacts
+Categories=Utility;Telephony;

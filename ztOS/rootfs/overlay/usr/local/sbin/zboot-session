@@ -1,0 +1,23 @@
+#!/bin/sh
+# Pick which shell greetd starts: zboot-session plasma-mobile|phosh|hyprland|gnome|ztmetro
+set -e
+case "${1:-}" in
+plasma-mobile) CMD=/usr/bin/startplasmamobile ;;
+plasma)        CMD=/usr/bin/startplasma-wayland ;;
+phosh)         CMD=/usr/local/bin/phosh-session-starlte ;;
+hyprland)      CMD=/usr/bin/Hyprland ;;
+gnome)         CMD=/usr/local/bin/gnome-session-starlte ;;
+ztmetro)       CMD=/usr/local/bin/ztmetro-session ;;
+"")            grep -m1 '^command' /etc/greetd/config.toml; exit 0 ;;
+*) echo "usage: zboot-session plasma-mobile|plasma|phosh|hyprland|gnome|ztmetro" >&2; exit 2 ;;
+esac
+sed -i "s|^command = .*|command = \"$CMD\"|" /etc/greetd/config.toml
+grep '^command' /etc/greetd/config.toml
+# "systemctl restart greetd" leaves the old compositor running: the new session
+# then cannot take the display and the panel falls back to the text console.
+# End the user's session completely first, and drop greetd's run file so the
+# restart uses [initial_session] again: [default_session] is a "greeter" class
+# session, in which mutter refuses to start ("Failed to find any matching session"). Detached, because the caller is
+# usually that same user over ssh and goes down with it.
+systemd-run --no-block --collect --unit=zboot-session-reset sh -c \
+	'systemctl stop greetd; loginctl terminate-user alarm; sleep 4; pkill -9 -u alarm; sleep 1; rm -f /run/greetd.run; systemctl start greetd'

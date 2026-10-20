@@ -1,0 +1,9 @@
+#!/bin/sh
+# Show, hide or toggle squeekboard:  zboot-osk show|hide|toggle
+visible=$(busctl --user get-property sm.puri.OSK0 /sm/puri/OSK0 sm.puri.OSK0 Visible 2>/dev/null | cut -d' ' -f2)
+case "${1:-toggle}" in
+show) want=true ;;
+hide) want=false ;;
+*) [ "$visible" = true ] && want=false || want=true ;;
+esac
+exec busctl --user call sm.puri.OSK0 /sm/puri/OSK0 sm.puri.OSK0 SetVisible b "$want"

@@ -1,0 +1,103 @@
+=== gpio
+gpiochip1: GPIOs 6-13, parent: platform/14050000.pinctrl, gpa0:
+ gpio-11  (                    |AP SLEEP            ) out hi    
+gpiochip2: GPIOs 14-21, parent: platform/14050000.pinctrl, gpa1:
+gpiochip6: GPIOs 44-45, parent: platform/14050000.pinctrl, gpa4:
+ gpio-44  (                    |SHUB INT            ) in  hi IRQ
+gpiochip10: GPIOs 63-70, parent: platform/13a80000.pinctrl, gph0:
+ gpio-66  (                    |spi20.0             ) out hi    
+ gpio-67  (                    |MCU RESP            ) in  lo    
+ gpio-68  (                    |MCU REQ             ) out lo    
+gpiochip39: GPIOs 139-146, parent: platform/10430000.pinctrl, gpg0:
+ gpio-141 (                    |GPS_PWR_EN          ) out hi    
+=== regulator
+ regulator                      use open bypass voltage current     min     max
+-------------------------------------------------------------------------------
+ regulator-dummy                  0    4      0     0mV     0mA     0mV     0mV 
+    14230000.adc                                                    0mV     0mV
+    10c00000.usb                                                    0mV     0mV
+    10c00000.usb                                                    0mV     0mV
+    10c00000.usb                                                    0mV     0mV
+ ufs-vcc                          1    1      0     0mV     0mA     0mV     0mV 
+    11120000.ufs                                                    0mV     0mV
+ VDD_EXT_1P3_PB03                 0    0      0  1300mV     0mA  1300mV  1300mV 
+ VDD_EXT_1P3_PB02                 0    0      0  1300mV     0mA  1300mV  1300mV 
+ VREG_BOOST_BYP                   0    0      0  3500mV     0mA  2600mV  4000mV 
+ S2MPB02_LDO1                     0    0      0   900mV     0mA   900mV   900mV 
+ S2MPB02_LDO2                     0    0      0  1000mV     0mA  1000mV  1000mV 
+ VDDD_1.05V_SUB                   0    0      0  1050mV     0mA  1050mV  1050mV 
+ S2MPB02_LDO4                     0    0      0  1200mV     0mA  1200mV  1200mV 
+ VDDD_1.05V_VT                    0    0      0  1050mV     0mA  1000mV  1050mV 
+ VDDIO_1.8V_VT                    0    0      0  1800mV     0mA  1800mV  1800mV 
+ VDDIO_1.8V_SUB                   0    0      0  1800mV     0mA  1800mV  1800mV 
+ HRM_1.8V_AP                      0    0      0  1800mV     0mA  1800mV  1800mV 
+ S2MPB02_LDO9                     0    0      0  1800mV     0mA  1800mV  1800mV 
+ VDDD_1.8V_OIS                    0    0      0  1800mV     0mA  1800mV  1800mV 
+ VDDA_2.8V_SUB                    0    0      0  2800mV     0mA  2800mV  2800mV 
+ VDDAF_2.8V_SUB                   0    0      0  2800mV     0mA  2800mV  2800mV 
+ VDDA_2.8V_VT                     0    0      0  2800mV     0mA  2800mV  2800mV 
+ VDDAF_COMMON_CAM                 0    0      0  3300mV     0mA  3300mV  3300mV 
+ VDDD_2.8V_OIS                    0    0      0  2800mV     0mA  2800mV  2800mV 
+ VDDAF_2.8V_VT                    0    0      0  2800mV     0mA  2800mV  2800mV 
+ VDD_GRIP_1P8                     0    0      0  1800mV     0mA  1800mV  1800mV 
+ VDD_PROXY_LED_3P3                0    0      0  3300mV     0mA  3300mV  3300mV 
+ VDDD_1.0V_CAM                    0    0      0  1025mV     0mA   975mV  1025mV 
+ VDDQ_1.1V_CAM                    0    0      0  1100mV     0mA  1100mV  1100mV 
+ VDDIO_1.8V_CAM                   0    0      0  1800mV     0mA  1800mV  1800mV 
+ VDDD_RET_1.0V_CAM                0    0      0  1025mV     0mA   700mV  1025mV 
+ VDDA_2.15V_CAM                   0    0      0  2150mV     0mA  2150mV  2150mV 
+ VDDA_2.95V_CAM                   0    0      0  2950mV     0mA  2950mV  2950mV 
+ VDD_VM_2.8V_OIS                  0    0      0  2800mV     0mA  2800mV  2800mV 
+ vdd1                             0    1      0  1600mV     0mA  1500mV  1600mV 
+    deviceless                                                   1600mV  1600mV
+ vdd2                             0    1      0  1800mV     0mA  1800mV  1800mV 
+    deviceless                                                      0mV     0mV
+ vdd3                             0    0      0  1800mV     0mA  1500mV  2000mV 
+ vdd4                             0    0      0  3000mV     0mA  2700mV  3775mV 
+ vdd5                             0    1      0  3000mV     0mA  3000mV  3000mV 
+    deviceless                                                      0mV     0mV
+ elvss                            0    0      0     0mV     0mA     0mA     0mA 
+ vdd_mif                          0    0      0   581mV     0mA   450mV   950mV 
+ vdd_cpucl1                       0    0      0   681mV     0mA   450mV  1300mV 
+ vdd_cpucl0                       0    0      0   618mV     0mA   450mV  1300mV 
+ vdd_int                          0    0      0   581mV     0mA   450mV   950mV 
+ vdd_cam                          0    0      0   581mV     0mA   450mV   950mV 
+ vdd_g3d                          0    0      0   581mV     0mA   450mV   950mV 
+ vdd_cpucl1_m                     0    0      0  1300mV     0mA   450mV  1300mV 
+ vdd2_mem                         0    0      0  1100mV     0mA   900mV  1300mV 
+ vddq_mem                         0    0      0   600mV     0mA   450mV   950mV 
+ vdd_lldo1                        0    1      0   850mV     0mA   750mV  1150mV 
+    exynos_pm_dvs                                                   0mV     0mV
+ vdd_lldo2                        0    0      0  1100mV     0mA   900mV  1300mV 
+ vdd_lldo3                        0    1      0  1300mV     0mA  1100mV  1500mV 
+    exynos_pm_dvs                                                   0mV     0mV
+ vdd_mldo                         0    1      0  2000mV     0mA  1750mV  2150mV 
+    exynos_pm_dvs                                                   0mV     0mV
+ vdd_ldo1                         0    0      0   750mV     0mA   700mV   950mV 
+ vqmmc                            0    1      0  2800mV     0mA  1800mV  3300mV 
+    11500000.dwmmc2                                              2800mV  3100mV
+ vdd_ldo3                         0    0      0  1800mV     0mA  1600mV  1950mV 
+ vdd_ldo4                         0    0      0   850mV     0mA   700mV  1100mV 
+ vdd_ldo5                         0    0      0  1800mV     0mA  1600mV  1950mV 
+ vdd_ldo6                         0    0      0   750mV     0mA   450mV   950mV 
+ vdd_ldo7                         0    0      0   750mV     0mA   450mV   950mV 
+ vdd_ldo8                         0    0      0  1200mV     0mA   700mV  1300mV 
+ vdd_ldo9                         0    0      0  1800mV     0mA  1600mV  1950mV 
+ vdd_ldo10                        0    0      0   600mV     0mA   450mV   950mV 
+ vdd_ldo11                        0    0      0   750mV     0mA   450mV   950mV 
+ vdd_ldo12                        0    0      0   850mV     0mA   700mV  1100mV 
+ vdd_ldo13                        0    0      0  1800mV     0mA  1600mV  1950mV 
+ vdd_ldo14                        0    0      0  3000mV     0mA  1800mV  3350mV 
+ vdd_ldo30                        0    0      0   600mV     0mA   450mV  1100mV 
+ vmmc                             0    1      0  2800mV     0mA  2800mV  2800mV 
+    11500000.dwmmc2                                              2800mV  2900mV
+ vdd_ldo32                        0    0      0  2800mV     0mA  1800mV  3375mV 
+ vdd_pmic_codec_1p8               0    4      0  1800mV     0mA  1800mV  1800mV 
+    cs47l92-codec                                                   0mV     0mV
+    spi2.0                                                          0mV     0mV
+    spi2.0                                                          0mV     0mV
+    MICVDD                        1    2      0  3000mV     0mA  3000mV  3000mV 
+       madera-extcon                                                0mV     0mV
+       cs47l92-codec                                                0mV     0mV
+ vdd_codec_1p2                    1    2      0  1200mV     0mA  1200mV  1200mV 
+    cs47l92-codec                                                   0mV     0mV

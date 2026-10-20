@@ -1,0 +1,15 @@
+# The USB gadget's network side, matched by the address zboot-usb-gadget gives it.
+[Match]
+MACAddress=02:5a:42:00:00:01
+
+[Network]
+Address=172.16.42.1/24
+DHCPServer=yes
+LinkLocalAddressing=ipv6
+ConfigureWithoutCarrier=yes
+
+[DHCPServer]
+PoolOffset=2
+PoolSize=1
+EmitDNS=no
+EmitRouter=no

@@ -1,0 +1,14 @@
+[app]
+id = "com.zerone.whatsapp"
+name = "WhatsApp"
+caps = "WHATSAPP"
+version = "0.1.0"
+entry = "main.py"
+icon = "icon.svg"
+description = "WhatsApp text messaging for ztOS"
+requires = ["nodejs", "npm", "chromium"]
+performance = "eco"
+
+[build]
+include = ["**/*.py", "**/*.js", "**/*.json", "**/*.svg"]
+exclude = ["node_modules/**"]

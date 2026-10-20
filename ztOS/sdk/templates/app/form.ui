@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry"><rect><x>0</x><y>0</y><width>328</width><height>300</height></rect></property>
+  <layout class="QVBoxLayout" name="layout">
+   <property name="leftMargin"><number>0</number></property>
+   <property name="rightMargin"><number>0</number></property>
+   <property name="spacing"><number>12</number></property>
+   <item>
+    <widget class="QLabel" name="caption">
+     <property name="text"><string>Your name</string></property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLineEdit" name="nameEdit"/>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="loud">
+     <property name="text"><string>Say it loudly</string></property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="greetButton">
+     <property name="text"><string>greet</string></property>
+     <property name="sizePolicy"><sizepolicy hsizetype="Maximum" vsizetype="Fixed"/></property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="greeting">
+     <property name="text"><string/></property>
+    </widget>
+   </item>
+   <item>
+    <spacer name="spacer"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

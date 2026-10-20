@@ -1,0 +1,16 @@
+// Top bar for a phone: everything is a finger-sized button.
+{
+    "layer": "top",
+    "position": "top",
+    "height": 44,
+    "modules-left": ["custom/launcher", "hyprland/workspaces"],
+    "modules-center": ["clock"],
+    "modules-right": ["network", "battery", "custom/osk", "custom/close"],
+    "custom/launcher": { "format": "Apps", "on-click": "pkill fuzzel || fuzzel", "tooltip": false },
+    "custom/osk": { "format": "Kbd", "on-click": "zboot-osk toggle", "tooltip": false },
+    "custom/close": { "format": "X", "on-click": "hyprctl dispatch 'hl.dsp.window.close()'", "tooltip": false },
+    "hyprland/workspaces": { "format": "{id}" },
+    "clock": { "format": "{:%H:%M}", "tooltip": false },
+    "network": { "format-wifi": "{signalStrength}%", "format-disconnected": "no wifi", "format-ethernet": "usb", "tooltip": false },
+    "battery": { "format": "{capacity}%", "format-charging": "{capacity}%+", "tooltip": false }
+}

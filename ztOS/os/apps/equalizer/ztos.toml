@@ -1,0 +1,13 @@
+[app]
+id = "com.zerone.equalizer"
+name = "Equalizer"
+caps = "AUDIO"
+version = "1.0.0"
+entry = "main.py"
+icon = "icon.svg"
+description = "System audio equalizer for ztOS"
+requires = ["easyeffects"]
+performance = "eco"
+
+[build]
+include = ["**/*.py", "**/*.svg"]

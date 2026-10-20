@@ -1,0 +1,237 @@
+=== 13a80000
+Pin config settings per pin
+Format: pin (name): configs
+pin 63 (gph0-0):  PUD(0x0) DRV(0x3) CON_PDN(0x2) PUD_PDN(0x1)
+pin 64 (gph0-1):  PUD(0x0) DRV(0x3) CON_PDN(0x2) PUD_PDN(0x1)
+pin 65 (gph0-2):  PUD(0x1) DRV(0x3) CON_PDN(0x2) PUD_PDN(0x1)
+pin 66 (gph0-3):  PUD(0x0) DRV(0x3) CON_PDN(0x2) PUD_PDN(0x1)
+pin 67 (gph0-4):  PUD(0x0) DRV(0x3) CON_PDN(0x0) PUD_PDN(0x0)
+pin 68 (gph0-5):  PUD(0x0) DRV(0x3) CON_PDN(0x1) PUD_PDN(0x0)
+pin 69 (gph0-6):  PUD(0x0) DRV(0x0) CON_PDN(0x0) PUD_PDN(0x0)
+pin 70 (gph0-7):  PUD(0x0) DRV(0x0) CON_PDN(0x0) PUD_PDN(0x0)
+pin 71 (gph1-0):  PUD(0x1) DRV(0x0) CON_PDN(0x2) PUD_PDN(0x1)
+pin 72 (gph1-1):  PUD(0x1) DRV(0x0) CON_PDN(0x2) PUD_PDN(0x1)
+pin 73 (gph1-2):  PUD(0x1) DRV(0x0) CON_PDN(0x2) PUD_PDN(0x1)
+pin 74 (gph1-3):  PUD(0x1) DRV(0x0) CON_PDN(0x2) PUD_PDN(0x1)
+pin 75 (gph1-4):  PUD(0x1) DRV(0x0) CON_PDN(0x2) PUD_PDN(0x1)
+Pinmux settings per pin
+Format: pin (name): mux_owner gpio_owner hog?
+pin 63 (gph0-0): 13ac0000.spi (GPIO UNCLAIMED) function /pinctrl@13A80000/sensorhub_mosi_sck_ssn group gph0-0
+pin 64 (gph0-1): 13ac0000.spi (GPIO UNCLAIMED) function /pinctrl@13A80000/sensorhub_mosi_sck_ssn group gph0-1
+pin 65 (gph0-2): 13ac0000.spi (GPIO UNCLAIMED) function /pinctrl@13A80000/sensorhub_miso group gph0-2
+pin 66 (gph0-3): 13ac0000.spi gph0:66 function /pinctrl@13A80000/sensorhub_mosi_sck_ssn group gph0-3
+pin 67 (gph0-4): spi20.0 gph0:67 function /pinctrl@13A80000/ssp-mcu-resp group gph0-4
+pin 68 (gph0-5): spi20.0 gph0:68 function /pinctrl@13A80000/ssp-mcu-req group gph0-5
+pin 69 (gph0-6): sec-mst (GPIO UNCLAIMED) function /pinctrl@13A80000/sec-mst,mst-data-gpio group gph0-6
+pin 70 (gph0-7): sec-mst (GPIO UNCLAIMED) function /pinctrl@13A80000/sec-mst,mst-en-gpio group gph0-7
+pin 71 (gph1-0): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 72 (gph1-1): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 73 (gph1-2): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 74 (gph1-3): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 75 (gph1-4): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+=== 10430000
+Pin config settings per pin
+Format: pin (name): configs
+pin 111 (gpp0-0):  PUD(0x0) DRV(0x0) CON_PDN(0x0) PUD_PDN(0x0)
+pin 112 (gpp0-1):  PUD(0x0) DRV(0x0) CON_PDN(0x0) PUD_PDN(0x0)
+pin 113 (gpp0-2):  PUD(0x0) DRV(0x0) CON_PDN(0x0) PUD_PDN(0x0)
+pin 114 (gpp0-3):  PUD(0x0) DRV(0x0) CON_PDN(0x0) PUD_PDN(0x0)
+pin 115 (gpp0-4):  PUD(0x0) DRV(0x0) CON_PDN(0x2) PUD_PDN(0x1)
+pin 116 (gpp0-5):  PUD(0x0) DRV(0x0) CON_PDN(0x2) PUD_PDN(0x1)
+pin 117 (gpp0-6):  PUD(0x0) DRV(0x0) CON_PDN(0x2) PUD_PDN(0x1)
+pin 118 (gpp0-7):  PUD(0x3) DRV(0x0) CON_PDN(0x2) PUD_PDN(0x1)
+pin 119 (gpp1-0):  PUD(0x1) DRV(0x2) CON_PDN(0x2) PUD_PDN(0x1)
+pin 120 (gpp1-1):  PUD(0x1) DRV(0x2) CON_PDN(0x2) PUD_PDN(0x1)
+pin 121 (gpp1-2):  PUD(0x1) DRV(0x2) CON_PDN(0x2) PUD_PDN(0x1)
+pin 122 (gpp1-3):  PUD(0x1) DRV(0x2) CON_PDN(0x2) PUD_PDN(0x1)
+pin 123 (gpp1-4):  PUD(0x0) DRV(0x0) CON_PDN(0x2) PUD_PDN(0x1)
+pin 124 (gpp1-5):  PUD(0x0) DRV(0x0) CON_PDN(0x2) PUD_PDN(0x1)
+pin 125 (gpp1-6):  PUD(0x0) DRV(0x0) CON_PDN(0x2) PUD_PDN(0x1)
+pin 126 (gpp1-7):  PUD(0x0) DRV(0x0) CON_PDN(0x2) PUD_PDN(0x1)
+pin 127 (gpp2-0):  PUD(0x1) DRV(0x2) CON_PDN(0x2) PUD_PDN(0x1)
+pin 128 (gpp2-1):  PUD(0x1) DRV(0x2) CON_PDN(0x2) PUD_PDN(0x1)
+pin 129 (gpp2-2):  PUD(0x1) DRV(0x2) CON_PDN(0x2) PUD_PDN(0x1)
+pin 130 (gpp2-3):  PUD(0x1) DRV(0x2) CON_PDN(0x2) PUD_PDN(0x1)
+pin 131 (gpp2-4):  PUD(0x0) DRV(0x2) CON_PDN(0x2) PUD_PDN(0x1)
+pin 132 (gpp2-5):  PUD(0x0) DRV(0x2) CON_PDN(0x2) PUD_PDN(0x1)
+pin 133 (gpp2-6):  PUD(0x1) DRV(0x2) CON_PDN(0x2) PUD_PDN(0x1)
+pin 134 (gpp2-7):  PUD(0x1) DRV(0x2) CON_PDN(0x2) PUD_PDN(0x1)
+pin 135 (gpp3-0):  PUD(0x0) DRV(0x3) CON_PDN(0x2) PUD_PDN(0x1)
+pin 136 (gpp3-1):  PUD(0x1) DRV(0x0) CON_PDN(0x2) PUD_PDN(0x1)
+pin 137 (gpp3-2):  PUD(0x0) DRV(0x2) CON_PDN(0x2) PUD_PDN(0x1)
+pin 138 (gpp3-3):  PUD(0x0) DRV(0x2) CON_PDN(0x2) PUD_PDN(0x1)
+pin 139 (gpg0-0):  PUD(0x3) DRV(0x0) CON_PDN(0x2) PUD_PDN(0x1)
+pin 140 (gpg0-1):  PUD(0x0) DRV(0x0) CON_PDN(0x3) PUD_PDN(0x0)
+pin 141 (gpg0-2):  PUD(0x1) DRV(0x3) CON_PDN(0x3) PUD_PDN(0x0)
+pin 142 (gpg0-3):  PUD(0x0) DRV(0x0) CON_PDN(0x2) PUD_PDN(0x1)
+pin 143 (gpg0-4):  PUD(0x3) DRV(0x0) CON_PDN(0x2) PUD_PDN(0x1)
+pin 144 (gpg0-5):  PUD(0x0) DRV(0x3) CON_PDN(0x3) PUD_PDN(0x1)
+pin 145 (gpg0-6):  PUD(0x1) DRV(0x0) CON_PDN(0x2) PUD_PDN(0x1)
+pin 146 (gpg0-7):  PUD(0x0) DRV(0x0) CON_PDN(0x0) PUD_PDN(0x0)
+pin 147 (gpg1-0):  PUD(0x0) DRV(0x0) CON_PDN(0x3) PUD_PDN(0x0)
+pin 148 (gpg1-1):  PUD(0x0) DRV(0x0) CON_PDN(0x2) PUD_PDN(0x1)
+pin 149 (gpg1-2):  PUD(0x0) DRV(0x0) CON_PDN(0x2) PUD_PDN(0x1)
+pin 150 (gpg1-3):  PUD(0x0) DRV(0x0) CON_PDN(0x2) PUD_PDN(0x1)
+pin 151 (gpg1-4):  PUD(0x0) DRV(0x0) CON_PDN(0x2) PUD_PDN(0x1)
+pin 152 (gpg1-5):  PUD(0x0) DRV(0x0) CON_PDN(0x2) PUD_PDN(0x1)
+pin 153 (gpg1-6):  PUD(0x1) DRV(0x2) CON_PDN(0x2) PUD_PDN(0x1)
+pin 154 (gpg1-7):  PUD(0x0) DRV(0x0) CON_PDN(0x0) PUD_PDN(0x0)
+pin 155 (gpg2-0):  PUD(0x0) DRV(0x0) CON_PDN(0x3) PUD_PDN(0x0)
+pin 156 (gpg2-1):  PUD(0x0) DRV(0x0) CON_PDN(0x2) PUD_PDN(0x1)
+pin 157 (gpg2-2):  PUD(0x1) DRV(0x0) CON_PDN(0x2) PUD_PDN(0x1)
+pin 158 (gpg2-3):  PUD(0x1) DRV(0x0) CON_PDN(0x2) PUD_PDN(0x1)
+pin 159 (gpg2-4):  PUD(0x1) DRV(0x0) CON_PDN(0x2) PUD_PDN(0x1)
+pin 160 (gpg2-5):  PUD(0x1) DRV(0x0) CON_PDN(0x2) PUD_PDN(0x1)
+pin 161 (gpg2-6):  PUD(0x1) DRV(0x0) CON_PDN(0x2) PUD_PDN(0x1)
+pin 162 (gpg2-7):  PUD(0x1) DRV(0x0) CON_PDN(0x2) PUD_PDN(0x1)
+Pinmux settings per pin
+Format: pin (name): mux_owner gpio_owner hog?
+pin 111 (gpp0-0): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 112 (gpp0-1): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 113 (gpp0-2): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 114 (gpp0-3): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 115 (gpp0-4): 10470000.spi (GPIO UNCLAIMED) function /pinctrl@10430000/spi2-bus group gpp0-4
+pin 116 (gpp0-5): 10470000.spi (GPIO UNCLAIMED) function /pinctrl@10430000/spi2-bus group gpp0-5
+pin 117 (gpp0-6): 10470000.spi (GPIO UNCLAIMED) function /pinctrl@10430000/spi2-bus group gpp0-6
+pin 118 (gpp0-7): 10470000.spi (GPIO UNCLAIMED) function /pinctrl@10430000/spi2-cs-func group gpp0-7
+pin 119 (gpp1-0): (MUX UNCLAIMED) gpp1:119
+pin 120 (gpp1-1): (MUX UNCLAIMED) gpp1:120
+pin 121 (gpp1-2): (MUX UNCLAIMED) gpp1:121
+pin 122 (gpp1-3): (MUX UNCLAIMED) gpp1:122
+pin 123 (gpp1-4): 104b0000.hsi2c (GPIO UNCLAIMED) function /pinctrl@10430000/hsi2c10-bus group gpp1-4
+pin 124 (gpp1-5): 104b0000.hsi2c (GPIO UNCLAIMED) function /pinctrl@10430000/hsi2c10-bus group gpp1-5
+pin 125 (gpp1-6): 104c0000.hsi2c (GPIO UNCLAIMED) function /pinctrl@10430000/hsi2c11-bus group gpp1-6
+pin 126 (gpp1-7): 104c0000.hsi2c (GPIO UNCLAIMED) function /pinctrl@10430000/hsi2c11-bus group gpp1-7
+pin 127 (gpp2-0): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 128 (gpp2-1): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 129 (gpp2-2): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 130 (gpp2-3): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 131 (gpp2-4): 10430000.pinctrl (GPIO UNCLAIMED) function /pinctrl@10430000/initial-state/gpp2-4 group gpp2-4
+pin 132 (gpp2-5): 10430000.pinctrl (GPIO UNCLAIMED) function /pinctrl@10430000/initial-state/gpp2-5 group gpp2-5
+pin 133 (gpp2-6): 10430000.pinctrl (GPIO UNCLAIMED) function /pinctrl@10430000/initial-state/gpp2-6 group gpp2-6
+pin 134 (gpp2-7): 10430000.pinctrl (GPIO UNCLAIMED) function /pinctrl@10430000/initial-state/gpp2-7 group gpp2-7
+pin 135 (gpp3-0): 6-0057 gpp3:135 function /pinctrl@10430000/hrm-irq group gpp3-0
+pin 136 (gpp3-1): 13-0066 (GPIO UNCLAIMED) function /pinctrl@10430000/vib-pwm group gpp3-1
+pin 137 (gpp3-2): 10440000.uart (GPIO UNCLAIMED) function /pinctrl@10430000/uart0-bus group gpp3-2
+pin 138 (gpp3-3): 10440000.uart (GPIO UNCLAIMED) function /pinctrl@10430000/uart0-bus group gpp3-3
+pin 139 (gpg0-0): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 140 (gpg0-1): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 141 (gpg0-2): gps gpg0:141 function /pinctrl@10430000/ssp-gps-pwr-en group gpg0-2
+pin 142 (gpg0-3): 15-0000 (GPIO UNCLAIMED) function /pinctrl@10430000/smpl_warn group gpg0-3
+pin 143 (gpg0-4): 11100000.phy gpg0:143 function /pinctrl@10430000/phy-port group gpg0-4
+pin 144 (gpg0-5): 116a0000.pcie0 gpg0:144 function /pinctrl@10430000/cfg_wlanen group gpg0-5
+pin 145 (gpg0-6): 10430000.pinctrl (GPIO UNCLAIMED) function /pinctrl@10430000/initial-state/gpg0-6 group gpg0-6
+pin 146 (gpg0-7): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 147 (gpg1-0): madera-pinctrl gpg1:147 function /pinctrl@10430000/codec-reset group gpg1-0
+pin 148 (gpg1-1): 10430000.pinctrl (GPIO UNCLAIMED) function /pinctrl@10430000/initial-state/gpg1-1 group gpg1-1
+pin 149 (gpg1-2): 10430000.pinctrl (GPIO UNCLAIMED) function /pinctrl@10430000/initial-state/gpg1-2 group gpg1-2
+pin 150 (gpg1-3): 10430000.pinctrl (GPIO UNCLAIMED) function /pinctrl@10430000/initial-state/gpg1-3 group gpg1-3
+pin 151 (gpg1-4): 10430000.pinctrl (GPIO UNCLAIMED) function /pinctrl@10430000/initial-state/gpg1-4 group gpg1-4
+pin 152 (gpg1-5): 10430000.pinctrl (GPIO UNCLAIMED) function /pinctrl@10430000/initial-state/gpg1-5 group gpg1-5
+pin 153 (gpg1-6): 6-0057 gpg1:153 function /pinctrl@10430000/hrm-en group gpg1-6
+pin 154 (gpg1-7): 13-0066 (GPIO UNCLAIMED) function /pinctrl@10430000/motor-boost-en group gpg1-7
+pin 155 (gpg2-0): bluetooth gpg2:155 function /pinctrl@10430000/bt-btwake group gpg2-0
+pin 156 (gpg2-1): 9-0059 (GPIO UNCLAIMED) function /pinctrl@10430000/sub-pmic-irq group gpg2-1
+pin 157 (gpg2-2): (MUX UNCLAIMED) gpg2:157
+pin 158 (gpg2-3): 10430000.pinctrl (GPIO UNCLAIMED) function /pinctrl@10430000/initial-state/gpg2-3 group gpg2-3
+pin 159 (gpg2-4): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 160 (gpg2-5): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 161 (gpg2-6): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 162 (gpg2-7): 10430000.pinctrl (GPIO UNCLAIMED) function /pinctrl@10430000/initial-state/gpg2-7 group gpg2-7
+=== 14050000
+Pin config settings per pin
+Format: pin (name): configs
+pin 0 (etc1-0):  PUD(0x1) DRV(0x0)
+pin 1 (etc1-1):  PUD(0x3) DRV(0x0)
+pin 2 (etc1-2):  PUD(0x1) DRV(0x0)
+pin 3 (etc1-3):  PUD(0x3) DRV(0x0)
+pin 4 (etc1-4):  PUD(0x1) DRV(0x0)
+pin 5 (etc1-5):  PUD(0x1) DRV(0x0)
+pin 6 (gpa0-0):  PUD(0x1) DRV(0x0)
+pin 7 (gpa0-1):  PUD(0x3) DRV(0x3)
+pin 8 (gpa0-2):  PUD(0x0) DRV(0x0)
+pin 9 (gpa0-3):  PUD(0x0) DRV(0x0)
+pin 10 (gpa0-4):  PUD(0x0) DRV(0x0)
+pin 11 (gpa0-5):  PUD(0x0) DRV(0x0)
+pin 12 (gpa0-6):  PUD(0x0) DRV(0x0)
+pin 13 (gpa0-7):  PUD(0x1) DRV(0x0)
+pin 14 (gpa1-0):  PUD(0x0) DRV(0x0)
+pin 15 (gpa1-1):  PUD(0x1) DRV(0x0)
+pin 16 (gpa1-2):  PUD(0x1) DRV(0x0)
+pin 17 (gpa1-3):  PUD(0x1) DRV(0x3)
+pin 18 (gpa1-4):  PUD(0x0) DRV(0x0)
+pin 19 (gpa1-5):  PUD(0x0) DRV(0x0)
+pin 20 (gpa1-6):  PUD(0x0) DRV(0x0)
+pin 21 (gpa1-7):  PUD(0x1) DRV(0x3)
+pin 22 (gpa2-0):  PUD(0x1) DRV(0x0)
+pin 23 (gpa2-1):  PUD(0x1) DRV(0x0)
+pin 24 (gpa2-2):  PUD(0x0) DRV(0x0)
+pin 25 (gpa2-3):  PUD(0x0) DRV(0x0)
+pin 26 (gpa2-4):  PUD(0x0) DRV(0x0)
+pin 27 (gpa2-5):  PUD(0x0) DRV(0x0)
+pin 28 (gpa2-6):  PUD(0x1) DRV(0x0)
+pin 29 (gpa2-7):  PUD(0x0) DRV(0x0)
+pin 30 (gpa3-0):  PUD(0x0) DRV(0x3)
+pin 31 (gpa3-1):  PUD(0x0) DRV(0x0)
+pin 32 (gpa3-2):  PUD(0x0) DRV(0x0)
+pin 33 (gpa3-3):  PUD(0x1) DRV(0x0)
+pin 34 (gpa3-4):  PUD(0x0) DRV(0x0)
+pin 35 (gpa3-5):  PUD(0x1) DRV(0x0)
+pin 36 (gpa3-6):  PUD(0x1) DRV(0x0)
+pin 37 (gpa3-7):  PUD(0x1) DRV(0x0)
+pin 38 (gpq0-0):  PUD(0x3) DRV(0x0)
+pin 39 (gpq0-1):  PUD(0x3) DRV(0x0)
+pin 40 (gpq0-2):  PUD(0x3) DRV(0x0)
+pin 41 (gpq0-3):  PUD(0x3) DRV(0x0)
+pin 42 (gpq0-4):  PUD(0x3) DRV(0x0)
+pin 43 (gpq0-5):  PUD(0x1) DRV(0x2)
+pin 44 (gpa4-0):  PUD(0x1) DRV(0x3)
+pin 45 (gpa4-1):  PUD(0x0) DRV(0x3)
+Pinmux settings per pin
+Format: pin (name): mux_owner gpio_owner hog?
+pin 0 (etc1-0): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 1 (etc1-1): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 2 (etc1-2): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 3 (etc1-3): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 4 (etc1-4): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 5 (etc1-5): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 6 (gpa0-0): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 7 (gpa0-1): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 8 (gpa0-2): certify_hall (GPIO UNCLAIMED) function /pinctrl@14050000/certify-hall-irq group gpa0-2
+pin 9 (gpa0-3): gpio_keys gpa0:9 function /pinctrl@14050000/key-volup group gpa0-3
+pin 10 (gpa0-4): gpio_keys gpa0:10 function /pinctrl@14050000/key-voldown group gpa0-4
+pin 11 (gpa0-5): spi20.0 gpa0:11 function /pinctrl@14050000/ssp-batch-wake-irq group gpa0-5
+pin 12 (gpa0-6): gpio_keys gpa0:12 function /pinctrl@14050000/key-wink group gpa0-6
+pin 13 (gpa0-7): 116a0000.pcie0 gpa0:13 function /pinctrl@14050000/wlan_host_wake group gpa0-7
+pin 14 (gpa1-0): 2-0048 gpa1:14 function /pinctrl@14050000/attn-irq group gpa1-0
+pin 15 (gpa1-1): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 16 (gpa1-2): (MUX UNCLAIMED) gpa1:16
+pin 17 (gpa1-3): spi1.0 gpa1:17 function /pinctrl@14050000/btp-irq-sleep group gpa1-3
+pin 18 (gpa1-4): 12-0060 (GPIO UNCLAIMED) function /pinctrl@14050000/dp-pmic-irq group gpa1-4
+pin 19 (gpa1-5): 11500000.dwmmc2 gpa1:19 function /pinctrl@14050000/dwmmc2_cd_ext_irq group gpa1-5
+pin 20 (gpa1-6): 13-0066 (GPIO UNCLAIMED) function /pinctrl@14050000/max77705-irq group gpa1-6
+pin 21 (gpa1-7): spi20.0 (GPIO UNCLAIMED) function /pinctrl@14050000/ssp-host-req group gpa1-7
+pin 22 (gpa2-0): 14-003b (GPIO UNCLAIMED) function /pinctrl@14050000/wpc-det group gpa2-0
+pin 23 (gpa2-1): 14050000.pinctrl (GPIO UNCLAIMED) function /pinctrl@14050000/initial-state/gpa2-1 group gpa2-1
+pin 24 (gpa2-2): madera-pinctrl (GPIO UNCLAIMED) function /pinctrl@14050000/codec-irq group gpa2-2
+pin 25 (gpa2-3): bluetooth gpa2:25 function /pinctrl@14050000/bt-hostwake group gpa2-3
+pin 26 (gpa2-4): gpio_keys gpa2:26 function /pinctrl@14050000/key-power group gpa2-4
+pin 27 (gpa2-5): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 28 (gpa2-6): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 29 (gpa2-7): 11090000.displayport (GPIO UNCLAIMED) function /pinctrl@14050000/dp_irq group gpa2-7
+pin 30 (gpa3-0): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 31 (gpa3-1): 14-003b (GPIO UNCLAIMED) function /pinctrl@14050000/wpc-int group gpa3-1
+pin 32 (gpa3-2): 116a0000.pcie0 (GPIO UNCLAIMED) function /pinctrl@14050000/pcie_wake group gpa3-2
+pin 33 (gpa3-3): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 34 (gpa3-4): (MUX UNCLAIMED) gpa3:34
+pin 35 (gpa3-5): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 36 (gpa3-6): hall (GPIO UNCLAIMED) function /pinctrl@14050000/hall-irq group gpa3-6
+pin 37 (gpa3-7): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 38 (gpq0-0): 10840000.uart (GPIO UNCLAIMED) function /pinctrl@14050000/uart1-bus group gpq0-0
+pin 39 (gpq0-1): 10840000.uart (GPIO UNCLAIMED) function /pinctrl@14050000/uart1-bus group gpq0-1
+pin 40 (gpq0-2): 10840000.uart (GPIO UNCLAIMED) function /pinctrl@14050000/uart1-bus group gpq0-2
+pin 41 (gpq0-3): 10840000.uart (GPIO UNCLAIMED) function /pinctrl@14050000/uart1-bus group gpq0-3
+pin 42 (gpq0-4): 141c0000.speedy (GPIO UNCLAIMED) function /pinctrl@14050000/speedy-bus group gpq0-4
+pin 43 (gpq0-5): 14050000.pinctrl (GPIO UNCLAIMED) function /pinctrl@14050000/initial-state/gpq0-5 group gpq0-5
+pin 44 (gpa4-0): spi20.0 gpa4:44 function /pinctrl@14050000/ssp-shub-int group gpa4-0
+pin 45 (gpa4-1): (MUX UNCLAIMED) (GPIO UNCLAIMED)

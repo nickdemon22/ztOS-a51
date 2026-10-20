@@ -1,0 +1,37 @@
+#!/bin/sh
+# Give hci0 the phone's own address, before bluetoothd takes it. The chip
+# boots with a placeholder (43:61:B2:...); Samsung keeps the real one in EFS,
+# which is mounted while the modem runs. A copy is kept for boots where EFS
+# is not mounted yet.
+EFS=/run/android/mnt/vendor/efs/bluetooth/bt_addr
+KEEP=/var/lib/zrn-bluetooth/bt_addr
+mkdir -p "$(dirname "$KEEP")"
+if [ -r "$EFS" ]; then
+	tr -d '\n\r' < "$EFS" > "$KEEP.new" && mv "$KEEP.new" "$KEEP"
+fi
+addr=$(cat "$KEEP" 2>/dev/null)
+# The controller is registered once its firmware is in (about 10 s after
+# attaching). Nothing may talk to it before that: management requests during
+# setup leave it stuck, never registered. So wait passively, on the kernel
+# log: the last thing setup prints here is the transmit power quirk.
+setup_done() {	# $1: how many setups to wait for
+	i=0
+	until [ "$(dmesg | grep -c "hci0: HCI Read Transmit Power Level command is advertised")" -ge "$1" ]; do
+		i=$((i + 1)); [ $i -gt 90 ] && return 1; sleep 1
+	done
+}
+setup_done 1 || { echo "zrn-bluetooth-addr: setup never finished"; exit 1; }
+# and registered a few seconds after that line; wait for it, asking once
+# a second only from now on
+sleep 5
+i=0
+until btmgmt info 2>/dev/null | grep -q "^hci0:"; do
+	i=$((i + 1)); [ $i -gt 20 ] && { echo "zrn-bluetooth-addr: hci0 not registered"; exit 1; }; sleep 1
+done
+case "$addr" in
+??:??:??:??:??:??)
+	btmgmt -i hci0 power off >/dev/null
+	btmgmt -i hci0 public-addr "$addr" >/dev/null
+	;;
+*) echo "zrn-bluetooth-addr: no address in EFS yet; keeping the chip's" ;;
+esac

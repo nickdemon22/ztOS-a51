@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Phone
+Comment=Phone dialer and call history
+Exec=ztphone %u
+Terminal=false
+Type=Application
+Icon=ztphone
+Categories=Utility;Telephony;
+MimeType=x-scheme-handler/tel;

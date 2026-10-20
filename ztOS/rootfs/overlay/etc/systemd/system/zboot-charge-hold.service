@@ -1,0 +1,15 @@
+[Unit]
+Description=Hold the boot while the battery is nearly empty and charging
+DefaultDependencies=no
+After=systemd-modules-load.service
+Before=sysinit.target systemd-udevd.service local-fs-pre.target shutdown.target
+Conflicts=shutdown.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/zboot-charge-hold
+TimeoutStartSec=infinity
+StandardOutput=journal+console
+
+[Install]
+WantedBy=sysinit.target

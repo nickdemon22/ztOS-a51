@@ -1,0 +1,139 @@
+gpiochip0: GPIOs 0-5, parent: platform/14050000.pinctrl, etc1:
+
+gpiochip1: GPIOs 6-13, parent: platform/14050000.pinctrl, gpa0:
+ gpio-9   (                    |gpio-keys: KEY_VOLUM) in  hi IRQ
+ gpio-10  (                    |gpio-keys: KEY_VOLUM) in  hi IRQ
+ gpio-11  (                    |AP SLEEP            ) out hi    
+ gpio-12  (                    |gpio-keys: KEY_WINK ) in  hi IRQ
+ gpio-13  (                    |WLAN_HOST_WAKE      ) in  lo    
+
+gpiochip2: GPIOs 14-21, parent: platform/14050000.pinctrl, gpa1:
+ gpio-14  (                    |sec,tsp_int         ) in  hi IRQ
+ gpio-16  (                    |nfc_int             ) in  lo IRQ
+ gpio-17  (                    |etspi_drdy          ) in  lo    
+ gpio-19  (                    |DWMCI_EXT_CD        ) in  lo IRQ
+
+gpiochip3: GPIOs 22-29, parent: platform/14050000.pinctrl, gpa2:
+ gpio-25  (                    |bthostwake_gpio     ) in  lo IRQ
+ gpio-26  (                    |gpio-keys: KEY_POWER) in  hi IRQ
+
+gpiochip4: GPIOs 30-37, parent: platform/14050000.pinctrl, gpa3:
+ gpio-34  (                    |lcd_reset           ) out lo    
+
+gpiochip5: GPIOs 38-43, parent: platform/14050000.pinctrl, gpq0:
+
+gpiochip6: GPIOs 44-45, parent: platform/14050000.pinctrl, gpa4:
+ gpio-44  (                    |SHUB INT            ) in  hi IRQ
+
+gpiochip7: GPIOs 46-50, parent: platform/17c60000.pinctrl, gpb0:
+
+gpiochip8: GPIOs 51-58, parent: platform/17c60000.pinctrl, gpb1:
+
+gpiochip9: GPIOs 59-62, parent: platform/17c60000.pinctrl, gpb2:
+
+gpiochip10: GPIOs 63-70, parent: platform/13a80000.pinctrl, gph0:
+ gpio-66  (                    |spi20.0             ) out hi    
+ gpio-67  (                    |MCU RESP            ) in  lo    
+ gpio-68  (                    |MCU REQ             ) out lo    
+
+gpiochip11: GPIOs 71-75, parent: platform/13a80000.pinctrl, gph1:
+
+gpiochip12: GPIOs 76-76, parent: platform/14220000.pinctrl, gpm0:
+
+gpiochip13: GPIOs 77-77, parent: platform/14220000.pinctrl, gpm1:
+
+gpiochip14: GPIOs 78-78, parent: platform/14220000.pinctrl, gpm2:
+
+gpiochip15: GPIOs 79-79, parent: platform/14220000.pinctrl, gpm3:
+
+gpiochip16: GPIOs 80-80, parent: platform/14220000.pinctrl, gpm4:
+
+gpiochip17: GPIOs 81-81, parent: platform/14220000.pinctrl, gpm5:
+
+gpiochip18: GPIOs 82-82, parent: platform/14220000.pinctrl, gpm6:
+
+gpiochip19: GPIOs 83-83, parent: platform/14220000.pinctrl, gpm7:
+
+gpiochip20: GPIOs 84-84, parent: platform/14220000.pinctrl, gpm10:
+
+gpiochip21: GPIOs 85-85, parent: platform/14220000.pinctrl, gpm11:
+
+gpiochip22: GPIOs 86-86, parent: platform/14220000.pinctrl, gpm12:
+
+gpiochip23: GPIOs 87-87, parent: platform/14220000.pinctrl, gpm13:
+
+gpiochip24: GPIOs 88-88, parent: platform/14220000.pinctrl, gpm14:
+
+gpiochip25: GPIOs 89-89, parent: platform/14220000.pinctrl, gpm15:
+
+gpiochip26: GPIOs 90-90, parent: platform/14220000.pinctrl, gpm16:
+
+gpiochip27: GPIOs 91-91, parent: platform/14220000.pinctrl, gpm17:
+
+gpiochip28: GPIOs 92-92, parent: platform/14220000.pinctrl, gpm40:
+
+gpiochip29: GPIOs 93-93, parent: platform/14220000.pinctrl, gpm41:
+
+gpiochip30: GPIOs 94-94, parent: platform/14220000.pinctrl, gpm42:
+
+gpiochip31: GPIOs 95-95, parent: platform/14220000.pinctrl, gpm43:
+ gpio-95  (                    |etspi_ldo_en        ) out lo    
+
+gpiochip32: GPIOs 96-97, parent: platform/11050000.pinctrl, gpf0:
+
+gpiochip33: GPIOs 98-104, parent: platform/11430000.pinctrl, gpf1:
+
+gpiochip34: GPIOs 105-110, parent: platform/11430000.pinctrl, gpf2:
+ gpio-107 (                    |116a0000.pcie0      ) out lo    
+
+gpiochip35: GPIOs 111-118, parent: platform/10430000.pinctrl, gpp0:
+
+gpiochip36: GPIOs 119-126, parent: platform/10430000.pinctrl, gpp1:
+ gpio-119 (                    |spi_gpio            ) in  lo    
+ gpio-120 (                    |spi_gpio            ) in  lo    
+ gpio-121 (                    |spi_gpio            ) in  lo    
+ gpio-122 (                    |spi32766.0          ) in  lo    
+
+gpiochip37: GPIOs 127-134, parent: platform/10430000.pinctrl, gpp2:
+gpiochip38: GPIOs 135-138, parent: platform/10430000.pinctrl, gpp3:
+ gpio-135 (                    |hrm_int             ) in  lo IRQ
+
+gpiochip39: GPIOs 139-146, parent: platform/10430000.pinctrl, gpg0:
+ gpio-141 (                    |GPS_PWR_EN          ) out hi    
+ gpio-143 (                    |PHY_CON             ) in  hi    
+ gpio-144 (                    |WLAN_REG_ON         ) out lo    
+
+gpiochip40: GPIOs 147-154, parent: platform/10430000.pinctrl, gpg1:
+ gpio-147 (                    |reset               ) out hi    
+ gpio-153 (                    |hrm_en              ) in  lo    
+
+gpiochip41: GPIOs 155-162, parent: platform/10430000.pinctrl, gpg2:
+ gpio-155 (                    |btwake_gpio         ) out lo    
+ gpio-157 (                    |disp_det            ) in  lo IRQ
+
+gpiochip42: GPIOs 163-170, parent: platform/10830000.pinctrl, gpp4:
+ gpio-166 (                    |ese_cs              ) in  lo    
+
+gpiochip43: GPIOs 171-178, parent: platform/10830000.pinctrl, gpp5:
+
+gpiochip44: GPIOs 179-182, parent: platform/10830000.pinctrl, gpp6:
+
+gpiochip45: GPIOs 183-190, parent: platform/10830000.pinctrl, gpc0:
+
+gpiochip46: GPIOs 191-198, parent: platform/10830000.pinctrl, gpc1:
+
+gpiochip47: GPIOs 199-202, parent: platform/10830000.pinctrl, gpd0:
+ gpio-201 (                    |ufs-vcc             ) out hi    
+
+gpiochip48: GPIOs 203-209, parent: platform/10830000.pinctrl, gpg3:
+ gpio-207 (                    |sec-mst,mst-pwr-gpio) out lo    
+
+gpiochip49: GPIOs 210-212, parent: platform/13880000.pinctrl, gpt0:
+
+gpiochip50: GPIOs 300-323, parent: i2c/10-0022, gpio-expander:
+ gpio-301 (                    |dp_sbu_sw_sel       ) in  lo    
+ gpio-304 (                    |dp_aux_sw_oe        ) out hi    
+ gpio-306 (                    |etspi_sleep         ) out lo    
+ gpio-307 (                    |bten_gpio           ) out lo    
+ gpio-309 (                    |nfc_firm            ) out lo    
+ gpio-311 (                    |nfc_ven             ) out hi    

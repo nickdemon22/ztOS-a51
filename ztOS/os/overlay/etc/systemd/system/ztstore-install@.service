@@ -1,0 +1,8 @@
+[Unit]
+Description=ztOS App Store: install from the repos for %i
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/ztstore-helper install %i

@@ -1,0 +1,6 @@
+#!/usr/bin/env python3
+# ztos: the ztOS installer (see installer/README.md)
+import os, sys
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
+from ztos_installer.cli import main
+sys.exit(main())

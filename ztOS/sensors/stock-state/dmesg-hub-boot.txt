@@ -1,0 +1,629 @@
+<3>[  140.898772]  [4:            lhd: 3711] [SSP] set_mcu_power: enable vdd_mcu_1p8(0), is enabled 1
+<3>[  140.946900]  [3:            lhd: 3711] [SSP] set_mcu_power: enable vdd_mcu_1p8(1), is enabled 1
+<6>[  140.967330]  [3:            lhd: 3711] bbd_common_open++
+<6>[  140.967353]  [3:            lhd: 3711] bbd_control
+<6>[  140.967368]  [3:            lhd: 3711] bbd_common_open--
+<6>[  140.967446]  [3:            lhd: 3711] bcm_spi_open++
+<6>[  140.967481]  [3:            lhd: 3711] wake enabled for irq 374
+<6>[  140.967499]  [3:            lhd: 3711] [SSPBBD]: tx ctrl 58: total 5 = len 2 + fc 2 + cmd 1
+<6>[  140.967515]  [3:            lhd: 3711] [SSPBBD]: rx ctrl 70: total 3 = len 2 + fc 0 + stat 1
+<6>[  140.967537]  [3:            lhd: 3711] [SSPBBD]: SPI @ 12000: Full Duplex Strm mode, 2B Len, with FC, Frame Len 8192 : tx ctrl 58, rx ctrl 70
+<6>[  140.968292]  [3:            lhd: 3711] [SSPBBD]: REG HSI_CTRL  @ : [00000000] 00000000 [40104094] 00000000 [40104098] 00000007 [4010409C] 000034E8 
+<6>[  140.968784]  [3:            lhd: 3711] [SSPBBD]: REG RNGDMA_RX @ : [40104040] 00914548 [40104044] 00002FFF [40104048] 00000001 [4010404C] 00000000 
+<6>[  140.969378]  [3:            lhd: 3711] [SSPBBD]: REG RNGDMA_TX @ : [40104060] 00917548 [40104064] 000017FF [40104068] 00000000 [4010406C] 00000000 
+<6>[  140.969950]  [3:            lhd: 3711] [SSPBBD]: REG ADL_ABR   @ : [401040A0] 00600000 [401040A4] 00000001 [401040A8] 00000000 [401040AC] 00080000 
+<6>[  140.969972]  [3:            lhd: 3711] bcm_spi_open--
+<6>[  140.970015]  [3:            lhd: 3711] bbd_control : BBD:PassThru=1
+<6>[  140.970045]  [3:            lhd: 3711] [SSPBBD] PatchTimer Start
+<6>[  140.970062]  [3:            lhd: 3711] bbd_enable_lk timeout:10 sec
+<6>[  141.197359]  [0:            lhd: 3711] bbd_common_open++
+<6>[  141.197380]  [0:            lhd: 3711] bbd_patch
+<6>[  141.197385]  [0:            lhd: 3711] bbd_common_open--
+<6>[  141.197465]  [0:            lhd: 3711] bbd_common_release[bbd_patch]++
+<6>[  141.197471]  [0:            lhd: 3711] bbd_common_release[bbd_patch]--
+<6>[  141.197511]  [0:            lhd: 3711] bbd_common_open++
+<6>[  141.197516]  [0:            lhd: 3711] bbd_patch
+<6>[  141.197520]  [0:            lhd: 3711] bbd_common_open--
+<6>[  142.026920]  [3:            lhd: 3711] bbd_common_release[bbd_patch]++
+<6>[  142.026957]  [3:            lhd: 3711] bbd_common_release[bbd_patch]--
+<3>[  142.087100]  [5:  kworker/u17:0:  114] [SSPBBD]: bcm_ssi_tx @ FC Bwritten 0 of 36...Fail retries 1
+<3>[  142.087230]  [5:  kworker/u17:0:  114] [SSPBBD]: bcm_ssi_tx @ FC Bwritten 0 of 36...Fail retries 2
+<3>[  142.087337]  [5:  kworker/u17:0:  114] [SSPBBD]: bcm_ssi_tx @ FC Bwritten 0 of 36...Fail retries 3
+<6>[  142.182828]  [5:  kworker/u17:0:  114] [SSPBBD] bcm_rxtx_work_func - PZC delay 1, wr CIRC_CNT 13, avail 0 
+<6>[  142.238935]  [3:            lhd: 3711] bbd_common_open++
+<6>[  142.238972]  [3:            lhd: 3711] bbd_sensor
+<6>[  142.238987]  [3:            lhd: 3711] bbd_common_open--
+<6>[  142.239381]  [3:            lhd: 3711] bbd_control : BBD:PassThru=0
+<6>[  142.239408]  [3:            lhd: 3711] [SSPBBD] Patch Done Timer Off
+<6>[  142.239421]  [3:            lhd: 3711] bbd_disable_lk
+<6>[  142.239442]  [3:            lhd: 3711] bbd_control : ESW:READY
+<6>[  143.169802]  [2:  kworker/u17:0:  114] [SSP]: MSG From MCU - PD: UT 3
+<6>[  143.169802]  [2:  kworker/u17:0:  114] Acc_INT_Occur
+<6>[  143.169802]  [2:  kworker/u17:0:  114] CPUART Send MSG++
+<6>[  143.169802]  [2:  kworker/u17:0:  114] SSP_ACC_Probe
+<6>[  143.169802]  [2:  kworker/u17:0:  114] Sensor_LDO_Toggle_cnt = 0 ~!
+<6>[  143.169802]  [2:  kworker/u17:0:  114] SSP_scale_range = 204
+<6>[  143.169802]  [2:  kworker/u17:0:  114] #>PRP
+<6>[  143.169802]  [2:  kworker/u17:0:  114] deviceId: 1
+<6>[  143.169802]  [2:  kworker/u17:0:  114] #>DEVINIT
+<6>[  143.169802]  [2:  kworker/u17:0:  114] #>RESETREG
+<6>[  143.169802]  [2:  kworker/u17:0:  114] #>PRX_INIT
+<6>[  143.169802]  [2:  kworker/u17:0:  114] #>alsInit
+<6>[  143.169802]  [2:  kworker/u17:0:  114] #>ccb_alsInit
+<6>[  143.169802]  [2:  kworker/u17:0:  114] #>initAlg
+<6>[  143.169802]  [2:  kworker/u17:0:  114] #>FLICKINIT
+<6>[  143.169802]  [2:  kworker/u17:0:  114] #>MOINIT
+<6>[  143.169802]  [2:  kworker/u17:0:  114] #>LIGP
+<3>[  143.170021]  [2:  kworker/u17:0:  114] [SSP]: MCU sensor init done
+<6>[  143.170265]  [2:  kworker/u17:0:  114] [SSP]: MSG From MCU - MCU Init is done ~ !!
+<3>[  143.170322]  [1:  kworker/u16:2:   65] [SSPBBD] Sensors of MCU are ready!
+<6>[  143.170363]  [1:  kworker/u16:2:   65] [SSP] ssp_enable, new enable = 1, old enable = 0
+<6>[  143.171423]  [2:  kworker/u17:0:  114] [SSP]: MSG From MCU - Add_First 1 1
+<6>[  143.171423]  [2:  kworker/u17:0:  114] add_AD_AR 1, 1 1 1, 20 20
+<6>[  143.171423]  [2:  kworker/u17:0:  114] final gyro rate = 20
+<6>[  143.171423]  [2:  kworker/u17:0:  114] [SSP] GYeDR 0x3
+<6>[  143.171423]  [2:  kworker/u17:0:  114] g_ptSh->cTimer = 20
+<6>[  143.171423]  [2:  kworker/u17:0:  114] SH_HA_SetRTC 20
+<6>[  143.172539]  [2:  kworker/u17:0:  114] [SSP]: MSG From MCU - Acc_FS_Open = 0xc
+<6>[  143.172539]  [2:  kworker/u17:0:  114] AKO
+<6>[  143.172539]  [2:  kworker/u17:0:  114] Add_First 0 1
+<6>[  143.172539]  [2:  kworker/u17:0:  114] add_AD_AR 0, 1 1 1, 20 20
+<6>[  143.172539]  [2:  kworker/u17:0:  114] SMA 33 0 0 0
+<6>[  143.172539]  [2:  kworker/u17:0:  114] GYROCAL Cal Init!!
+<6>[  143.172539]  [2:  kworker/u17:0:  114] [SSP] Algo 33 is added
+<6>[  143.172539]  [2:  kworker/u17:0:  114] Start-End cal 22
+<6>[  143.172870]  [2:  kworker/u17:0:  114] [SSP]: MSG From MCU - SSP_Bulk = 28 60
+<6>[  143.172870]  [2:  kworker/u17:0:  114] Add_First 28 1
+<6>[  143.172870]  [2:  kworker/u17:0:  114] add_AD_AR 28, 1 1 1, 60 60
+<6>[  143.172870]  [2:  kworker/u17:0:  114] SMA 66 0 0 28
+<6>[  143.172870]  [2:  kworker/u17:0:  114] [SSP] Acc Cal Init!!
+<6>[  143.172870]  [2:  kworker/u17:0:  114] [SSP] Algo 66 is added
+<6>[  143.172870]  [2:  kworker/u17:0:  114] Start-End cal 20
+<6>[  143.172960]  [2:  kworker/u17:0:  114] [SSP]: MSG From MCU - SSP_Receive_first_time_offset ~ !!
+<6>[  143.173433]  [1:  kworker/u16:2:   65] [SSP] MCU device ID = 85, reading ID = 85
+<6>[  143.175852]  [1:  kworker/u16:2:   65] [SSP] Sensor Posision A : 4, G : 4, M: 5, P: 0
+<6>[  143.178895]  [1:  kworker/u16:2:   65] [SSP] glass_type : 0
+<6>[  143.181929]  [2:  kworker/u17:0:  114] [SSP]: MSG From MCU - [SSP] ap_set_data (978) SH_MSG2SSP_GLASS_TYPE (0)
+<3>[  143.182362]  [1:  kworker/u16:2:   65] [SSP]: state: 1111111111111000001111111011010111111
+<6>[  143.186349]  [1:  kworker/u16:2:   65] [SSP] FUSE ROM Data 128 , 128, 128
+<6>[  143.189188]  [1:  kworker/u16:2:   65] [SSP] set_pdc_matrix: finished
+<3>[  143.189318]  [1:  kworker/u16:2:   65] [SSP] load_magnetic_cal_param_from_nvm: filp_open failed
+<3>[  143.189357]  [1:  kworker/u16:2:   65] [SSP] set_magnetic_cal_param_to_ssp, 0,0,0,0,0,0,0,0,0,0,0,0,0
+<6>[  143.193821]  [2:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_Algo => 
+<6>[  143.193821]  [2:  kworker/u17:0:  114] [SSP_MCU] 000000 0001000000 0000000000 0000000000 0000001000 0000000000 0000000000 0000000000
+<6>[  143.193821]  [2:  kworker/u17:0:  114] [SSP_MCU] LCD On_Off 1, AP_Status 1
+<6>[  143.193821]  [2:  kworker/u17:0:  114] [SSP_MCU]Sensor_Bypass => ACC:0,-1,20 Gyro:0,-1,20 Mag:0,-1,-1 
+<6>[  143.193821]  [2:  kworker/u17:0:  114]  MagC:0,-1,-1 Baro:0,-1,-1 Prox:0,-1,-1 Light:0,-1,-1 UnGy:0,-1,-1 
+<6>[  143.193821]  [2:  kworker/u17:0:  114]  GRV:0,-1,-1 RV:0,-1,-1 Bulk:1,60 Timer:20
+<6>[  143.195726]  [1:  kworker/u16:2:   65] [SSP]: initialize_thermistor_table: UP:1558 SUB:1567 finished
+<6>[  143.198577]  [2:  kworker/u17:0:  114] [SSP]: MSG From MCU - Receive_THM_0_TH = 974, Receive_THM_1_TH = 986
+<6>[  143.198860]  [1:  kworker/u16:2:   65] [SSP] MCU Firm Rev : New = 19121700
+<6>[  143.201455]  [1:  kworker/u16:2:   65] [SSP] get_accel_range - Range : 8
+<3>[  143.201479]  [1:  kworker/u16:2:   65] [SSP_RST] reset triggered 143194810050
+<3>[  143.201513]  [1:  kworker/u16:2:   65] [SSP_RST] reset finished 143194845204
+<3>[  143.201598]  [1:  kworker/u16:2:   65] [SSP]: gyro_open_calibration - Can't open calibration file(2)
+<6>[  143.204388]  [1:  kworker/u16:2:   65] [SSP] Set gyro cal data 0, 0, 0
+<6>[  143.206990]  [1:  kworker/u16:2:   65] [SSP] Set accel cal data 0, 0, 0
+<6>[  143.208403]  [2:  kworker/u17:0:  114] [SSP]: MSG From MCU - [SSP] RCV GyrCal= 0
+<6>[  143.208403]  [2:  kworker/u17:0:  114] [SSP] RCV GyrCal= 0
+<6>[  143.208403]  [2:  kworker/u17:0:  114] [SSP] RCV GyrCal= 0
+<6>[  143.208813]  [1:  kworker/u16:2:   65] [SSP]: Proximity Threshold - 0, 0, 0, 0
+<6>[  143.210207]  [2:  kworker/u17:0:  114] [SSP]: MSG From MCU - [SSPJ] RCV AccCal= 0
+<6>[  143.210207]  [2:  kworker/u17:0:  114] [SSPJ] RCV AccCal= 0
+<6>[  143.210207]  [2:  kworker/u17:0:  114] [SSPJ] RCV AccCal= 0
+<6>[  143.213307]  [2:  kworker/u17:0:  114] [SSP]: MSG From MCU - #>ams_cfgFeat_t  AMS_CONFIG_PROX op 2 , data 0,mode 0
+<6>[  143.213307]  [2:  kworker/u17:0:  114] #>threshod 0 = 0
+<6>[  143.213307]  [2:  kworker/u17:0:  114] #>ams_cfgFeat_t  AMS_CONFIG_PROX op 3 , data 0,mode 0
+<6>[  143.213307]  [2:  kworker/u17:0:  114] #>threshod 1 = 0
+<6>[  143.213307]  [2:  kworker/u17:0:  114] #>ams_cfgFeat_t  AMS_CONFIG_PROX op 4 , data 0,mode 0
+<6>[  143.213307]  [2:  kworker/u17:0:  114] #>threshod 2 = 0
+<6>[  143.213307]  [2:  kworker/u17:0:  114] #>ams_cfgFeat_t  AMS_CONFIG_PROX op 5 , data 0,mode 0
+<6>[  143.213307]  [2:  kworker/u17:0:  114] #>threshod 3 = 0
+<6>[  143.213307]  [2:  kworker/u17:0:  114] #>THSET 0 0 0 0
+<6>[  143.213831]  [1:  kworker/u16:2:   65] [SSP]: set_light_coef - 0 0 0 0 0 0 0
+<6>[  143.213890]  [1:  kworker/u16:2:   65] [SSP]: ssp_send_cmd - command 0xdb 0
+<6>[  143.213927]  [1:  kworker/u16:2:   65] [SSP]: ssp_AlgoPacket - 2, 1, -43, 1 (4)
+<6>[  143.213954]  [2:  kworker/u17:0:  114] [SSP]: ssp_sensorhub_report_notice -
+<6>[  143.213954]  [2:  kworker/u17:0:  114] reset
+<6>[  143.218007]  [2:  kworker/u17:0:  114] [SSP]: MSG From MCU - #>ccb_alsInit
+<6>[  143.218007]  [2:  kworker/u17:0:  114] #>initAlg
+<6>[  143.218007]  [2:  kworker/u17:0:  114] #>LIGHT COEF 0 0 0 0 0 0 0
+<6>[  143.847222]  [1:  kworker/u16:2:   65] [SSP]: debug_work_func(14) - Sensor state: 0x1fff07f6bf, RC: 0(0, 0, 0), CC: 0, TC: 0 NSC: 0 EC: 0 GPS: false
+<6>[  144.012368]  [2:  kworker/u17:0:  114] [SSP]: MSG From MCU - CPUART: NOT COMPLETE(WR)
+<6>[  144.012368]  [2:  kworker/u17:0:  114] CPUART Send MSG++
+<6>[  145.112334]  [2:  kworker/u17:0:  114] [SSP]: MSG From MCU - CPUART: NOT COMPLETE(WR)
+<6>[  145.112334]  [2:  kworker/u17:0:  114] CPUART Send MSG++
+<6>[  146.214438]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_Algo => 
+<6>[  146.214438]  [3:  kworker/u17:0:  114] [SSP_MCU] 000000 0001000000 0000000000 0000000000 0000001000 0000000000 0000000000 0000000000
+<6>[  146.214438]  [3:  kworker/u17:0:  114] [SSP_MCU] LCD On_Off 1, AP_Status 1
+<6>[  146.214438]  [3:  kworker/u17:0:  114] [SSP_MCU]Sensor_Bypass => ACC:0,-1,20 Gyro:0,-1,20 Mag:0,-1,-1 
+<6>[  146.214438]  [3:  kworker/u17:0:  114]  MagC:0,-1,-1 Baro:0,-1,-1 Prox:0,-1,-1 Light:0,-1,-1 UnGy:0,-1,-1 
+<6>[  146.214438]  [3:  kworker/u17:0:  114]  GRV:0,-1,-1 RV:0,-1,-1 Bulk:1,60 Timer:20
+<6>[  146.232254]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - CPUART: NOT COMPLETE(WR)
+<6>[  146.232254]  [3:  kworker/u17:0:  114] CPUART Send MSG++
+<6>[  147.192555]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_Gyro-10,1,4,-0.006,0.001,-0.002, -1,20, 0
+<6>[  147.332228]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - CPUART: NOT COMPLETE(WR)
+<6>[  147.332228]  [3:  kworker/u17:0:  114] CPUART Send MSG++
+<6>[  147.452447]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_ACC--172,43,4073,-1,20 ldo_toggle :0
+<6>[  148.432253]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - CPUART: NOT COMPLETE(WR)
+<6>[  148.432253]  [3:  kworker/u17:0:  114] CPUART Send MSG++
+<6>[  148.967760]  [1:  kworker/u16:2:   65] etspi_work_func_debug ldo: 0, sleep: 0, tz: 1, spi_value: 0x0, type: unknown
+<6>[  149.073029]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - SSP Gyro Send 1 1 9845 -1255 3660 35 20
+<6>[  149.234317]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_Algo => 
+<6>[  149.234317]  [3:  kworker/u17:0:  114] [SSP_MCU] 000000 0001000000 0000000000 0000000000 0000001000 0000000000 0000000000 0000000000
+<6>[  149.234317]  [3:  kworker/u17:0:  114] [SSP_MCU] LCD On_Off 1, AP_Status 1
+<6>[  149.234317]  [3:  kworker/u17:0:  114] [SSP_MCU]Sensor_Bypass => ACC:0,-1,20 Gyro:0,-1,20 Mag:0,-1,-1 
+<6>[  149.234317]  [3:  kworker/u17:0:  114]  MagC:0,-1,-1 Baro:0,-1,-1 Prox:0,-1,-1 Light:0,-1,-1 UnGy:0,-1,-1 
+<6>[  149.234317]  [3:  kworker/u17:0:  114]  GRV:0,-1,-1 RV:0,-1,-1 Bulk:1,60 Timer:20
+<6>[  149.552185]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - CPUART: NOT COMPLETE(WR)
+<6>[  149.552185]  [3:  kworker/u17:0:  114] CPUART Send MSG++
+<6>[  149.991226]  [1:  kworker/u16:2:   65] [SSP]: debug_work_func(12) - Sensor state: 0x1fff07f6bf, RC: 0(0, 0, 0), CC: 0, TC: 0 NSC: 0 EC: 0 GPS: false
+<6>[  150.143022]  [0:  kworker/u16:2:   65] [FG] 0080h,ff9bh,7f80h,ff01h,1900h,07c1h,42e8h,62edh,2419h,c700h,0621h,0622h,003bh,4187h,40eah,079ah,0b5ch,ffffh,2800h,5f00h,06d9h,0148h,2458h,000eh,0b97h,c616h,2516h,d3b0h,12d8h,0314h,03c0h,0760h,02abh,6200h,1400h,0b78h,1403h,2305h,2458h,8036h,2606h,cea4h,2039h,0890h,e3e1h,290eh,0400h,0001h,63d7h,3a4fh,0a0ch,ffffh,1d40h,0b97h,08e4h,05e0h,0040h,332ah,a7e2h,0622h,1680h,1008h,f89ah,e000h,07fch,0000h,0889h,00b0h,c573h,02eeh,3317h,01deh,3f5eh,2241h,0762h,008dh,ffcfh,ffd8h,05a9h,0b97h,0000h,63d1h,0007h,2bdch,7f80h,0005h,0946h,05a2h,0000h,006bh,090ch,0050h,0000h,0204h,0001h,0000h,0ed0h,0000h,0000h,0000h,0000h,0000h,0000h,0000h,0000h,0000h,0000h,0010h,003bh,ffffh,40e1h,075fh,1cdch,1280h,e680h,2516h,0400h,0000h,1489h,0003h,4a9eh,0004h,4658h,0000h,4000h,0000h,7d00h,0920h,ffffh,ffffh,ffffh,ffffh,20a3h,0000h,0000h,fb7dh,401bh,554fh,01ech,c2ebh,0026h,2910h,c6f2h,3fa9h,
+<6>[  150.145869]  [0:  kworker/u16:2:   65] [FG power] ISYS(61mA),ISYSAVG(52mA),VSYS(3992mV),IIN(474mA),VBYP(4760mV),QH(-40000uah)
+<6>[  150.145893]  [0:  kworker/u16:2:   65] max77705_fg_read_vfocv: VFOCV(3898)mV, data(0xc2eb)
+<7>[  150.146407]  [0:  kworker/u16:2:   65] max77705_fg_read_current: current=502mA
+<7>[  150.147246]  [0:  kworker/u16:2:   65] max77705_fg_read_avg_current: avg_current=490mA
+<7>[  150.154518]  [3:  kworker/u16:2:   65] max77705_fg_write_temp: temperature to (361, 0x2419)
+<6>[  150.155945]  [2:  kworker/u16:2:   65] max77705_fg_read_vcell: VCELL(3978)mV, data(0xc6f2)
+<7>[  150.156807]  [2:  kworker/u16:2:   65] max77705_fg_read_avg_current: avg_current=490mA
+<7>[  150.156830]  [2:  kworker/u16:2:   65] max77705_get_fuelgauge_soc: soc(669)
+<6>[  150.156870]  [2:  kworker/u16:2:   65] sec_bat_get_property cable type = 4 sleep_mode = 0
+<6>[  150.157507]  [2:  kworker/u16:2:   65] max77705_fg_get_scaled_capacity : current_standard(1000)
+<6>[  150.157538]  [2:  kworker/u16:2:   65] max77705_fg_get_scaled_capacity : CABLE TYPE(4) INPUT CURRENT(475) CHARGING MODE(CC Mode)capacity_max (1000) scaled capacity(66.9), raw_soc(66.9)
+<7>[  150.157560]  [2:  kworker/u16:2:   65] max77705_fg_get_atomic_capacity : NOW(66), OLD(66)
+<6>[  150.157605]  [2:  kworker/u16:2:   65] sec-battery battery: sec_bat_get_battery_info:Vnow(3980mV),Vavg(3961mV),Inow(502mA),Imax(475mA),Ichg(550mA),SOC(66%),Tbat(361),Tusb(365),Tchg(373),Twpc(361)
+<6>[  150.158344]  [2:  kworker/u16:2:   65] sec-battery battery: sec_bat_cisd_check: [CISD] iavg: 490, incur: 475, chgcur: 550,
+<6>[  150.158344]  [2:  kworker/u16:2:   65] cc_T: 0, lcd_off_T: 0, passed_T: 122, full_T: 0, chg_end_T: 0, cisd: 0x0
+<7>[  150.158392]  [2:  kworker/u16:2:   65] calc_ttf: cc_time: 6976
+<7>[  150.158421]  [2:  kworker/u16:2:   65] calc_ttf: cap: 3000, soc:  669, T:   7356, avg:  490, cv soc:  976, i:   70, val: 475
+<6>[  150.158448]  [2:  kworker/u16:2:   65] sec-battery battery: sec_bat_calc_time_to_full: T:  7416 sec, passed time:   122, current: 475
+<6>[  150.158477]  [2:  kworker/u16:2:   65] max77705_chg_set_wdtmr_kick: WDT Kick
+<6>[  150.159440]  [2:  kworker/u16:2:   65] max77705_get_charging_health: reg_data(0x3)
+<6>[  150.159798]  [2:  kworker/u16:2:   65] max77705_get_charging_health: details00(0xe0)
+<6>[  150.160211]  [2:  kworker/u16:2:   65] max77705_get_vbus_state: VBUS is valid. CHGIN < CHGIN_OVLO
+<6>[  150.161739]  [2:  kworker/u16:2:   65] max77705_get_charging_health: vbus_state: 0x3, chg_dtls: 0x1, iin: 474mA, vbyp: 4760mV
+<6>[  150.162145]  [2:  kworker/u16:2:   65] max77705_check_cnfg12_reg: valid_data = 0x60, reg_data = 0x60
+<6>[  150.169050]  [0:  kworker/u16:2:   65] max77705 : [0xb1]0x1a, [0xb2]0xdf, [0xb3]0xe0, [0xb4]0x31, [0xb5]0x00, [0xb6]0xff, [0xb7]0x15, [0xb8]0x38, [0xb9]0x4b, [0xba]0x9b, [0xbb]0x13, [0xbc]0x3c, [0xbd]0x6c, [0xbe]0x34, [0xbf]0x02, [0xc0]0x92, [0xc1]0x14, [0xc2]0x00, [0xc3]0x60, 
+<6>[  150.169823]  [0:  kworker/u16:2:   65] max77705_chg_monitor_work: [CHG] MODE(0x5), B2SOVRC(0xc), otg_on(0)
+<6>[  150.169874]  [0:  kworker/u16:2:   65] sec-battery battery: sec_bat_monitor_work: Status(Charging), mode(Normal), Health(Good), Cable(USB, USB, 1, 0), level(100%), slate_mode(0), store_mode(0), HV(NONE, 0), sleep_mode(0), Cycle(-1)
+<6>[  150.169935]  [0:  kworker/u16:2:   65] sec-battery battery: sec_bat_set_polling: Polling time 30/30 sec.
+<6>[  150.170073]  [0:    kworker/0:0:    4] sec_bat_get_property cable type = 4 sleep_mode = 0
+<6>[  150.652299]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - CPUART: NOT COMPLETE(WR)
+<6>[  150.652299]  [3:  kworker/u17:0:  114] CPUART Send MSG++
+<6>[  151.192517]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_Gyro-10,-2,4,-0.000,-0.000,-0.000, -1,20, 0
+<6>[  151.452315]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_ACC--172,48,4079,-1,20 ldo_toggle :0
+<6>[  151.752142]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - CPUART: NOT COMPLETE(WR)
+<6>[  151.752142]  [3:  kworker/u17:0:  114] CPUART Send MSG++
+<6>[  152.234290]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_Algo => 
+<6>[  152.234290]  [3:  kworker/u17:0:  114] [SSP_MCU] 000000 0001000000 0000000000 0000000000 0000001000 0000000000 0000000000 0000000000
+<6>[  152.234290]  [3:  kworker/u17:0:  114] [SSP_MCU] LCD On_Off 1, AP_Status 1
+<6>[  152.234290]  [3:  kworker/u17:0:  114] [SSP_MCU]Sensor_Bypass => ACC:0,-1,20 Gyro:0,-1,20 Mag:0,-1,-1 
+<6>[  152.234290]  [3:  kworker/u17:0:  114]  MagC:0,-1,-1 Baro:0,-1,-1 Prox:0,-1,-1 Light:0,-1,-1 UnGy:0,-1,-1 
+<6>[  152.234290]  [3:  kworker/u17:0:  114]  GRV:0,-1,-1 RV:0,-1,-1 Bulk:1,60 Timer:20
+<6>[  152.871893]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - CPUART: NOT COMPLETE(WR)
+<6>[  152.871893]  [3:  kworker/u17:0:  114] CPUART Send MSG++
+<6>[  153.153150]  [3:  kworker/u17:0:  114] [SSP]: parse_dataframe - Gyro caldata received from MCU
+<6>[  153.153213]  [3:  kworker/u17:0:  114] [SSP]: do gyro calibrate 9788, -1396, 3705
+<3>[  153.153299]  [3:  kworker/u17:0:  114] [SSP]: save_gyro_caldata - Can't open calibration file
+<6>[  153.153340]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - [SSP] Send GyrCal=9788
+<6>[  153.153340]  [3:  kworker/u17:0:  114] [SSP] Send GyrCal=-1396
+<6>[  153.153340]  [3:  kworker/u17:0:  114] [SSP] Send GyrCal=3705
+<6>[  153.972170]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - CPUART: NOT COMPLETE(WR)
+<6>[  153.972170]  [3:  kworker/u17:0:  114] CPUART Send MSG++
+<6>[  155.072182]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - CPUART: NOT COMPLETE(WR)
+<6>[  155.072182]  [3:  kworker/u17:0:  114] CPUART retry -1--
+<6>[  155.192507]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_Gyro-9,-4,4,0.000,-0.002,-0.000, -1,20, 0
+<6>[  155.234234]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_Algo => 
+<6>[  155.234234]  [3:  kworker/u17:0:  114] [SSP_MCU] 000000 0001000000 0000000000 0000000000 0000001000 0000000000 0000000000 0000000000
+<6>[  155.234234]  [3:  kworker/u17:0:  114] [SSP_MCU] LCD On_Off 1, AP_Status 1
+<6>[  155.234234]  [3:  kworker/u17:0:  114] [SSP_MCU]Sensor_Bypass => ACC:0,-1,20 Gyro:0,-1,20 Mag:0,-1,-1 
+<6>[  155.234234]  [3:  kworker/u17:0:  114]  MagC:0,-1,-1 Baro:0,-1,-1 Prox:0,-1,-1 Light:0,-1,-1 UnGy:0,-1,-1 
+<6>[  155.234234]  [3:  kworker/u17:0:  114]  GRV:0,-1,-1 RV:0,-1,-1 Bulk:1,60 Timer:20
+<6>[  155.452274]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_ACC--179,46,4072,-1,20 ldo_toggle :0
+<6>[  155.879114]  [2:  kworker/u16:1:   59] [SSP]: debug_work_func(12) - Sensor state: 0x1fff07f6bf, RC: 0(0, 0, 0), CC: 0, TC: 0 NSC: 0 EC: 0 GPS: false
+<6>[  158.234346]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_Algo => 
+<6>[  158.234346]  [3:  kworker/u17:0:  114] [SSP_MCU] 000000 0001000000 0000000000 0000000000 0000001000 0000000000 0000000000 0000000000
+<6>[  158.234346]  [3:  kworker/u17:0:  114] [SSP_MCU] LCD On_Off 1, AP_Status 1
+<6>[  158.234346]  [3:  kworker/u17:0:  114] [SSP_MCU]Sensor_Bypass => ACC:0,-1,20 Gyro:0,-1,20 Mag:0,-1,-1 
+<6>[  158.234346]  [3:  kworker/u17:0:  114]  MagC:0,-1,-1 Baro:0,-1,-1 Prox:0,-1,-1 Light:0,-1,-1 UnGy:0,-1,-1 
+<6>[  158.234346]  [3:  kworker/u17:0:  114]  GRV:0,-1,-1 RV:0,-1,-1 Bulk:1,60 Timer:20
+<6>[  159.192482]  [2:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_Gyro-9,-3,4,0.000,-0.001,-0.000, -1,20, 0
+<6>[  159.452171]  [2:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_ACC--202,59,4093,-1,20 ldo_toggle :0
+<6>[  159.975634]  [2:  kworker/u16:1:   59] etspi_work_func_debug ldo: 0, sleep: 0, tz: 1, spi_value: 0x0, type: unknown
+<6>[  160.323040]  [0:  kworker/u16:1:   59] [FG] 0080h,ff9bh,7f80h,ff01h,1900h,07c2h,42f4h,62edh,2419h,c712h,062eh,062dh,003bh,4193h,40f4h,079bh,0b5ch,ffffh,2800h,5f00h,06c8h,0148h,2451h,000eh,0b97h,c647h,2516h,d3b0h,12d8h,0314h,03c0h,0761h,02a8h,6200h,1400h,0b78h,1403h,2305h,2451h,8038h,2606h,cea4h,2039h,0890h,e3e1h,290eh,0400h,0001h,6771h,3d00h,0a0ch,ffffh,1d3eh,0b97h,08e4h,05e0h,0040h,332ah,a7e2h,062dh,1680h,1008h,f8d3h,e000h,07fch,0000h,0889h,00c8h,c573h,02eeh,3317h,01c4h,3f5eh,2241h,0766h,00b3h,ffcfh,ffd9h,6d5bh,0b97h,0000h,63e9h,0007h,2b9bh,7f80h,0005h,0946h,05a2h,0000h,006bh,090ch,0050h,0000h,0204h,0001h,0000h,0ee3h,0000h,0000h,0000h,0000h,0000h,0000h,0000h,0000h,0000h,0000h,0010h,003bh,ffffh,40eah,0760h,1c5fh,0100h,06fch,000fh,2d00h,0000h,7fffh,0003h,4a9eh,0004h,4658h,0000h,4000h,0000h,7d00h,0920h,ffffh,ffffh,ffffh,ffffh,20a3h,0000h,0000h,fdb3h,401ch,5554h,01f6h,c2f2h,0026h,2913h,c712h,3fcfh,
+<6>[  160.325805]  [0:  kworker/u16:1:   59] [FG power] ISYS(56mA),ISYSAVG(56mA),VSYS(3996mV),IIN(476mA),VBYP(4757mV),QH(-39000uah)
+<6>[  160.325829]  [0:  kworker/u16:1:   59] max77705_fg_read_vfocv: VFOCV(3898)mV, data(0xc2f2)
+<7>[  160.326297]  [0:  kworker/u16:1:   59] max77705_fg_read_current: current=494mA
+<7>[  160.327243]  [0:  kworker/u16:1:   59] max77705_fg_read_avg_current: avg_current=494mA
+<7>[  160.338766]  [1:  kworker/u16:1:   59] max77705_fg_write_temp: temperature to (360, 0x2400)
+<7>[  160.341042]  [1:  kworker/u16:1:   59] max77705_fg_read_avg_current: avg_current=494mA
+<7>[  160.341067]  [1:  kworker/u16:1:   59] max77705_get_fuelgauge_soc: soc(669)
+<6>[  160.341110]  [1:  kworker/u16:1:   59] sec_bat_get_property cable type = 4 sleep_mode = 0
+<6>[  160.341886]  [1:  kworker/u16:1:   59] max77705_fg_get_scaled_capacity : current_standard(1000)
+<6>[  160.341921]  [1:  kworker/u16:1:   59] max77705_fg_get_scaled_capacity : CABLE TYPE(4) INPUT CURRENT(475) CHARGING MODE(CC Mode)capacity_max (1000) scaled capacity(66.9), raw_soc(66.9)
+<7>[  160.341944]  [1:  kworker/u16:1:   59] max77705_fg_get_atomic_capacity : NOW(66), OLD(66)
+<6>[  160.341995]  [1:  kworker/u16:1:   59] sec-battery battery: sec_bat_get_battery_info:Vnow(3981mV),Vavg(3965mV),Inow(494mA),Imax(475mA),Ichg(550mA),SOC(66%),Tbat(360),Tusb(363),Tchg(371),Twpc(360)
+<6>[  160.342965]  [1:  kworker/u16:1:   59] sec-battery battery: sec_bat_cisd_check: [CISD] iavg: 494, incur: 475, chgcur: 550,
+<6>[  160.342965]  [1:  kworker/u16:1:   59] cc_T: 0, lcd_off_T: 0, passed_T: 122, full_T: 0, chg_end_T: 0, cisd: 0x0
+<7>[  160.343013]  [1:  kworker/u16:1:   59] calc_ttf: cc_time: 6976
+<7>[  160.343040]  [1:  kworker/u16:1:   59] calc_ttf: cap: 3000, soc:  669, T:   7356, avg:  494, cv soc:  976, i:   70, val: 475
+<6>[  160.343070]  [1:  kworker/u16:1:   59] sec-battery battery: sec_bat_calc_time_to_full: T:  7416 sec, passed time:   122, current: 475
+<6>[  160.343098]  [1:  kworker/u16:1:   59] max77705_chg_set_wdtmr_kick: WDT Kick
+<6>[  160.344143]  [1:  kworker/u16:1:   59] max77705_get_charging_health: reg_data(0x3)
+<6>[  160.344702]  [3:  kworker/u16:1:   59] max77705_get_charging_health: details00(0xe0)
+<6>[  160.345027]  [3:  kworker/u16:1:   59] max77705_get_vbus_state: VBUS is valid. CHGIN < CHGIN_OVLO
+<6>[  160.346503]  [3:  kworker/u16:1:   59] max77705_get_charging_health: vbus_state: 0x3, chg_dtls: 0x1, iin: 468mA, vbyp: 4764mV
+<6>[  160.346924]  [3:  kworker/u16:1:   59] max77705_check_cnfg12_reg: valid_data = 0x60, reg_data = 0x60
+<6>[  160.346962]  [3:  kworker/u16:1:   59] sec_bat_swelling_check: swelling highblock(410), highrecov(390)
+<7>[  160.347361]  [3:  kworker/u16:1:   59] max77705_get_float_voltage: battery cv reg : 0x13, float voltage val : 4350
+<6>[  160.347391]  [3:  kworker/u16:1:   59] sec_bat_swelling_check: status(1), swell_mode(0:0:0), cv(4350)mV, temp(360)
+<6>[  160.347427]  [3:  kworker/u16:1:   59] sec-battery battery: sec_bat_fullcharged_check: Charging Mode : Normal
+<6>[  160.347452]  [3:  kworker/u16:1:   59] sec_bat_set_current_event: current event before(0x0), after(0x0)
+<6>[  160.347481]  [3:  kworker/u16:1:   59] sec_bat_calculate_safety_time : EXPIRED_TIME(10772191), IP(2375000), CP(2392500), CURR(490), STANDARD(2150)
+<6>[  160.347506]  [3:  kworker/u16:1:   59] sec_bat_calculate_safety_time : CAL_EXPIRED_TIME(47265736) TIME NOW(160) TIME PREV(129)
+<6>[  160.347529]  [3:  kworker/u16:1:   59] sec_bat_calculate_safety_time : REMAIN_TIME(10765125) CAL_REMAIN_TIME(47234736)
+<6>[  160.347557]  [3:  kworker/u16:1:   59] sec_bat_check_mix_temp: mix_limit(0), temp(360), chg_temp(371), input_current(475)
+<6>[  160.347581]  [3:  kworker/u16:1:   59] sec_bat_check_afc_temp: cable_type(4), chg_limit(0) vbus_by_siop(0)
+<6>[  160.347601]  [3:  kworker/u16:1:   59] sec_bat_get_charging_current_by_siop: incurr(475), chgcurr(550)
+<6>[  160.354972]  [0:  kworker/u16:1:   59] max77705 : [0xb1]0x1a, [0xb2]0xdf, [0xb3]0xe0, [0xb4]0x31, [0xb5]0x00, [0xb6]0xff, [0xb7]0x15, [0xb8]0x38, [0xb9]0x4b, [0xba]0x9b, [0xbb]0x13, [0xbc]0x3c, [0xbd]0x6c, [0xbe]0x34, [0xbf]0x02, [0xc0]0x92, [0xc1]0x14, [0xc2]0x00, [0xc3]0x60, 
+<6>[  160.355740]  [0:  kworker/u16:1:   59] max77705_chg_monitor_work: [CHG] MODE(0x5), B2SOVRC(0xc), otg_on(0)
+<6>[  160.355786]  [0:  kworker/u16:1:   59] sec-battery battery: sec_bat_monitor_work: Status(Charging), mode(Normal), Health(Good), Cable(USB, USB, 1, 0), level(100%), slate_mode(0), store_mode(0), HV(NONE, 0), sleep_mode(0), Cycle(-1)
+<6>[  160.355844]  [0:  kworker/u16:1:   59] sec-battery battery: sec_bat_set_polling: Polling time 10/30 sec.
+<6>[  160.355981]  [0:    kworker/0:0:    4] sec_bat_get_property cable type = 4 sleep_mode = 0
+<6>[  161.234390]  [2:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_Algo => 
+<6>[  161.234390]  [2:  kworker/u17:0:  114] [SSP_MCU] 000000 0001000000 0000000000 0000000000 0000001000 0000000000 0000000000 0000000000
+<6>[  161.234390]  [2:  kworker/u17:0:  114] [SSP_MCU] LCD On_Off 1, AP_Status 1
+<6>[  161.234390]  [2:  kworker/u17:0:  114] [SSP_MCU]Sensor_Bypass => ACC:0,-1,20 Gyro:0,-1,20 Mag:0,-1,-1 
+<6>[  161.234390]  [2:  kworker/u17:0:  114]  MagC:0,-1,-1 Baro:0,-1,-1 Prox:0,-1,-1 Light:0,-1,-1 UnGy:0,-1,-1 
+<6>[  161.234390]  [2:  kworker/u17:0:  114]  GRV:0,-1,-1 RV:0,-1,-1 Bulk:1,60 Timer:20
+<6>[  162.023133]  [3:  kworker/u16:1:   59] [SSP]: debug_work_func(4) - Sensor state: 0x1fff07f6bf, RC: 0(0, 0, 0), CC: 0, TC: 0 NSC: 0 EC: 0 GPS: false
+<6>[  163.192496]  [2:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_Gyro-10,-3,3,-0.000,-0.001,0.000, -1,20, 0
+<6>[  163.452289]  [2:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_ACC--180,44,4081,-1,20 ldo_toggle :0
+<6>[  164.234245]  [2:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_Algo => 
+<6>[  164.234245]  [2:  kworker/u17:0:  114] [SSP_MCU] 000000 0001000000 0000000000 0000000000 0000001000 0000000000 0000000000 0000000000
+<6>[  164.234245]  [2:  kworker/u17:0:  114] [SSP_MCU] LCD On_Off 1, AP_Status 1
+<6>[  164.234245]  [2:  kworker/u17:0:  114] [SSP_MCU]Sensor_Bypass => ACC:0,-1,20 Gyro:0,-1,20 Mag:0,-1,-1 
+<6>[  164.234245]  [2:  kworker/u17:0:  114]  MagC:0,-1,-1 Baro:0,-1,-1 Prox:0,-1,-1 Light:0,-1,-1 UnGy:0,-1,-1 
+<6>[  164.234245]  [2:  kworker/u17:0:  114]  GRV:0,-1,-1 RV:0,-1,-1 Bulk:1,60 Timer:20
+<6>[  164.839065]  [0:    kworker/0:0:    4] sec_ts 2-0048: [sec_input] mode:0202 noise:0 iq:1 depth:0 lp:(40/-1) D0F000 // v:0130 cal:A2(09) C01T0028.CENT.L FFFFF // id(0,0) // #6 5
+<6>[  167.192551]  [2:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_Gyro-8,2,4,0.001,0.002,-0.000, -1,20, 0
+<6>[  167.234212]  [2:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_Algo => 
+<6>[  167.234212]  [2:  kworker/u17:0:  114] [SSP_MCU] 000000 0001000000 0000000000 0000000000 0000001000 0000000000 0000000000 0000000000
+<6>[  167.234212]  [2:  kworker/u17:0:  114] [SSP_MCU] LCD On_Off 1, AP_Status 1
+<6>[  167.234212]  [2:  kworker/u17:0:  114] [SSP_MCU]Sensor_Bypass => ACC:0,-1,20 Gyro:0,-1,20 Mag:0,-1,-1 
+<6>[  167.234212]  [2:  kworker/u17:0:  114]  MagC:0,-1,-1 Baro:0,-1,-1 Prox:0,-1,-1 Light:0,-1,-1 UnGy:0,-1,-1 
+<6>[  167.234212]  [2:  kworker/u17:0:  114]  GRV:0,-1,-1 RV:0,-1,-1 Bulk:1,60 Timer:20
+<6>[  167.452276]  [2:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_ACC--181,45,4076,-1,20 ldo_toggle :0
+<6>[  167.911212]  [2:  kworker/u16:2:   65] [SSP]: debug_work_func(6) - Sensor state: 0x1fff07f6bf, RC: 0(0, 0, 0), CC: 0, TC: 0 NSC: 0 EC: 0 GPS: false
+<6>[  170.234155]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_Algo => 
+<6>[  170.234155]  [3:  kworker/u17:0:  114] [SSP_MCU] 000000 0001000000 0000000000 0000000000 0000001000 0000000000 0000000000 0000000000
+<6>[  170.234155]  [3:  kworker/u17:0:  114] [SSP_MCU] LCD On_Off 1, AP_Status 1
+<6>[  170.234155]  [3:  kworker/u17:0:  114] [SSP_MCU]Sensor_Bypass => ACC:0,-1,20 Gyro:0,-1,20 Mag:0,-1,-1 
+<6>[  170.234155]  [3:  kworker/u17:0:  114]  MagC:0,-1,-1 Baro:0,-1,-1 Prox:0,-1,-1 Light:0,-1,-1 UnGy:0,-1,-1 
+<6>[  170.234155]  [3:  kworker/u17:0:  114]  GRV:0,-1,-1 RV:0,-1,-1 Bulk:1,60 Timer:20
+<6>[  170.507034]  [1:  kworker/u16:2:   65] [FG] 0080h,ff9bh,7f80h,ff01h,1900h,07c3h,42feh,62edh,2400h,c728h,0647h,0637h,003bh,41a0h,4106h,079dh,0b5ch,ffffh,2800h,5f00h,06b8h,0148h,2449h,000eh,0b97h,c671h,2516h,d3b0h,12d8h,0314h,03c0h,0763h,02a4h,6200h,1400h,0b78h,1403h,2305h,2449h,8032h,2606h,cea4h,2039h,0890h,e3e1h,290eh,0400h,0001h,6b4fh,3fddh,0a0ch,ffffh,1d45h,0b97h,08e4h,05e0h,0040h,332ah,a7e2h,0637h,1680h,1008h,f90dh,e000h,07fch,0000h,0889h,0084h,c573h,02eeh,3317h,01d1h,3f5eh,2241h,0766h,008dh,ffcfh,ffdah,d755h,0b97h,0000h,63e7h,0007h,2bb3h,7f80h,0005h,0946h,05a2h,0000h,006bh,090ch,0050h,0000h,0204h,0001h,0000h,0ecah,0000h,0000h,0000h,0000h,0000h,0000h,0000h,0000h,0000h,0000h,0010h,003bh,ffffh,40fdh,0762h,1cb5h,024dh,0700h,0008h,167eh,0000h,7fffh,ffffh,4a9eh,0004h,4658h,0000h,4000h,0000h,7d00h,0920h,ffffh,ffffh,ffffh,ffffh,20a6h,0000h,0000h,ff67h,4019h,5566h,01ech,c2f9h,0026h,2913h,c728h,3fcfh,
+<6>[  170.509822]  [1:  kworker/u16:2:   65] [FG power] ISYS(46mA),ISYSAVG(45mA),VSYS(3996mV),IIN(473mA),VBYP(4767mV),QH(-38000uah)
+<6>[  170.509847]  [1:  kworker/u16:2:   65] max77705_fg_read_vfocv: VFOCV(3899)mV, data(0xc2f9)
+<7>[  170.510356]  [1:  kworker/u16:2:   65] max77705_fg_read_current: current=502mA
+<7>[  170.511281]  [1:  kworker/u16:2:   65] max77705_fg_read_avg_current: avg_current=497mA
+<7>[  170.524230]  [0:  kworker/u16:2:   65] max77705_fg_write_temp: temperature to (359, 0x23e6)
+<7>[  170.526502]  [0:  kworker/u16:2:   65] max77705_fg_read_avg_current: avg_current=497mA
+<7>[  170.526528]  [0:  kworker/u16:2:   65] max77705_get_fuelgauge_soc: soc(669)
+<6>[  170.526566]  [0:  kworker/u16:2:   65] sec_bat_get_property cable type = 4 sleep_mode = 0
+<6>[  170.527383]  [0:  kworker/u16:2:   65] max77705_fg_get_scaled_capacity : current_standard(1000)
+<6>[  170.527413]  [0:  kworker/u16:2:   65] max77705_fg_get_scaled_capacity : CABLE TYPE(4) INPUT CURRENT(475) CHARGING MODE(CC Mode)capacity_max (1000) scaled capacity(66.9), raw_soc(66.9)
+<7>[  170.527437]  [0:  kworker/u16:2:   65] max77705_fg_get_atomic_capacity : NOW(66), OLD(66)
+<6>[  170.527489]  [0:  kworker/u16:2:   65] sec-battery battery: sec_bat_get_battery_info:Vnow(3983mV),Vavg(3968mV),Inow(502mA),Imax(475mA),Ichg(550mA),SOC(66%),Tbat(359),Tusb(361),Tchg(370),Twpc(359)
+<6>[  170.528377]  [0:  kworker/u16:2:   65] sec-battery battery: sec_bat_cisd_check: [CISD] iavg: 497, incur: 475, chgcur: 550,
+<6>[  170.528377]  [0:  kworker/u16:2:   65] cc_T: 0, lcd_off_T: 0, passed_T: 153, full_T: 0, chg_end_T: 0, cisd: 0x0
+<7>[  170.528425]  [0:  kworker/u16:2:   65] calc_ttf: cc_time: 6976
+<7>[  170.528453]  [0:  kworker/u16:2:   65] calc_ttf: cap: 3000, soc:  669, T:   7356, avg:  497, cv soc:  976, i:   70, val: 475
+<6>[  170.528485]  [0:  kworker/u16:2:   65] sec-battery battery: sec_bat_calc_time_to_full: T:  7416 sec, passed time:   153, current: 475
+<6>[  170.528513]  [0:  kworker/u16:2:   65] max77705_chg_set_wdtmr_kick: WDT Kick
+<6>[  170.529556]  [0:  kworker/u16:2:   65] max77705_get_charging_health: reg_data(0x3)
+<6>[  170.529947]  [0:  kworker/u16:2:   65] max77705_get_charging_health: details00(0xe0)
+<6>[  170.530335]  [0:  kworker/u16:2:   65] max77705_get_vbus_state: VBUS is valid. CHGIN < CHGIN_OVLO
+<7>[  170.531604]  [0:  kworker/u16:2:   65] max77705_fg_read_iin: iin_current=471mA
+<6>[  170.532088]  [0:  kworker/u16:2:   65] max77705_fg_read_vbyp: VBYP(4767), data(0x2bb3)
+<6>[  170.532116]  [0:  kworker/u16:2:   65] max77705_get_charging_health: vbus_state: 0x3, chg_dtls: 0x1, iin: 471mA, vbyp: 4767mV
+<6>[  170.532513]  [0:  kworker/u16:2:   65] max77705_check_cnfg12_reg: valid_data = 0x60, reg_data = 0x60
+<6>[  170.539779]  [1:  kworker/u16:2:   65] max77705 : [0xb1]0x1a, [0xb2]0xdf, [0xb3]0xe0, [0xb4]0x31, [0xb5]0x00, [0xb6]0xff, [0xb7]0x15, [0xb8]0x38, [0xb9]0x4b, [0xba]0x9b, [0xbb]0x13, [0xbc]0x3c, [0xbd]0x6c, [0xbe]0x34, [0xbf]0x02, [0xc0]0x92, [0xc1]0x14, [0xc2]0x00, [0xc3]0x60, 
+<6>[  170.540512]  [1:  kworker/u16:2:   65] max77705_chg_monitor_work: [CHG] MODE(0x5), B2SOVRC(0xc), otg_on(0)
+<6>[  170.540561]  [1:  kworker/u16:2:   65] sec-battery battery: sec_bat_monitor_work: Status(Charging), mode(Normal), Health(Good), Cable(USB, USB, 1, 0), level(100%), slate_mode(0), store_mode(0), HV(NONE, 0), sleep_mode(0), Cycle(-1)
+<6>[  170.540623]  [1:  kworker/u16:2:   65] sec-battery battery: sec_bat_set_polling: Polling time 20/30 sec.
+<6>[  170.540764]  [1:    kworker/1:1: 1640] sec_bat_get_property cable type = 4 sleep_mode = 0
+<7>[  170.541263]  [1:    kworker/1:1: 1640] max77705_fg_read_isys: isys_current=46mA
+<7>[  170.541729]  [1:    kworker/1:1: 1640] max77705_fg_read_isys_avg: isys_avg_current=45mA
+<6>[  170.983739]  [2:  kworker/u16:2:   65] etspi_work_func_debug ldo: 0, sleep: 0, tz: 1, spi_value: 0x0, type: unknown
+<6>[  171.192361]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_Gyro-8,-2,3,0.001,-0.000,0.000, -1,20, 0
+<6>[  171.452212]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_ACC--187,46,4077,-1,20 ldo_toggle :0
+<6>[  173.234106]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_Algo => 
+<6>[  173.234106]  [3:  kworker/u17:0:  114] [SSP_MCU] 000000 0001000000 0000000000 0000000000 0000001000 0000000000 0000000000 0000000000
+<6>[  173.234106]  [3:  kworker/u17:0:  114] [SSP_MCU] LCD On_Off 1, AP_Status 1
+<6>[  173.234106]  [3:  kworker/u17:0:  114] [SSP_MCU]Sensor_Bypass => ACC:0,-1,20 Gyro:0,-1,20 Mag:0,-1,-1 
+<6>[  173.234106]  [3:  kworker/u17:0:  114]  MagC:0,-1,-1 Baro:0,-1,-1 Prox:0,-1,-1 Light:0,-1,-1 UnGy:0,-1,-1 
+<6>[  173.234106]  [3:  kworker/u17:0:  114]  GRV:0,-1,-1 RV:0,-1,-1 Bulk:1,60 Timer:20
+<6>[  174.055238]  [2:  kworker/u16:2:   65] [SSP]: debug_work_func(4) - Sensor state: 0x1fff07f6bf, RC: 0(0, 0, 0), CC: 0, TC: 0 NSC: 0 EC: 0 GPS: false
+<6>[  175.192272]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_Gyro-8,-1,4,0.001,0.000,-0.000, -1,20, 0
+<6>[  175.452110]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_ACC--165,40,4078,-1,20 ldo_toggle :0
+<6>[  176.234139]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_Algo => 
+<6>[  176.234139]  [3:  kworker/u17:0:  114] [SSP_MCU] 000000 0001000000 0000000000 0000000000 0000001000 0000000000 0000000000 0000000000
+<6>[  176.234139]  [3:  kworker/u17:0:  114] [SSP_MCU] LCD On_Off 1, AP_Status 1
+<6>[  176.234139]  [3:  kworker/u17:0:  114] [SSP_MCU]Sensor_Bypass => ACC:0,-1,20 Gyro:0,-1,20 Mag:0,-1,-1 
+<6>[  176.234139]  [3:  kworker/u17:0:  114]  MagC:0,-1,-1 Baro:0,-1,-1 Prox:0,-1,-1 Light:0,-1,-1 UnGy:0,-1,-1 
+<6>[  176.234139]  [3:  kworker/u17:0:  114]  GRV:0,-1,-1 RV:0,-1,-1 Bulk:1,60 Timer:20
+<6>[  179.192316]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_Gyro-8,-2,2,0.001,-0.000,0.001, -1,20, 0
+<6>[  179.234047]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_Algo => 
+<6>[  179.234047]  [3:  kworker/u17:0:  114] [SSP_MCU] 000000 0001000000 0000000000 0000000000 0000001000 0000000000 0000000000 0000000000
+<6>[  179.234047]  [3:  kworker/u17:0:  114] [SSP_MCU] LCD On_Off 1, AP_Status 1
+<6>[  179.234047]  [3:  kworker/u17:0:  114] [SSP_MCU]Sensor_Bypass => ACC:0,-1,20 Gyro:0,-1,20 Mag:0,-1,-1 
+<6>[  179.234047]  [3:  kworker/u17:0:  114]  MagC:0,-1,-1 Baro:0,-1,-1 Prox:0,-1,-1 Light:0,-1,-1 UnGy:0,-1,-1 
+<6>[  179.234047]  [3:  kworker/u17:0:  114]  GRV:0,-1,-1 RV:0,-1,-1 Bulk:1,60 Timer:20
+<6>[  179.452015]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_ACC--191,43,4086,-1,20 ldo_toggle :0
+<6>[  179.943080]  [1:  kworker/u16:1:   59] [SSP]: debug_work_func(6) - Sensor state: 0x1fff07f6bf, RC: 0(0, 0, 0), CC: 0, TC: 0 NSC: 0 EC: 0 GPS: false
+<6>[  180.541888]  [3:  kworker/u16:2:   65] max77705_fg_read_vcell: VCELL(3980)mV, data(0xc704)
+<6>[  180.691014]  [3:  kworker/u16:2:   65] [FG] 0080h,ff9bh,7f80h,ff01h,1900h,07c5h,430ah,62edh,23e6h,c704h,0642h,0636h,003bh,41ach,410dh,079eh,0b5ch,ffffh,2800h,5f00h,06abh,0148h,243eh,000eh,0b97h,c696h,2516h,d3b0h,12d8h,0314h,03c0h,0764h,02a3h,6200h,1400h,0b78h,1403h,2305h,243eh,803ch,2606h,cea4h,2039h,0890h,e3e1h,290eh,0400h,0001h,6ef1h,428bh,0a0ch,ffffh,1d3ah,0b97h,08e4h,05e0h,0040h,332ah,a7e2h,0636h,1680h,1008h,f947h,e000h,07fch,0000h,0889h,0066h,c573h,02eeh,3317h,01b8h,3f5eh,2241h,076bh,0088h,ffcfh,ffdch,3f44h,0b97h,0000h,63f4h,0007h,2bc0h,7f80h,0005h,0946h,05a2h,0000h,006bh,090ch,0050h,0000h,0204h,0001h,0000h,0e7eh,0000h,0000h,0000h,0000h,0000h,0000h,0000h,0000h,0000h,0000h,0010h,003bh,ffffh,4106h,0763h,195ah,0635h,0635h,0005h,0222h,0634h,0003h,0003h,4a9eh,0004h,4658h,0000h,4000h,0000h,7d00h,0920h,ffffh,ffffh,ffffh,ffffh,20a2h,0000h,0000h,eaaah,401eh,5556h,01d8h,c301h,0026h,2910h,c704h,3ff4h,
+<6>[  180.693765]  [2:  kworker/u16:2:   65] [FG power] ISYS(56mA),ISYSAVG(49mA),VSYS(3998mV),IIN(463mA),VBYP(4773mV),QH(-36000uah)
+<6>[  180.693789]  [2:  kworker/u16:2:   65] max77705_fg_read_vfocv: VFOCV(3900)mV, data(0xc300)
+<7>[  180.694260]  [2:  kworker/u16:2:   65] max77705_fg_read_current: current=481mA
+<7>[  180.695188]  [2:  kworker/u16:2:   65] max77705_fg_read_avg_current: avg_current=496mA
+<7>[  180.704977]  [0:  kworker/u16:2:   65] max77705_fg_write_temp: temperature to (358, 0x23cd)
+<7>[  180.707167]  [0:  kworker/u16:2:   65] max77705_fg_read_avg_current: avg_current=496mA
+<7>[  180.707195]  [0:  kworker/u16:2:   65] max77705_get_fuelgauge_soc: soc(670)
+<6>[  180.707239]  [0:  kworker/u16:2:   65] sec_bat_get_property cable type = 4 sleep_mode = 0
+<6>[  180.708018]  [0:  kworker/u16:2:   65] max77705_fg_get_scaled_capacity : current_standard(1000)
+<6>[  180.708053]  [0:  kworker/u16:2:   65] max77705_fg_get_scaled_capacity : CABLE TYPE(4) INPUT CURRENT(475) CHARGING MODE(CC Mode)capacity_max (1000) scaled capacity(67.0), raw_soc(67.0)
+<7>[  180.708077]  [0:  kworker/u16:2:   65] max77705_fg_get_atomic_capacity : NOW(67), OLD(66)
+<6>[  180.708127]  [0:  kworker/u16:2:   65] sec-battery battery: sec_bat_get_battery_info:Vnow(3980mV),Vavg(3971mV),Inow(481mA),Imax(475mA),Ichg(550mA),SOC(67%),Tbat(358),Tusb(359),Tchg(368),Twpc(358)
+<6>[  180.709017]  [0:  kworker/u16:2:   65] sec-battery battery: sec_bat_cisd_check: [CISD] iavg: 496, incur: 475, chgcur: 550,
+<6>[  180.709017]  [0:  kworker/u16:2:   65] cc_T: 0, lcd_off_T: 0, passed_T: 153, full_T: 0, chg_end_T: 0, cisd: 0x0
+<7>[  180.709065]  [0:  kworker/u16:2:   65] calc_ttf: cc_time: 6955
+<7>[  180.709090]  [0:  kworker/u16:2:   65] calc_ttf: cap: 3000, soc:  670, T:   7335, avg:  496, cv soc:  976, i:   70, val: 475
+<6>[  180.709117]  [0:  kworker/u16:2:   65] sec-battery battery: sec_bat_calc_time_to_full: T:  7395 sec, passed time:   153, current: 475
+<6>[  180.709143]  [0:  kworker/u16:2:   65] max77705_chg_set_wdtmr_kick: WDT Kick
+<6>[  180.710233]  [0:  kworker/u16:2:   65] max77705_get_charging_health: reg_data(0x3)
+<6>[  180.710588]  [0:  kworker/u16:2:   65] max77705_get_charging_health: details00(0xe0)
+<6>[  180.711018]  [0:  kworker/u16:2:   65] max77705_get_vbus_state: VBUS is valid. CHGIN < CHGIN_OVLO
+<6>[  180.712707]  [0:  kworker/u16:2:   65] max77705_get_charging_health: vbus_state: 0x3, chg_dtls: 0x1, iin: 463mA, vbyp: 4773mV
+<6>[  180.713095]  [0:  kworker/u16:2:   65] max77705_check_cnfg12_reg: valid_data = 0x60, reg_data = 0x60
+<6>[  180.720634]  [2:  kworker/u16:2:   65] max77705 : [0xb1]0x1a, [0xb2]0xdf, [0xb3]0xe0, [0xb4]0x31, [0xb5]0x00, [0xb6]0xff, [0xb7]0x15, [0xb8]0x38, [0xb9]0x4b, [0xba]0x9b, [0xbb]0x13, [0xbc]0x3c, [0xbd]0x6c, [0xbe]0x34, [0xbf]0x02, [0xc0]0x92, [0xc1]0x14, [0xc2]0x00, [0xc3]0x60, 
+<6>[  180.721350]  [2:  kworker/u16:2:   65] max77705_chg_monitor_work: [CHG] MODE(0x5), B2SOVRC(0xc), otg_on(0)
+<6>[  180.721399]  [2:  kworker/u16:2:   65] sec-battery battery: sec_bat_monitor_work: Status(Charging), mode(Normal), Health(Good), Cable(USB, USB, 1, 0), level(100%), slate_mode(0), store_mode(0), HV(NONE, 0), sleep_mode(0), Cycle(-1)
+<6>[  180.721466]  [2:  kworker/u16:2:   65] sec-battery battery: sec_bat_set_polling: Polling time 30/30 sec.
+<6>[  180.721609]  [2:    kworker/2:1: 1639] sec_bat_get_property cable type = 4 sleep_mode = 0
+<6>[  181.991608]  [2:  kworker/u16:2:   65] etspi_work_func_debug ldo: 0, sleep: 0, tz: 1, spi_value: 0x0, type: unknown
+<6>[  182.234055]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_Algo => 
+<6>[  182.234055]  [3:  kworker/u17:0:  114] [SSP_MCU] 000000 0001000000 0000000000 0000000000 0000001000 0000000000 0000000000 0000000000
+<6>[  182.234055]  [3:  kworker/u17:0:  114] [SSP_MCU] LCD On_Off 1, AP_Status 1
+<6>[  182.234055]  [3:  kworker/u17:0:  114] [SSP_MCU]Sensor_Bypass => ACC:0,-1,20 Gyro:0,-1,20 Mag:0,-1,-1 
+<6>[  182.234055]  [3:  kworker/u17:0:  114]  MagC:0,-1,-1 Baro:0,-1,-1 Prox:0,-1,-1 Light:0,-1,-1 UnGy:0,-1,-1 
+<6>[  182.234055]  [3:  kworker/u17:0:  114]  GRV:0,-1,-1 RV:0,-1,-1 Bulk:1,60 Timer:20
+<6>[  183.192230]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_Gyro-8,-1,4,0.001,0.000,-0.000, -1,20, 0
+<6>[  183.452048]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_ACC--189,38,4087,-1,20 ldo_toggle :0
+<6>[  185.233990]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_Algo => 
+<6>[  185.233990]  [3:  kworker/u17:0:  114] [SSP_MCU] 000000 0001000000 0000000000 0000000000 0000001000 0000000000 0000000000 0000000000
+<6>[  185.233990]  [3:  kworker/u17:0:  114] [SSP_MCU] LCD On_Off 1, AP_Status 1
+<6>[  185.233990]  [3:  kworker/u17:0:  114] [SSP_MCU]Sensor_Bypass => ACC:0,-1,20 Gyro:0,-1,20 Mag:0,-1,-1 
+<6>[  185.233990]  [3:  kworker/u17:0:  114]  MagC:0,-1,-1 Baro:0,-1,-1 Prox:0,-1,-1 Light:0,-1,-1 UnGy:0,-1,-1 
+<6>[  185.233990]  [3:  kworker/u17:0:  114]  GRV:0,-1,-1 RV:0,-1,-1 Bulk:1,60 Timer:20
+<6>[  185.831228]  [2:  kworker/u16:2:   65] [SSP]: debug_work_func(4) - Sensor state: 0x1fff07f6bf, RC: 0(0, 0, 0), CC: 0, TC: 0 NSC: 0 EC: 0 GPS: false
+<6>[  187.192214]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_Gyro-9,-2,5,0.000,-0.000,-0.001, -1,20, 0
+<6>[  187.451935]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - Sensor_ACC--180,46,4089,-1,20 ldo_toggle :0
+<6>[  187.473660]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - rm_AD_AR 1, 0 1 0 20 -1
+<6>[  187.476198]  [3:  kworker/u17:0:  114] [SSP]: MSG From MCU - AKC
+<6>[  187.476198]  [3:  kworker/u17:0:  114] AFF-CLOSE
+<6>[  187.476198]  [3:  kworker/u17:0:  114] rm_AD_AR 0, 0 1 0 20 -1
+<6>[  187.476198]  [3:  kworker/u17:0:  114] SMR 33 1 0
+<6>[  187.476198]  [3:  kworker/u17:0:  114] [SSP] Algo 33 type is deleted
+<6>[  187.476198]  [3:  kworker/u17:0:  114] Start-End cal 23
+<6>[  187.479536]  [2:  kworker/u17:0:  114] [SSP]: MSG From MCU - rm_AD_AR 28, 0 1 0 60 -1
+<6>[  187.479536]  [2:  kworker/u17:0:  114] SMR 66 268435456 0
+<6>[  187.479536]  [2:  kworker/u17:0:  114] g_ptSh->cTimer = 0
+<6>[  187.479536]  [2:  kworker/u17:0:  114] SH_HA_SetRTC 0
+<6>[  187.479536]  [2:  kworker/u17:0:  114] [SSP] Algo 66 type is deleted
+<6>[  187.479536]  [2:  kworker/u17:0:  114] Start-End cal 21
+<6>[  188.796903]  [3:   exynos_hpgov: 3636] do_cpu_hotplug: enable_cpus= fast_hp=1
+<6>[  188.796932]  [3:   exynos_hpgov: 3636] do_cpu_hotplug: disable_cpus=5-7 fast_hp=1
+<6>[  188.798431]  [5:        cpuhp/5:   39] Trustonic TEE: mobicore_cpu_callback: Cpu 5 is going to hotplug out
+<6>[  188.798442]  [5:        cpuhp/5:   39] Trustonic TEE: mc_cpu_offline: not active CPU, no action taken
+<6>[  188.798568]  [6:        cpuhp/6:   45] Trustonic TEE: mobicore_cpu_callback: Cpu 6 is going to hotplug out
+<6>[  188.798575]  [6:        cpuhp/6:   45] Trustonic TEE: mc_cpu_offline: not active CPU, no action taken
+<6>[  188.798605]  [7:        cpuhp/7:   51] Trustonic TEE: mobicore_cpu_callback: Cpu 7 is going to hotplug out
+<6>[  188.798611]  [7:        cpuhp/7:   51] Trustonic TEE: mc_cpu_offline: not active CPU, no action taken
+<5>[  188.800279]  [0:   exynos_hpgov: 3636] CPU5: shutdown
+<5>[  188.800318]  [0:   exynos_hpgov: 3636] CPU6: shutdown
+<5>[  188.800339]  [0:   exynos_hpgov: 3636] CPU7: shutdown
+<6>[  188.800687]  [0:   exynos_hpgov: 3636] Trustonic TEE: mobicore_cpu_callback: Cpu 5 is hotplug out
+<6>[  188.801529]  [0:   exynos_hpgov: 3636] Trustonic TEE: mobicore_cpu_callback: Cpu 6 is hotplug out
+<6>[  188.802338]  [0:   exynos_hpgov: 3636] Trustonic TEE: mobicore_cpu_callback: Cpu 7 is hotplug out
+<6>[  188.869972]  [0:   exynos_hpgov: 3636] do_cpu_hotplug: enable_cpus=5-7 fast_hp=1
+<6>[  188.870000]  [0:   exynos_hpgov: 3636] do_cpu_hotplug: disable_cpus= fast_hp=1
+<6>[  188.870466]  [0:   exynos_hpgov: 3636] exynos_hpgov_validate_hpin: max_freq 2314000, cur_freq 1690000, next_mode 2 
+<6>[  188.870622]  [5:      swapper/5:    0] Detected VIPT I-cache on CPU5
+<6>[  188.870685]  [5:      swapper/5:    0] CPU5: Booted secondary processor [531f0020]
+<6>[  188.870916]  [0:   exynos_hpgov: 3636] exynos_hpgov_validate_hpin: max_freq 1794000, cur_freq 1690000, next_mode 3 
+<6>[  188.871080]  [6:      swapper/6:    0] Detected VIPT I-cache on CPU6
+<6>[  188.871135]  [6:      swapper/6:    0] CPU6: Booted secondary processor [531f0020]
+<6>[  188.871371]  [3:   exynos_hpgov: 3636] exynos_hpgov_validate_hpin: max_freq 1794000, cur_freq 1690000, next_mode 4 
+<6>[  188.871567]  [7:      swapper/7:    0] Detected VIPT I-cache on CPU7
+<6>[  188.871620]  [7:      swapper/7:    0] CPU7: Booted secondary processor [531f0020]
+<6>[  189.128918]  [2:   exynos_hpgov: 3636] do_cpu_hotplug: enable_cpus= fast_hp=1
+<6>[  189.128947]  [2:   exynos_hpgov: 3636] do_cpu_hotplug: disable_cpus=5-7 fast_hp=1
+<6>[  189.130462]  [5:        cpuhp/5:   39] Trustonic TEE: mobicore_cpu_callback: Cpu 5 is going to hotplug out
+<6>[  189.130474]  [7:        cpuhp/7:   51] Trustonic TEE: mobicore_cpu_callback: Cpu 7 is going to hotplug out
+<6>[  189.130482]  [7:        cpuhp/7:   51] Trustonic TEE: mc_cpu_offline: not active CPU, no action taken
+<6>[  189.130487]  [5:        cpuhp/5:   39] Trustonic TEE: mc_cpu_offline: not active CPU, no action taken
+<6>[  189.130591]  [6:        cpuhp/6:   45] Trustonic TEE: mobicore_cpu_callback: Cpu 6 is going to hotplug out
+<6>[  189.130599]  [6:        cpuhp/6:   45] Trustonic TEE: mc_cpu_offline: not active CPU, no action taken
+<5>[  189.132052]  [3:   exynos_hpgov: 3636] CPU5: shutdown
+<5>[  189.132087]  [3:   exynos_hpgov: 3636] CPU6: shutdown
+<5>[  189.132110]  [3:   exynos_hpgov: 3636] CPU7: shutdown
+<6>[  189.132448]  [3:   exynos_hpgov: 3636] Trustonic TEE: mobicore_cpu_callback: Cpu 5 is hotplug out
+<6>[  189.133142]  [3:   exynos_hpgov: 3636] Trustonic TEE: mobicore_cpu_callback: Cpu 6 is hotplug out
+<6>[  189.133703]  [3:   exynos_hpgov: 3636] Trustonic TEE: mobicore_cpu_callback: Cpu 7 is hotplug out
+<6>[  189.405833]  [3:   exynos_hpgov: 3636] do_cpu_hotplug: enable_cpus=5-7 fast_hp=1
+<6>[  189.405854]  [3:   exynos_hpgov: 3636] do_cpu_hotplug: disable_cpus= fast_hp=1
+<6>[  189.406148]  [3:   exynos_hpgov: 3636] exynos_hpgov_validate_hpin: max_freq 2314000, cur_freq 1586000, next_mode 2 
+<6>[  189.406340]  [5:      swapper/5:    0] Detected VIPT I-cache on CPU5
+<6>[  189.406412]  [5:      swapper/5:    0] CPU5: Booted secondary processor [531f0020]
+<6>[  189.406482]  [3:   exynos_hpgov: 3636] exynos_hpgov_validate_hpin: max_freq 1794000, cur_freq 1586000, next_mode 3 
+<6>[  189.406671]  [6:      swapper/6:    0] Detected VIPT I-cache on CPU6
+<6>[  189.406729]  [6:      swapper/6:    0] CPU6: Booted secondary processor [531f0020]
+<6>[  189.406827]  [3:   exynos_hpgov: 3636] exynos_hpgov_validate_hpin: max_freq 1794000, cur_freq 1586000, next_mode 4 
+<6>[  189.407027]  [7:      swapper/7:    0] Detected VIPT I-cache on CPU7
+<6>[  189.407082]  [7:      swapper/7:    0] CPU7: Booted secondary processor [531f0020]
+<6>[  190.867217]  [3:  kworker/u16:2:   65] [FG] 0080h,ff9bh,7f80h,ff01h,1900h,07c6h,4313h,62edh,23cdh,c6fah,0606h,05d8h,003bh,41b5h,4116h,079fh,0b5ch,ffffh,2800h,5f00h,069eh,0148h,2432h,000eh,0b97h,c6a3h,2516h,d3b0h,12d8h,0314h,03c0h,0765h,02b2h,6200h,1400h,0b78h,1403h,2305h,2432h,802ah,2606h,cea4h,2039h,0890h,e3e1h,290eh,0400h,0001h,72b3h,454eh,0a0ch,ffffh,1d4bh,0b97h,08e4h,05e0h,0040h,332ah,a7e2h,05d8h,1680h,1008h,f981h,e000h,07fch,0000h,0889h,00bah,c573h,02eeh,3317h,01c1h,3f5eh,2241h,076bh,00e2h,ffcfh,ffddh,86e3h,0b97h,0000h,63d6h,0007h,2ba2h,7f80h,0005h,0946h,05a2h,0000h,006bh,090ch,0050h,0088h,0204h,0001h,0000h,0ee3h,0000h,0000h,0000h,0000h,0000h,0000h,0000h,0000h,0000h,0000h,0010h,003bh,ffffh,410dh,0764h,13a6h,ffffh,f5d8h,0006h,fffdh,0000h,0010h,0003h,4a9eh,0004h,4658h,0000h,4000h,0000h,7d00h,0920h,ffffh,ffffh,ffffh,ffffh,20adh,0000h,0000h,ed73h,4015h,5558h,01d4h,c307h,0026h,2910h,c708h,3ff4h,
+<6>[  190.869353]  [3:  kworker/u16:2:   65] [FG power] ISYS(74mA),ISYSAVG(72mA),VSYS(3993mV),IIN(476mA),VBYP(4760mV),QH(-35000uah)
+<6>[  190.869376]  [3:  kworker/u16:2:   65] max77705_fg_read_vfocv: VFOCV(3900)mV, data(0xc307)
+<7>[  190.869806]  [3:  kworker/u16:2:   65] max77705_fg_read_current: current=477mA
+<7>[  190.870617]  [3:  kworker/u16:2:   65] max77705_fg_read_avg_current: avg_current=467mA
+<7>[  190.879603]  [0:  kworker/u16:2:   65] max77705_fg_write_temp: temperature to (357, 0x23b3)
+<7>[  190.881454]  [0:  kworker/u16:2:   65] max77705_fg_read_avg_current: avg_current=467mA
+<7>[  190.881480]  [0:  kworker/u16:2:   65] max77705_get_fuelgauge_soc: soc(670)
+<6>[  190.881521]  [0:  kworker/u16:2:   65] sec_bat_get_property cable type = 4 sleep_mode = 0
+<6>[  190.882245]  [0:  kworker/u16:2:   65] max77705_fg_get_scaled_capacity : current_standard(1000)
+<6>[  190.882277]  [0:  kworker/u16:2:   65] max77705_fg_get_scaled_capacity : CABLE TYPE(4) INPUT CURRENT(475) CHARGING MODE(CC Mode)capacity_max (1000) scaled capacity(67.0), raw_soc(67.0)
+<7>[  190.882302]  [0:  kworker/u16:2:   65] max77705_fg_get_atomic_capacity : NOW(67), OLD(67)
+<6>[  190.882353]  [0:  kworker/u16:2:   65] sec-battery battery: sec_bat_get_battery_info:Vnow(3979mV),Vavg(3972mV),Inow(477mA),Imax(475mA),Ichg(550mA),SOC(67%),Tbat(357),Tusb(357),Tchg(367),Twpc(357)
+<6>[  190.883080]  [0:  kworker/u16:2:   65] sec-battery battery: sec_bat_cisd_check: [CISD] iavg: 467, incur: 475, chgcur: 550,
+<6>[  190.883080]  [0:  kworker/u16:2:   65] cc_T: 0, lcd_off_T: 0, passed_T: 153, full_T: 0, chg_end_T: 0, cisd: 0x0
+<7>[  190.883127]  [0:  kworker/u16:2:   65] calc_ttf: cc_time: 6955
+<7>[  190.883154]  [0:  kworker/u16:2:   65] calc_ttf: cap: 3000, soc:  670, T:   7335, avg:  467, cv soc:  976, i:   70, val: 475
+<6>[  190.883184]  [0:  kworker/u16:2:   65] sec-battery battery: sec_bat_calc_time_to_full: T:  7395 sec, passed time:   153, current: 475
+<6>[  190.883209]  [0:  kworker/u16:2:   65] max77705_chg_set_wdtmr_kick: WDT Kick
+<6>[  190.884441]  [2:  kworker/u16:2:   65] max77705_get_charging_health: reg_data(0x3)
+<6>[  190.884839]  [2:  kworker/u16:2:   65] max77705_get_charging_health: details00(0xe0)
+<6>[  190.885250]  [1:  kworker/u16:2:   65] max77705_get_vbus_state: VBUS is valid. CHGIN < CHGIN_OVLO
+<6>[  190.887041]  [1:  kworker/u16:2:   65] max77705_get_charging_health: vbus_state: 0x3, chg_dtls: 0x1, iin: 476mA, vbyp: 4760mV
+<6>[  190.887437]  [1:  kworker/u16:2:   65] max77705_check_cnfg12_reg: valid_data = 0x60, reg_data = 0x60
+<6>[  190.887474]  [1:  kworker/u16:2:   65] sec_bat_swelling_check: swelling highblock(410), highrecov(390)
+<7>[  190.887901]  [1:  kworker/u16:2:   65] max77705_get_float_voltage: battery cv reg : 0x13, float voltage val : 4350
+<6>[  190.887931]  [1:  kworker/u16:2:   65] sec_bat_swelling_check: status(1), swell_mode(0:0:0), cv(4350)mV, temp(357)
+<6>[  190.887965]  [1:  kworker/u16:2:   65] sec-battery battery: sec_bat_fullcharged_check: Charging Mode : Normal
+<6>[  190.887991]  [1:  kworker/u16:2:   65] sec_bat_set_current_event: current event before(0x0), after(0x0)
+<6>[  190.888020]  [1:  kworker/u16:2:   65] sec_bat_calculate_safety_time : EXPIRED_TIME(10765125), IP(2375000), CP(2392500), CURR(490), STANDARD(2150)
+<6>[  190.888044]  [1:  kworker/u16:2:   65] sec_bat_calculate_safety_time : CAL_EXPIRED_TIME(47234732) TIME NOW(190) TIME PREV(160)
+<6>[  190.888065]  [1:  kworker/u16:2:   65] sec_bat_calculate_safety_time : REMAIN_TIME(10758287) CAL_REMAIN_TIME(47204732)
+<6>[  190.888092]  [1:  kworker/u16:2:   65] sec_bat_check_mix_temp: mix_limit(0), temp(357), chg_temp(367), input_current(475)
+<6>[  190.888119]  [1:  kworker/u16:2:   65] sec_bat_check_afc_temp: cable_type(4), chg_limit(0) vbus_by_siop(0)
+<6>[  190.888143]  [1:  kworker/u16:2:   65] sec_bat_get_charging_current_by_siop: incurr(475), chgcurr(550)
+<6>[  190.895770]  [2:  kworker/u16:2:   65] max77705 : [0xb1]0x1a, [0xb2]0xdf, [0xb3]0xe0, [0xb4]0x31, [0xb5]0x00, [0xb6]0xff, [0xb7]0x15, [0xb8]0x38, [0xb9]0x4b, [0xba]0x9b, [0xbb]0x13, [0xbc]0x3c, [0xbd]0x6c, [0xbe]0x34, [0xbf]0x02, [0xc0]0x92, [0xc1]0x14, [0xc2]0x00, [0xc3]0x60, 
+<6>[  190.896499]  [2:  kworker/u16:2:   65] max77705_chg_monitor_work: [CHG] MODE(0x5), B2SOVRC(0xc), otg_on(0)
+<6>[  190.896548]  [2:  kworker/u16:2:   65] sec-battery battery: sec_bat_monitor_work: Status(Charging), mode(Normal), Health(Good), Cable(USB, USB, 1, 0), level(100%), slate_mode(0), store_mode(0), HV(NONE, 0), sleep_mode(0), Cycle(-1)
+<6>[  190.896608]  [2:  kworker/u16:2:   65] sec-battery battery: sec_bat_set_polling: Polling time 10/30 sec.
+<6>[  190.896761]  [2:    kworker/2:1: 1639] sec_bat_get_property cable type = 4 sleep_mode = 0
+<6>[  191.975253]  [2:  kworker/u16:2:   65] [SSP]: debug_work_func(5) - Sensor state: 0x1fff07f6bf, RC: 0(0, 0, 0), CC: 0, TC: 0 NSC: 0 EC: 0 GPS: false
+<6>[  192.999734]  [2:  kworker/u16:2:   65] etspi_work_func_debug ldo: 0, sleep: 0, tz: 1, spi_value: 0x0, type: unknown
+<6>[  195.558835]  [0:    kworker/0:0:    4] sec_ts 2-0048: [sec_input] mode:0202 noise:0 iq:1 depth:0 lp:(40/-1) D0F000 // v:0130 cal:A2(09) C01T0028.CENT.L FFFFF // id(0,0) // #7 6
+<6>[  197.863111]  [2:  kworker/u16:1:   59] [SSP]: debug_work_func(0) - Sensor state: 0x1fff07f6bf, RC: 0(0, 0, 0), CC: 0, TC: 0 NSC: 0 EC: 0 GPS: false
+<6>[  201.047052]  [0:  kworker/u16:2:   65] [FG] 0080h,ff9bh,7f80h,ff01h,1900h,07c7h,431dh,62edh,23b3h,c70eh,05d8h,0602h,003bh,41c8h,4129h,07a1h,0b5ch,ffffh,2800h,5f00h,0694h,0148h,2425h,000eh,0b97h,c6bfh,2516h,d3b0h,12d8h,0314h,03c0h,0767h,02a6h,6200h,1400h,0b78h,1403h,2305h,2425h,8030h,2606h,cea4h,2039h,0890h,e3e1h,290eh,0400h,0001h,7656h,47f1h,0a0ch,ffffh,1d45h,0b97h,08e4h,05e0h,0040h,332ah,a7e2h,0602h,1680h,1008h,f9bbh,e000h,07fch,0000h,0889h,00f2h,c573h,02eeh,3317h,01d4h,3f5eh,2241h,076ah,00c8h,ffcfh,ffdeh,e812h,0b97h,0000h,6404h,0007h,2bb3h,7f80h,0005h,0946h,05a2h,0000h,006bh,090ch,0050h,004bh,0204h,0001h,0000h,0eeah,0000h,0000h,0000h,0000h,0000h,0000h,0000h,0000h,0000h,0000h,0010h,003bh,ffffh,411fh,0766h,11eah,0000h,0a0ch,0b97h,5cb8h,fa4dh,0220h,0017h,4a9eh,0004h,4658h,0000h,4000h,0000h,7d00h,0920h,ffffh,ffffh,ffffh,ffffh,20b0h,0000h,0000h,efa2h,4018h,5570h,01e1h,c30eh,0026h,2910h,c740h,3ff4h,
+<6>[  201.049876]  [2:  kworker/u16:2:   65] [FG power] ISYS(75mA),ISYSAVG(62mA),VSYS(4000mV),IIN(477mA),VBYP(4767mV),QH(-34000uah)
+<6>[  201.049904]  [2:  kworker/u16:2:   65] max77705_fg_read_vfocv: VFOCV(3901)mV, data(0xc30e)
+<7>[  201.050338]  [2:  kworker/u16:2:   65] max77705_fg_read_current: current=490mA
+<7>[  201.051260]  [2:  kworker/u16:2:   65] max77705_fg_read_avg_current: avg_current=480mA
+<7>[  201.059005]  [3:  kworker/u16:2:   65] max77705_fg_write_temp: temperature to (356, 0x2399)
+<6>[  201.060466]  [2:  kworker/u16:2:   65] max77705_fg_read_vcell: VCELL(3985)mV, data(0xc740)
+<7>[  201.061269]  [2:  kworker/u16:2:   65] max77705_fg_read_avg_current: avg_current=480mA
+<7>[  201.061296]  [2:  kworker/u16:2:   65] max77705_get_fuelgauge_soc: soc(671)
+<6>[  201.061340]  [2:  kworker/u16:2:   65] sec_bat_get_property cable type = 4 sleep_mode = 0
+<6>[  201.062029]  [2:  kworker/u16:2:   65] max77705_fg_get_scaled_capacity : current_standard(1000)
+<6>[  201.062064]  [2:  kworker/u16:2:   65] max77705_fg_get_scaled_capacity : CABLE TYPE(4) INPUT CURRENT(475) CHARGING MODE(CC Mode)capacity_max (1000) scaled capacity(67.1), raw_soc(67.1)
+<7>[  201.062087]  [2:  kworker/u16:2:   65] max77705_fg_get_atomic_capacity : NOW(67), OLD(67)
+<6>[  201.062139]  [2:  kworker/u16:2:   65] sec-battery battery: sec_bat_get_battery_info:Vnow(3981mV),Vavg(3974mV),Inow(490mA),Imax(475mA),Ichg(550mA),SOC(67%),Tbat(356),Tusb(355),Tchg(367),Twpc(356)
+<6>[  201.062912]  [2:  kworker/u16:2:   65] sec-battery battery: sec_bat_cisd_check: [CISD] iavg: 480, incur: 475, chgcur: 550,
+<6>[  201.062912]  [2:  kworker/u16:2:   65] cc_T: 0, lcd_off_T: 0, passed_T: 183, full_T: 0, chg_end_T: 0, cisd: 0x0
+<7>[  201.062961]  [2:  kworker/u16:2:   65] calc_ttf: cc_time: 6933
+<7>[  201.062988]  [2:  kworker/u16:2:   65] calc_ttf: cap: 3000, soc:  671, T:   7313, avg:  480, cv soc:  976, i:   70, val: 475
+<6>[  201.063016]  [2:  kworker/u16:2:   65] sec-battery battery: sec_bat_calc_time_to_full: T:  7373 sec, passed time:   183, current: 475
+<6>[  201.063044]  [2:  kworker/u16:2:   65] max77705_chg_set_wdtmr_kick: WDT Kick
+<6>[  201.063978]  [2:  kworker/u16:2:   65] max77705_get_charging_health: reg_data(0x3)
+<6>[  201.064337]  [2:  kworker/u16:2:   65] max77705_get_charging_health: details00(0xe0)
+<6>[  201.064703]  [1:  kworker/u16:2:   65] max77705_get_vbus_state: VBUS is valid. CHGIN < CHGIN_OVLO
+<6>[  201.066373]  [1:  kworker/u16:2:   65] max77705_get_charging_health: vbus_state: 0x3, chg_dtls: 0x1, iin: 477mA, vbyp: 4767mV
+<6>[  201.066810]  [1:  kworker/u16:2:   65] max77705_check_cnfg12_reg: valid_data = 0x60, reg_data = 0x60
+<6>[  201.073305]  [2:  kworker/u16:2:   65] max77705 : [0xb1]0x1a, [0xb2]0xdf, [0xb3]0xe0, [0xb4]0x31, [0xb5]0x00, [0xb6]0xff, [0xb7]0x15, [0xb8]0x38, [0xb9]0x4b, [0xba]0x9b, [0xbb]0x13, [0xbc]0x3c, [0xbd]0x6c, [0xbe]0x34, [0xbf]0x02, [0xc0]0x92, [0xc1]0x14, [0xc2]0x00, [0xc3]0x60, 
+<6>[  201.074049]  [2:  kworker/u16:2:   65] max77705_chg_monitor_work: [CHG] MODE(0x5), B2SOVRC(0xc), otg_on(0)
+<6>[  201.074102]  [2:  kworker/u16:2:   65] sec-battery battery: sec_bat_monitor_work: Status(Charging), mode(Normal), Health(Good), Cable(USB, USB, 1, 0), level(100%), slate_mode(0), store_mode(0), HV(NONE, 0), sleep_mode(0), Cycle(-1)
+<6>[  201.074157]  [2:  kworker/u16:2:   65] sec-battery battery: sec_bat_set_polling: Polling time 20/30 sec.
+<6>[  201.074288]  [2:    kworker/2:1: 1639] sec_bat_get_property cable type = 4 sleep_mode = 0
+<6>[  201.706988]  [0:    kworker/0:0:    4] max77705_muic: max77705_muic_print_reg_log USBC1:0x2f, USBC2:0x05, BC:0x81, CC0:0x51, CC1:0x8, PD0:0x19, PD1:0x7 attached_dev:1
+<6>[  201.707043]  [0:    kworker/0:0:    4] max77705_muic: max77705_muic_print_reg_log UIC_INT_M:0x4, CC_INT_M:0x20, PD_INT_M:0x0, VDM_INT_M:0xf0, PMIC_MASK:0x2, WDT:0, POR:0
+<6>[  204.007098]  [2:  kworker/u16:2:   65] [SSP]: debug_work_func(0) - Sensor state: 0x1fff07f6bf, RC: 0(0, 0, 0), CC: 0, TC: 0 NSC: 0 EC: 0 GPS: false
+<6>[  204.007709]  [2:  kworker/u16:2:   65] etspi_work_func_debug ldo: 0, sleep: 0, tz: 1, spi_value: 0x0, type: unknown
+<6>[  209.895794]  [3:  kworker/u16:2:   65] [SSP]: debug_work_func(0) - Sensor state: 0x1fff07f6bf, RC: 0(0, 0, 0), CC: 0, TC: 0 NSC: 0 EC: 0 GPS: false
+<6>[  211.223045]  [0:  kworker/u16:1:   59] [FG] 0080h,ff9bh,7f80h,ff01h,1900h,07c8h,4329h,62edh,2399h,c752h,0625h,05f6h,003bh,41d5h,4132h,07a2h,0b5ch,ffffh,2800h,5f00h,0689h,0148h,2416h,000eh,0b97h,c6d2h,2516h,d3b0h,12d8h,0314h,03c0h,0768h,02a9h,6200h,1400h,0b78h,1403h,2305h,2416h,8034h,2606h,cea4h,2039h,0890h,e3e1h,290eh,0400h,0001h,7a25h,4ab9h,0a0ch,ffffh,1d43h,0b97h,08e4h,05e0h,0040h,332ah,a7e2h,05f6h,1680h,1008h,f9f5h,e000h,07fch,0000h,0889h,00cah,c573h,02eeh,3317h,01bbh,3f5eh,2241h,076fh,00b2h,ffcfh,ffe0h,40b8h,0b97h,0000h,6400h,0007h,2b8ah,7f80h,0005h,0946h,05a2h,0000h,006bh,090ch,0050h,002bh,0204h,0001h,0000h,0e90h,0000h,0000h,0000h,0000h,0000h,0000h,0000h,0000h,0000h,0000h,0010h,003bh,ffffh,4129h,0767h,0c66h,0624h,ee12h,0000h,0624h,0000h,07a2h,0000h,4a9eh,0004h,4658h,0000h,4000h,0000h,7d00h,0920h,ffffh,ffffh,ffffh,ffffh,20a2h,0000h,0000h,f269h,401ah,5576h,01e1h,c315h,0027h,2910h,c74eh,401ah,
+<6>[  211.225845]  [0:  kworker/u16:1:   59] [FG power] ISYS(63mA),ISYSAVG(55mA),VSYS(4000mV),IIN(466mA),VBYP(4750mV),QH(-32000uah)
+<6>[  211.225870]  [0:  kworker/u16:1:   59] max77705_fg_read_vfocv: VFOCV(3901)mV, data(0xc315)
+<7>[  211.226370]  [0:  kworker/u16:1:   59] max77705_fg_read_current: current=491mA
+<7>[  211.227287]  [0:  kworker/u16:1:   59] max77705_fg_read_avg_current: avg_current=476mA
+<7>[  211.235597]  [3:  kworker/u16:1:   59] max77705_fg_write_temp: temperature to (355, 0x2380)
+<7>[  211.237839]  [2:  kworker/u16:1:   59] max77705_fg_read_avg_current: avg_current=476mA
+<7>[  211.237863]  [2:  kworker/u16:1:   59] max77705_get_fuelgauge_soc: soc(671)
+<6>[  211.237905]  [2:  kworker/u16:1:   59] sec_bat_get_property cable type = 4 sleep_mode = 0
+<6>[  211.238937]  [1:  kworker/u16:1:   59] max77705_fg_get_scaled_capacity : current_standard(1000)
+<6>[  211.238968]  [1:  kworker/u16:1:   59] max77705_fg_get_scaled_capacity : CABLE TYPE(4) INPUT CURRENT(475) CHARGING MODE(CC Mode)capacity_max (1000) scaled capacity(67.1), raw_soc(67.1)
+<7>[  211.238993]  [1:  kworker/u16:1:   59] max77705_fg_get_atomic_capacity : NOW(67), OLD(67)
+<6>[  211.239039]  [1:  kworker/u16:1:   59] sec-battery battery: sec_bat_get_battery_info:Vnow(3986mV),Vavg(3976mV),Inow(491mA),Imax(475mA),Ichg(550mA),SOC(67%),Tbat(355),Tusb(354),Tchg(366),Twpc(356)
+<6>[  211.239735]  [1:  kworker/u16:1:   59] sec-battery battery: sec_bat_cisd_check: [CISD] iavg: 476, incur: 475, chgcur: 550,
+<6>[  211.239735]  [1:  kworker/u16:1:   59] cc_T: 0, lcd_off_T: 0, passed_T: 183, full_T: 0, chg_end_T: 0, cisd: 0x0
+<7>[  211.239780]  [1:  kworker/u16:1:   59] calc_ttf: cc_time: 6933
+<7>[  211.239805]  [1:  kworker/u16:1:   59] calc_ttf: cap: 3000, soc:  671, T:   7313, avg:  476, cv soc:  976, i:   70, val: 475
+<6>[  211.239835]  [1:  kworker/u16:1:   59] sec-battery battery: sec_bat_calc_time_to_full: T:  7373 sec, passed time:   183, current: 475
+<6>[  211.239861]  [1:  kworker/u16:1:   59] max77705_chg_set_wdtmr_kick: WDT Kick
+<6>[  211.240839]  [1:  kworker/u16:1:   59] max77705_get_charging_health: reg_data(0x3)
+<6>[  211.241206]  [1:  kworker/u16:1:   59] max77705_get_charging_health: details00(0xe0)
+<6>[  211.241566]  [1:  kworker/u16:1:   59] max77705_get_vbus_state: VBUS is valid. CHGIN < CHGIN_OVLO
+<6>[  211.243153]  [1:  kworker/u16:1:   59] max77705_get_charging_health: vbus_state: 0x3, chg_dtls: 0x1, iin: 466mA, vbyp: 4750mV
+<6>[  211.243519]  [1:  kworker/u16:1:   59] max77705_check_cnfg12_reg: valid_data = 0x60, reg_data = 0x60
+<6>[  211.250799]  [0:  kworker/u16:1:   59] max77705 : [0xb1]0x1a, [0xb2]0xdf, [0xb3]0xe0, [0xb4]0x31, [0xb5]0x00, [0xb6]0xff, [0xb7]0x15, [0xb8]0x38, [0xb9]0x4b, [0xba]0x9b, [0xbb]0x13, [0xbc]0x3c, [0xbd]0x6c, [0xbe]0x34, [0xbf]0x02, [0xc0]0x92, [0xc1]0x14, [0xc2]0x00, [0xc3]0x60, 
+<6>[  211.251528]  [0:  kworker/u16:1:   59] max77705_chg_monitor_work: [CHG] MODE(0x5), B2SOVRC(0xc), otg_on(0)
+<6>[  211.251572]  [0:  kworker/u16:1:   59] sec-battery battery: sec_bat_monitor_work: Status(Charging), mode(Normal), Health(Good), Cable(USB, USB, 1, 0), level(100%), slate_mode(0), store_mode(0), HV(NONE, 0), sleep_mode(0), Cycle(-1)
+<6>[  211.251630]  [0:  kworker/u16:1:   59] sec-battery battery: sec_bat_set_polling: Polling time 30/30 sec.
+<6>[  211.251766]  [0:    kworker/0:0:    4] sec_bat_get_property cable type = 4 sleep_mode = 0
+<6>[  215.015855]  [3:  kworker/u16:1:   59] etspi_work_func_debug ldo: 0, sleep: 0, tz: 1, spi_value: 0x0, type: unknown
+<6>[  216.039065]  [3:  kworker/u16:1:   59] [SSP]: debug_work_func(0) - Sensor state: 0x1fff07f6bf, RC: 0(0, 0, 0), CC: 0, TC: 0 NSC: 0 EC: 0 GPS: false
+<6>[  221.403049]  [0:  kworker/u16:1:   59] [FG] 0080h,ff9bh,7f80h,ff01h,1900h,07cah,4333h,62edh,2380h,c762h,064fh,061eh,003bh,41deh,4142h,07a4h,0b5ch,ffffh,2800h,5f00h,0681h,0148h,2406h,000eh,0b97h,c6edh,2516h,d3b0h,12d8h,0314h,03c0h,076ah,02a0h,6200h,1400h,0b78h,1403h,2305h,2406h,8040h,2606h,cea4h,2039h,0890h,e3e1h,290eh,0400h,0001h,7de2h,4d6ah,0a0ch,ffffh,1d35h,0b97h,08e4h,05e0h,0040h,332ah,a7e2h,061eh,1680h,1008h,fa2fh,e000h,07fch,0000h,0889h,006ch,c6d8h,02eeh,3317h,01c4h,3f5eh,2241h,076fh,007eh,ffcfh,ffe1h,a9d9h,0b97h,0000h,63fbh,0007h,2b64h,7f80h,0005h,0946h,05a2h,0000h,006bh,090ch,0050h,0000h,0204h,0001h,0000h,0e81h,0000h,0000h,0000h,0000h,0000h,0000h,0000h,0000h,0000h,0000h,0010h,003bh,ffffh,4132h,0768h,1cd4h,e199h,ec8ch,7f81h,0011h,0000h,4000h,0000h,4a9eh,0004h,4658h,0000h,4000h,0000h,7d00h,0920h,ffffh,ffffh,ffffh,ffffh,20a5h,0000h,0000h,f4a2h,4020h,557ch,01ddh,c31ch,0027h,2910h,c75ch,401ah,
+<6>[  221.405811]  [1:  kworker/u16:1:   59] [FG power] ISYS(33mA),ISYSAVG(39mA),VSYS(3999mV),IIN(464mA),VBYP(4733mV),QH(-31000uah)
+<6>[  221.405837]  [1:  kworker/u16:1:   59] max77705_fg_read_vfocv: VFOCV(3902)mV, data(0xc31c)
+<7>[  221.406290]  [1:  kworker/u16:1:   59] max77705_fg_read_current: current=486mA
+<7>[  221.407190]  [1:  kworker/u16:1:   59] max77705_fg_read_avg_current: avg_current=489mA
+<7>[  221.417835]  [0:  kworker/u16:1:   59] max77705_fg_write_temp: temperature to (355, 0x2380)
+<7>[  221.420257]  [1:  kworker/u16:1:   59] max77705_fg_read_avg_current: avg_current=489mA
+<7>[  221.420282]  [1:  kworker/u16:1:   59] max77705_get_fuelgauge_soc: soc(671)
+<6>[  221.420320]  [1:  kworker/u16:1:   59] sec_bat_get_property cable type = 4 sleep_mode = 0
+<6>[  221.421162]  [1:  kworker/u16:1:   59] max77705_fg_get_scaled_capacity : current_standard(1000)
+<6>[  221.421197]  [1:  kworker/u16:1:   59] max77705_fg_get_scaled_capacity : CABLE TYPE(4) INPUT CURRENT(475) CHARGING MODE(CC Mode)capacity_max (1000) scaled capacity(67.1), raw_soc(67.1)
+<7>[  221.421222]  [1:  kworker/u16:1:   59] max77705_fg_get_atomic_capacity : NOW(67), OLD(67)
+<6>[  221.421270]  [1:  kworker/u16:1:   59] sec-battery battery: sec_bat_get_battery_info:Vnow(3987mV),Vavg(3978mV),Inow(486mA),Imax(475mA),Ichg(550mA),SOC(67%),Tbat(355),Tusb(352),Tchg(364),Twpc(355)
+<6>[  221.422153]  [1:  kworker/u16:1:   59] sec-battery battery: sec_bat_cisd_check: [CISD] iavg: 489, incur: 475, chgcur: 550,
+<6>[  221.422153]  [1:  kworker/u16:1:   59] cc_T: 0, lcd_off_T: 0, passed_T: 183, full_T: 0, chg_end_T: 0, cisd: 0x0
+<7>[  221.422202]  [1:  kworker/u16:1:   59] calc_ttf: cc_time: 6933
+<7>[  221.422229]  [1:  kworker/u16:1:   59] calc_ttf: cap: 3000, soc:  671, T:   7313, avg:  489, cv soc:  976, i:   70, val: 475
+<6>[  221.422261]  [1:  kworker/u16:1:   59] sec-battery battery: sec_bat_calc_time_to_full: T:  7373 sec, passed time:   183, current: 475
+<6>[  221.422287]  [1:  kworker/u16:1:   59] max77705_chg_set_wdtmr_kick: WDT Kick
+<6>[  221.423374]  [1:  kworker/u16:1:   59] max77705_get_charging_health: reg_data(0x3)
+<6>[  221.423824]  [1:  kworker/u16:1:   59] max77705_get_charging_health: details00(0xe0)
+<6>[  221.424292]  [1:  kworker/u16:1:   59] max77705_get_vbus_state: VBUS is valid. CHGIN < CHGIN_OVLO
+<7>[  221.425543]  [1:  kworker/u16:1:   59] max77705_fg_read_iin: iin_current=464mA
+<6>[  221.425961]  [1:  kworker/u16:1:   59] max77705_fg_read_vbyp: VBYP(4733), data(0x2b64)
+<6>[  221.425991]  [1:  kworker/u16:1:   59] max77705_get_charging_health: vbus_state: 0x3, chg_dtls: 0x1, iin: 464mA, vbyp: 4733mV
+<6>[  221.426445]  [1:  kworker/u16:1:   59] max77705_check_cnfg12_reg: valid_data = 0x60, reg_data = 0x60
+<6>[  221.426483]  [1:  kworker/u16:1:   59] sec_bat_swelling_check: swelling highblock(410), highrecov(390)
+<7>[  221.427141]  [2:  kworker/u16:1:   59] max77705_get_float_voltage: battery cv reg : 0x13, float voltage val : 4350
+<6>[  221.427169]  [2:  kworker/u16:1:   59] sec_bat_swelling_check: status(1), swell_mode(0:0:0), cv(4350)mV, temp(355)
+<6>[  221.427199]  [2:  kworker/u16:1:   59] sec-battery battery: sec_bat_fullcharged_check: Charging Mode : Normal
+<6>[  221.427224]  [2:  kworker/u16:1:   59] sec_bat_set_current_event: current event before(0x0), after(0x0)
+<6>[  221.427253]  [2:  kworker/u16:1:   59] sec_bat_calculate_safety_time : EXPIRED_TIME(10758287), IP(2375000), CP(2392500), CURR(490), STANDARD(2150)
+<6>[  221.427275]  [2:  kworker/u16:1:   59] sec_bat_calculate_safety_time : CAL_EXPIRED_TIME(47204728) TIME NOW(221) TIME PREV(190)
+<6>[  221.427295]  [2:  kworker/u16:1:   59] sec_bat_calculate_safety_time : REMAIN_TIME(10751221) CAL_REMAIN_TIME(47173728)
+<6>[  221.427322]  [2:  kworker/u16:1:   59] sec_bat_check_mix_temp: mix_limit(0), temp(355), chg_temp(364), input_current(475)
+<6>[  221.427348]  [2:  kworker/u16:1:   59] sec_bat_check_afc_temp: cable_type(4), chg_limit(0) vbus_by_siop(0)
+<6>[  221.427372]  [2:  kworker/u16:1:   59] sec_bat_get_charging_current_by_siop: incurr(475), chgcurr(550)
+<6>[  221.434143]  [0:  kworker/u16:1:   59] max77705 : [0xb1]0x1a, [0xb2]0xdf, [0xb3]0xe0, [0xb4]0x31, [0xb5]0x00, [0xb6]0xff, [0xb7]0x15, [0xb8]0x38, [0xb9]0x4b, [0xba]0x9b, [0xbb]0x13, [0xbc]0x3c, [0xbd]0x6c, [0xbe]0x34, [0xbf]0x02, [0xc0]0x92, [0xc1]0x14, [0xc2]0x00, [0xc3]0x60, 
+<6>[  221.434931]  [0:  kworker/u16:1:   59] max77705_chg_monitor_work: [CHG] MODE(0x5), B2SOVRC(0xc), otg_on(0)
+<6>[  221.434979]  [0:  kworker/u16:1:   59] sec-battery battery: sec_bat_monitor_work: Status(Charging), mode(Normal), Health(Good), Cable(USB, USB, 1, 0), level(100%), slate_mode(0), store_mode(0), HV(NONE, 0), sleep_mode(0), Cycle(-1)
+<6>[  221.435042]  [0:  kworker/u16:1:   59] sec-battery battery: sec_bat_set_polling: Polling time 10/30 sec.
+<6>[  221.435181]  [0:    kworker/0:0:    4] sec_bat_get_property cable type = 4 sleep_mode = 0
+<7>[  221.435682]  [0:    kworker/0:0:    4] max77705_fg_read_isys: isys_current=33mA
+<7>[  221.436142]  [0:    kworker/0:0:    4] max77705_fg_read_isys_avg: isys_avg_current=39mA
+<6>[  221.927090]  [0:  kworker/u16:1:   59] [SSP]: debug_work_func(0) - Sensor state: 0x1fff07f6bf, RC: 0(0, 0, 0), CC: 0, TC: 0 NSC: 0 EC: 0 GPS: false

@@ -1,0 +1,2 @@
+# the rear flash as a torch (leds/zrn-flash.ko): the shell, in group video, switches it
+ACTION=="add", SUBSYSTEM=="leds", KERNEL=="white:torch", RUN+="/usr/bin/chgrp video /sys%p/brightness", RUN+="/usr/bin/chmod g+w /sys%p/brightness"

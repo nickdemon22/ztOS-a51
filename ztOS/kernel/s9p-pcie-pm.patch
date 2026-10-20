@@ -1,0 +1,64 @@
+diff --git a/drivers/pci/controller/dwc/pcie-exynos9810.c b/drivers/pci/controller/dwc/pcie-exynos9810.c
+index b272137..b2277e2 100644
+--- a/drivers/pci/controller/dwc/pcie-exynos9810.c
++++ b/drivers/pci/controller/dwc/pcie-exynos9810.c
+@@ -48,6 +48,7 @@
+ #include <linux/module.h>
+ #include <linux/of.h>
+ #include <linux/platform_device.h>
++#include <linux/pm.h>
+ #include <linux/regmap.h>
+ 
+ #include "pcie-designware.h"
+@@ -568,6 +569,43 @@ static void exynos9810_pcie_remove(struct platform_device *pdev)
+ 	dw_pcie_host_deinit(&ep->pci.pp);
+ }
+ 
++static int exynos9810_pcie_suspend_noirq(struct device *dev)
++{
++	struct exynos9810_pcie *ep = dev_get_drvdata(dev);
++
++	/* Children have already suspended and saved PCI configuration. Stop
++	 * the link even with ASPM L1 enabled: SYS_SLEEP loses ELBI and iATU
++	 * state, so a retained-link assumption cannot be used on this SoC. */
++	elb_writel(ep, 0, PCIE_IRQ_EN_PULSE);
++	elb_writel(ep, 0, PCIE_IRQ_EN_LEVEL);
++	elb_writel(ep, 0, PCIE_IRQ_EN_SPECIAL);
++	dw_pcie_stop_link(&ep->pci);
++	ep->pci.suspended = true;
++	return 0;
++}
++
++static int exynos9810_pcie_resume_noirq(struct device *dev)
++{
++	struct exynos9810_pcie *ep = dev_get_drvdata(dev);
++
++	/* Parent resumes before PCI children: replay PHY/host setup, restore
++	 * outbound mappings and train the link before their config accesses. */
++	/* GPIO providers may have restored the pre-suspend PERST# value. */
++	dw_pcie_stop_link(&ep->pci);
++	if (ep->wl_reg_on) {
++		/* A powerdown GPIO may have removed WLAN power during sleep.
++		 * Keep PERST# asserted for the same cold-start delay as probe. */
++		gpiod_set_value_cansleep(ep->wl_reg_on, 1);
++		msleep(200);
++	}
++	return dw_pcie_resume_noirq(&ep->pci);
++}
++
++static const struct dev_pm_ops exynos9810_pcie_pm_ops = {
++	NOIRQ_SYSTEM_SLEEP_PM_OPS(exynos9810_pcie_suspend_noirq,
++				exynos9810_pcie_resume_noirq)
++};
++
+ static const struct of_device_id exynos9810_pcie_of_match[] = {
+ 	{ .compatible = "samsung,exynos9810-pcie", },
+ 	{ },
+@@ -580,6 +618,7 @@ static struct platform_driver exynos9810_pcie_driver = {
+ 	.driver = {
+ 		.name = "pcie-exynos9810",
+ 		.of_match_table = exynos9810_pcie_of_match,
++		.pm = pm_sleep_ptr(&exynos9810_pcie_pm_ops),
+ 	},
+ };
+ module_platform_driver(exynos9810_pcie_driver);

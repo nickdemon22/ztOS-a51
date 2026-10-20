@@ -1,0 +1,4 @@
+PAN_MAX_AFBC_PACKING_RATIO=0
+# Mali-G72: AFBC conversion jobs can fault during page texture uploads,
+# leaving the header black until its next upload. Keep GLES, use tiled textures.
+PAN_MESA_DEBUG=noafbc

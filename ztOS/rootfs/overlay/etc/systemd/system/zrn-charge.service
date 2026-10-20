@@ -1,0 +1,9 @@
+[Unit]
+Description=Set charger current limits from the charger type
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/zrn-charge
+
+[Install]
+WantedBy=multi-user.target

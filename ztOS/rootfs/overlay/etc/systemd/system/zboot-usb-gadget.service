@@ -1,0 +1,18 @@
+[Unit]
+Description=USB gadget: NCM network and ACM serial console
+DefaultDependencies=no
+After=sys-kernel-config.mount systemd-modules-load.service
+Requires=sys-kernel-config.mount
+Before=network-pre.target
+Wants=network-pre.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/zboot-usb-gadget
+# Disarm the boot stage's deadman: USB is up, so this boot can be reached and
+# does not need to be reset. A boot that never gets here still resets.
+ExecStartPost=/usr/bin/touch /run/zboot.hold
+
+[Install]
+WantedBy=multi-user.target

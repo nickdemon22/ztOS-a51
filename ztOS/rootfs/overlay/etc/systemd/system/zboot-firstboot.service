@@ -1,0 +1,12 @@
+[Unit]
+Description=zboot first boot: grow the root filesystem, set up the pacman keyring
+ConditionPathExists=/etc/zboot-firstboot
+After=systemd-remount-fs.service local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/zboot-firstboot
+TimeoutStartSec=600
+
+[Install]
+WantedBy=multi-user.target

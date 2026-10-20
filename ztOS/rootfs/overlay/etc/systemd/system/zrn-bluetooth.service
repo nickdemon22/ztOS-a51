@@ -1,0 +1,15 @@
+[Unit]
+Description=Galaxy S9 Bluetooth (BCM4361 on UART_BT)
+Before=bluetooth.service
+# the address after it, in the background: nothing else at boot waits for it
+# (multi-user.target, and with it the sensor framework, waited ~20 s)
+Wants=zrn-bluetooth-addr.service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/sbin/zrn-bluetooth
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

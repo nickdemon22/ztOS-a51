@@ -1,0 +1,11 @@
+#!/bin/sh
+# Runs once: everything the image build could not do without running target code.
+set -eu
+
+dev=$(findmnt -no SOURCE /)
+[ -b "$dev" ] || { echo "Root filesystem source is not a block device: $dev" >&2; exit 1; }
+resize2fs "$dev"
+pacman-key --init
+pacman-key --populate archlinuxarm
+# Leave the marker in place on failure so the next boot retries.
+rm -f /etc/zboot-firstboot

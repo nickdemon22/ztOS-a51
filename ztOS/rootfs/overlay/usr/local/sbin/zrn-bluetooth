@@ -1,0 +1,13 @@
+#!/bin/sh
+# The Galaxy S9's Bluetooth: zrn-bt.ko powers the BCM4361's Bluetooth side and
+# brings up its UART (ttySAC0) (bluetooth/README.md); btattach then
+# hands the UART to the kernel's Broadcom HCI driver, which loads
+# brcm/BCM.samsung,starlte.hcd. Runs for as long as Bluetooth is attached.
+set -e
+modprobe zrn-bt
+# the UART's tty (ttySAC0 on a fresh boot; samsung_tty numbers by probe order)
+i=0
+until tty=$(basename "$(find /sys/devices/platform/exynos850-uart.0/ -maxdepth 4 -name "ttySAC*" 2>/dev/null | head -1)") && [ "$tty" != . ]; do
+	i=$((i + 1)); [ $i -gt 20 ] && { echo "zrn-bluetooth: no UART"; exit 1; }; sleep 0.25
+done
+exec btattach -B "/dev/$tty" -P bcm -S 115200

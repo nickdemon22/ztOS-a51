@@ -1,0 +1,15 @@
+[Unit]
+Description=Idle cores power down (zrn-cpuidle): not enabled until `zrn-cpuidle keep`
+After=multi-user.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/zrn-cpuidle start
+# A clean shutdown proves the load did not freeze the phone, even inside the
+# two minutes the confirmation timer waits: without this a quick reboot left
+# the mark behind and every boot after refused to load the module.
+ExecStop=/bin/rm -f /var/lib/zrn-cpuidle/loading
+
+[Install]
+WantedBy=graphical.target

@@ -1,0 +1,9 @@
+[Unit]
+Description=zrnperfd (minimal): power profiles and screen-off low power for ztMETRO
+
+[Service]
+ExecStart=/usr/local/sbin/zrnperfd
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

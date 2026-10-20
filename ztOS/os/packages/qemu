@@ -1,0 +1,2 @@
+# ztOS in QEMU (the "virt" machine): the generic Arch Linux ARM kernel
+linux-aarch64

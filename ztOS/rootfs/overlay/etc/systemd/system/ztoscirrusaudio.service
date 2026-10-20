@@ -1,0 +1,11 @@
+[Unit]
+Description=ztOSCirrusAudio: the Galaxy S9's audio DSP and speaker amplifiers
+After=multi-user.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/ztoscirrusaudio
+
+[Install]
+WantedBy=graphical.target

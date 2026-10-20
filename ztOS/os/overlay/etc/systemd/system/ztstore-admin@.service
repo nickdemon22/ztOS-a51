@@ -1,0 +1,6 @@
+[Unit]
+Description=ztOS App Store: install a built package, or remove one, for %i
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/ztstore-helper admin %i

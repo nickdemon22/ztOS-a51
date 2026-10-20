@@ -1,0 +1,4 @@
+# a charger went in or out: look at what it is and set the limits to suit
+ACTION=="change", SUBSYSTEM=="power_supply", KERNEL=="max77705-charger", RUN+="/usr/bin/systemctl start --no-block zrn-charge.service"
+# the battery going from charging to full: the LED turns green
+ACTION=="change", SUBSYSTEM=="power_supply", KERNEL=="max170xx_battery", RUN+="/usr/bin/systemctl start --no-block zrn-charge.service"

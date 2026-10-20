@@ -1,0 +1,5 @@
+#!/bin/sh
+# pacman through the build host's proxy, for when the phone has no network of
+# its own: the USB link reaches the host and nothing else. Start
+# scripts/pacman-proxy.py on the host first.
+exec env http_proxy=http://172.16.42.2:8080 https_proxy= pacman "$@"

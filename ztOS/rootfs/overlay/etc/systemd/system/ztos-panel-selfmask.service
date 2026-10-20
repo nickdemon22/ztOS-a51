@@ -1,0 +1,13 @@
+[Unit]
+Description=ztOS: switch the panel's self mask off, so the panel can sleep without dark patches
+After=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/ztos-panel-selfmask
+# only now may blanking put the panel to sleep
+ExecStartPost=/bin/sh -c 'echo Y > /sys/module/s9p_decon/parameters/panel_sleep'
+RemainAfterExit=yes
+
+[Install]
+WantedBy=graphical.target

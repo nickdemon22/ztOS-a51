@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ztOS wiki</title>
+<meta name="description" content="ztOS is a phone operating system with Windows Phone 8.1's look and motion, on Arch Linux ARM and mainline Linux, running on the Galaxy S9.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f2f2f2;
+    --panel: #ffffff;
+    --ink: #181818;
+    --mute: #595959;
+    --faint: #dcdcdc;
+    --line: #868686;
+    --font: "Archivo", "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #121212; --panel: #1a1a1a; --ink: #eaeaea;
+      --mute: #9d9d9d; --faint: #2c2c2c; --line: #6b6b6b;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #121212; --panel: #1a1a1a; --ink: #eaeaea;
+    --mute: #9d9d9d; --faint: #2c2c2c; --line: #6b6b6b;
+  }
+  html { scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 1rem); }
+
+  *, *::before, *::after { box-sizing: border-box; border-radius: 0; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: var(--font); font-size: 1.0625rem; font-weight: 350; line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  img, svg { max-width: 100%; display: block; }
+  a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+  a:hover { text-decoration-thickness: 1px; text-underline-offset: 0.3em; }
+  h1, h2, h3 { font-weight: 300; font-stretch: 90%; letter-spacing: -0.02em; line-height: 1; margin: 0; }
+  p { margin: 0 0 1em; max-width: 62ch; }
+  ul.prose, ol.prose { max-width: 62ch; padding-left: 1.25rem; margin: 0 0 1em; }
+  ul.prose li, ol.prose li { margin-bottom: 0.35rem; }
+  :focus-visible { outline: 1px solid var(--ink); outline-offset: 3px; }
+  code { font-family: var(--mono); font-size: 0.9em; }
+  b, strong { font-weight: 500; }
+
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 clamp(1rem, 4vw, 2.5rem); }
+
+  /* Layout and sidebar */
+  .layout { display: grid; grid-template-columns: 250px minmax(0, 1fr); align-items: start; }
+  .content { min-width: 0; }
+  .sidebar {
+    position: sticky; top: env(safe-area-inset-top, 0px);
+    height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    display: flex; flex-direction: column; padding: 1.5rem 1.25rem;
+    border-right: 1px solid var(--line); overflow-y: auto;
+  }
+  .side-top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem; }
+  .wordmark { font-weight: 400; font-stretch: 90%; font-size: 1.5rem; letter-spacing: -0.02em; text-decoration: none; }
+  .wordmark span { color: var(--mute); }
+  .sidebar .menu-btn { display: none; }
+  .side-nav { display: flex; flex-direction: column; flex: 1; }
+  .side-nav ul { list-style: none; margin: 0; padding: 0; }
+  .side-nav a {
+    display: block; text-decoration: none; padding: 0.35rem 0.75rem; border: 1px solid transparent;
+    transition: background-color 120ms linear, color 120ms linear;
+  }
+  .side-nav a:hover, .side-nav a[aria-current="true"] { background: var(--ink); color: var(--paper); }
+  .side-nav a:focus-visible { outline-offset: 1px; }
+  .side-nav .sub-nav { margin: 0.2rem 0 0.4rem 0.75rem; border-left: 1px solid var(--line); }
+  .side-nav .sub-nav a { font-size: 0.9375rem; padding: 0.25rem 0.75rem; color: var(--mute); }
+  .side-nav .sub-nav a:hover, .side-nav .sub-nav a[aria-current="true"] { color: var(--paper); }
+  .side-nav li.hidden { display: none; }
+  .side-foot { margin-top: auto; padding-top: 1.5rem; border-top: 1px solid var(--line); font-size: 0.9375rem; }
+  .side-foot p { margin: 0.75rem 0 0; color: var(--mute); }
+  .search { margin-bottom: 1rem; }
+  .search input { font: inherit; font-size: 0.9375rem; width: 100%; color: var(--ink); background: var(--panel);
+    border: 1px solid var(--line); padding: 0.5rem 0.7rem; -webkit-appearance: none; appearance: none; }
+  .search input::placeholder { color: var(--mute); }
+  .search input:focus-visible { border-color: var(--ink); outline: 1px solid var(--ink); outline-offset: 2px; }
+  .no-hits { color: var(--mute); font-size: 0.9375rem; padding: 0.35rem 0.75rem; }
+
+  /* Buttons and tags */
+  .btn {
+    font: inherit; font-weight: 400; font-size: 1rem; display: inline-block; cursor: pointer;
+    text-decoration: none; line-height: 1.2; padding: 0.75rem 1.25rem;
+    background: var(--ink); color: var(--paper); border: 1px solid var(--line);
+    transition: background-color 120ms linear, color 120ms linear;
+  }
+  .btn:hover { background: var(--paper); color: var(--ink); text-decoration: none; }
+  .btn.ghost { background: transparent; color: var(--ink); }
+  .btn.ghost:hover { background: var(--ink); color: var(--paper); }
+  .btn.small { padding: 0.4rem 0.75rem; font-size: 0.9375rem; }
+  .tag { display: inline-block; border: 1px solid var(--line); padding: 0.1rem 0.5rem; font-size: 0.8125rem; vertical-align: 0.1em; }
+  .tag.solid { background: var(--ink); color: var(--paper); }
+  .tag.dashed { border-style: dashed; color: var(--mute); border-color: var(--mute); }
+
+  /* Article head */
+  .hero { border-bottom: 1px solid var(--line); }
+  .hero .wrap { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr); gap: clamp(1.5rem, 4vw, 3rem);
+    padding-top: clamp(2rem, 6vw, 4rem); padding-bottom: clamp(2rem, 6vw, 4rem); align-items: start; }
+  .crumb { color: var(--mute); font-size: 0.9375rem; margin-bottom: 1.25rem; }
+  .hero h1 { font-size: clamp(2.75rem, 7.5vw, 5.75rem); line-height: 0.92; letter-spacing: -0.035em; margin-bottom: 1.5rem; }
+  .hero p.lead { font-size: 1.25rem; }
+  .actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.75rem; }
+
+  /* Infobox */
+  .infobox { border: 1px solid var(--line); background: var(--panel); font-size: 0.9375rem; margin: 0; }
+  .infobox .cap { padding: 0.7rem 0.9rem; border-bottom: 1px solid var(--line); font-weight: 500; }
+  .infobox .term { padding: 0.9rem; border-bottom: 1px solid var(--line); font-family: var(--mono); font-size: 0.8125rem;
+    line-height: 1.45; white-space: pre; overflow-x: auto; color: var(--ink); }
+  .infobox dl { margin: 0; display: grid; grid-template-columns: 7.5rem 1fr; }
+  .infobox dt, .infobox dd { margin: 0; padding: 0.55rem 0.9rem; border-bottom: 1px solid var(--faint); }
+  .infobox dt { color: var(--mute); }
+  .infobox dl > :nth-last-child(-n+2) { border-bottom: 0; }
+
+  /* Sections */
+  .section { border-bottom: 1px solid var(--line); }
+  .section .wrap { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: clamp(1rem, 3vw, 2.5rem);
+    padding-top: clamp(2rem, 5vw, 3.25rem); padding-bottom: clamp(2rem, 5vw, 3.25rem); }
+  .section h2 { font-size: 2rem; }
+  .section .sub { color: var(--mute); font-size: 0.9375rem; margin-top: 0.75rem; max-width: 24ch; }
+  .body h3 { font-size: 1.375rem; margin: 2rem 0 0.75rem; }
+  .body h3:first-child { margin-top: 0; }
+  .body > * + .table-scroll, .body > * + pre, .body > * + .alert, .body > * + .steps, .body > * + .rules { margin-top: 0.25rem; }
+  .body .table-scroll, .body pre, .body .alert, .body .steps, .body .rules { margin-bottom: 1.25rem; }
+
+  /* Code */
+  pre { font-family: var(--mono); font-size: 0.875rem; line-height: 1.5; background: var(--panel); border: 1px solid var(--line);
+    padding: 0.85rem 1rem; margin: 0; overflow-x: auto; max-width: 100%; }
+  pre .c { color: var(--mute); }
+
+  /* Tables */
+  .table-scroll { overflow-x: auto; border: 1px solid var(--line); background: var(--panel); }
+  table { width: 100%; border-collapse: collapse; min-width: 560px; font-size: 0.9375rem; }
+  th, td { text-align: left; padding: 0.7rem 1rem; border-bottom: 1px solid var(--faint); font-weight: 350; vertical-align: top; }
+  thead th { font-weight: 500; border-bottom: 1px solid var(--line); }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr { transition: background-color 120ms linear, color 120ms linear; }
+  tbody tr:hover, tbody tr:focus-within { background: var(--ink); color: var(--paper); }
+  td.k { font-family: var(--mono); font-size: 0.875rem; white-space: nowrap; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* Steps: a real sequence, so numbered */
+  .steps { list-style: none; margin: 0; padding: 0; border: 1px solid var(--line); background: var(--panel); counter-reset: s; }
+  .steps li { counter-increment: s; display: grid; grid-template-columns: 2.75rem 1fr; border-bottom: 1px solid var(--faint); }
+  .steps li:last-child { border-bottom: 0; }
+  .steps li::before { content: counter(s); padding: 0.75rem 0 0.75rem 1rem; color: var(--mute); font-variant-numeric: tabular-nums; }
+  .steps li div { padding: 0.75rem 1rem 0.75rem 0; }
+  .steps li b { display: block; }
+  .steps li span { color: var(--mute); font-size: 0.9375rem; }
+  .steps li span code { color: var(--ink); }
+
+  /* Definition grid */
+  .rules { display: grid; grid-template-columns: repeat(2, 1fr); border: 1px solid var(--line); background: var(--panel); margin: 0; }
+  .rules > div { padding: 0.8rem 1rem; border-bottom: 1px solid var(--faint); }
+  .rules > div:nth-child(odd) { border-right: 1px solid var(--faint); }
+  .rules > div:nth-last-child(-n+2) { border-bottom: 0; }
+  .rules dt { font-weight: 500; }
+  .rules dd { margin: 0; color: var(--mute); font-size: 0.9375rem; }
+
+  /* Status ladder */
+  .ladder { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); background: var(--panel); margin-bottom: 1.25rem; }
+  .ladder > div { padding: 0.9rem 1rem; border-right: 1px solid var(--line); }
+  .ladder > div:last-child { border-right: 0; }
+  .ladder b { display: block; font-family: var(--mono); font-weight: 400; margin-bottom: 0.35rem; }
+  .ladder span { color: var(--mute); font-size: 0.9375rem; }
+
+  .alert { border: 1px solid var(--line); background: var(--panel); padding: 0.85rem 1rem; max-width: 70ch; }
+  .alert b { display: block; font-weight: 500; }
+
+  /* Flow drawing */
+  .flow { border: 1px solid var(--line); background: var(--panel); margin-bottom: 1.25rem; }
+  .flow svg { width: 100%; height: auto; }
+  .flow figcaption { border-top: 1px solid var(--line); padding: 0.55rem 0.9rem; font-size: 0.875rem; color: var(--mute); }
+  figure { margin: 0; }
+
+  footer .wrap { display: grid; grid-template-columns: 220px 1fr 1fr; gap: clamp(1rem, 4vw, 3rem); padding-top: 2rem; padding-bottom: 2.5rem; font-size: 0.9375rem; }
+  footer p { margin: 0 0 0.25rem; }
+  footer .mute { color: var(--mute); }
+
+
+  /* Screenshot strip: phone screens side by side, each in a hairline frame */
+  .shots { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.75rem; }
+  .shots figure { border: 1px solid var(--line); background: var(--panel); }
+  .shots img { width: 100%; height: auto; }
+  .shots figcaption { border-top: 1px solid var(--line); padding: 0.45rem 0.6rem; font-size: 0.8125rem; color: var(--mute); }
+  @media (max-width: 1000px) { .shots { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (max-width: 560px) { .shots { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 1000px) {
+    .hero .wrap, .section .wrap, footer .wrap { grid-template-columns: minmax(0, 1fr); }
+    .section .sub { max-width: none; }
+    .rules { grid-template-columns: 1fr; }
+    .rules > div:nth-child(odd) { border-right: 0; }
+    .rules > div:nth-last-child(2) { border-bottom: 1px solid var(--faint); }
+    .ladder { grid-template-columns: 1fr; }
+    .ladder > div { border-right: 0; border-bottom: 1px solid var(--line); }
+    .ladder > div:last-child { border-bottom: 0; }
+  }
+  @media (max-width: 860px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--line); padding: 1rem clamp(1rem, 4vw, 2.5rem); overflow: visible; }
+    .side-top { margin-bottom: 0; }
+    .sidebar .menu-btn { display: inline-block; }
+    .side-nav { display: none; margin-top: 1rem; }
+    .side-nav.open { display: flex; }
+    .side-foot { margin-top: 1rem; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+<aside class="sidebar">
+  <div class="side-top">
+    <a class="wordmark" href="#top">ztOS <span>wiki</span></a>
+    <button class="btn ghost small menu-btn" id="menu" type="button" aria-expanded="false" aria-controls="side-nav">Menu</button>
+  </div>
+  <nav class="side-nav" id="side-nav" aria-label="Contents">
+    <div class="search">
+      <label for="q" style="position:absolute;left:-9999px">Search this wiki</label>
+      <input type="search" id="q" placeholder="Search this wiki" autocomplete="off">
+    </div>
+    <ul id="toc">
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#screens">Screenshots</a></li>
+      <li><a href="#ztmetro">ztMETRO</a></li>
+      <li><a href="#apps">Apps</a></li>
+      <li><a href="#sdk">The SDK</a></li>
+      <li><a href="#services">System services</a></li>
+      <li>
+        <a href="#s9">The Galaxy S9 port</a>
+        <ul class="sub-nav">
+          <li><a href="#installing">Installing</a></li>
+          <li><a href="#hardware">Hardware status</a></li>
+          <li><a href="#quirks">Known quirks</a></li>
+          <li><a href="#recovery">Getting back in</a></li>
+        </ul>
+      </li>
+      <li><a href="#ztconflo">ztConflo: other phones</a></li>
+      <li><a href="#status">Status and next</a></li>
+      <li><a href="#see-also">See also</a></li>
+    </ul>
+    <p class="no-hits" id="no-hits" hidden>Nothing matches.</p>
+    <div class="side-foot">
+      <button class="btn ghost small" id="theme" type="button" aria-pressed="false">Dark mode</button>
+      <p><a href="https://github.com/Zerone-Laboratories/ztOS">Source on GitHub</a></p>
+    </div>
+  </nav>
+</aside>
+
+<div class="content">
+<main id="top">
+
+  <section class="hero" id="overview">
+    <div class="wrap">
+      <div>
+        <p class="crumb">Zerone Laboratories / operating systems</p>
+        <h1>ztOS</h1>
+        <p class="lead">A phone operating system with Windows Phone 8.1's look and motion, on Arch Linux ARM and mainline Linux.</p>
+        <p>ztOS is the ztMETRO shell, its own apps, an updater and an SDK for apps in Python and Qt, on an ordinary Arch Linux ARM system. It runs on the Samsung Galaxy S9 (SM-G960N, starlte) and in the QEMU emulator. Everything that moves is drawn by the GPU.</p>
+        <p>It is alpha software. The S9 port runs a mainline 7.1 kernel with the phone's GPU, display, touch, Wi-Fi, 4G data, sound and sensors working. ztConflo, its image builder, is how it reaches other phones.</p>
+        <div class="actions">
+          <a class="btn" href="#installing">Install it</a>
+          <a class="btn ghost" href="https://github.com/Zerone-Laboratories/ztOS">View the source</a>
+        </div>
+      </div>
+      <aside class="infobox" aria-label="At a glance">
+        <div class="cap">ztOS at a glance</div>
+        <dl>
+          <dt>Version</dt><dd>0.1.0 alpha 2</dd>
+          <dt>Shell</dt><dd>ztMETRO</dd>
+          <dt>Base</dt><dd>Arch Linux ARM, systemd</dd>
+          <dt>Kernel</dt><dd>Mainline Linux 7.1</dd>
+          <dt>Devices</dt><dd>Galaxy S9 (starlte), QEMU; others through <a href="#ztconflo">ztConflo</a></dd>
+          <dt>Graphics</dt><dd>Mesa Panfrost, OpenGL ES 3.1 on the S9's Mali-G72</dd>
+          <dt>Apps</dt><dd>Native C apps, and Python and Qt through the SDK</dd>
+          <dt>Written in</dt><dd>C, Python, shell</dd>
+          <dt>Licence</dt><dd>GPL 3</dd>
+        </dl>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section" id="screens">
+    <div class="wrap">
+      <div><h2>Screenshots</h2><p class="sub">Taken from the live display of a Galaxy S9.</p></div>
+      <div class="body">
+        <div class="shots">
+          <figure><img src="wiki/start.jpg" width="540" height="1110" alt="Start: live tiles in the Windows Phone layout" loading="lazy"><figcaption>Start</figcaption></figure>
+          <figure><img src="wiki/app-list.jpg" width="540" height="1110" alt="The alphabetical app list" loading="lazy"><figcaption>App list</figcaption></figure>
+          <figure><img src="wiki/networking.jpg" width="540" height="1110" alt="Settings, cellular and SIM, with signal and registration" loading="lazy"><figcaption>Cellular and SIM</figcaption></figure>
+          <figure><img src="wiki/sensors.jpg" width="540" height="1110" alt="ZrnDevTest showing live sensor readings" loading="lazy"><figcaption>Sensors, in ZrnDevTest</figcaption></figure>
+          <figure><img src="wiki/about.jpg" width="540" height="1110" alt="Settings, about: the device and ztOS version" loading="lazy"><figcaption>About</figcaption></figure>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="ztmetro">
+    <div class="wrap">
+      <div><h2>ztMETRO</h2><p class="sub">The shell, and the only one installed.</p></div>
+      <div class="body">
+        <p>ztMETRO is a Wayland compositor, built on wlroots, that is also the whole phone interface: Start with its live tiles, the app list and search, the action centre, the app switcher, the lock screen and the on-screen keyboard. Its look and motion are Windows Phone 8.1's, measured frame by frame against screen recordings of real Lumias.</p>
+        <p>It renders itself with OpenGL ES: every tile, bar and app surface is a textured quad with its own matrix, which is what lets tiles tilt under a finger and whole screens swing. Text is drawn once and kept as a texture, and frames are drawn only while something moves.</p>
+        <dl class="rules">
+          <div><dt>Start and tiles</dt><dd>Pin, move and resize tiles; the turnstile when an app opens and when you come back.</dd></div>
+          <div><dt>Action centre</dt><dd>Notifications, quick actions, brightness, and a media banner.</dd></div>
+          <div><dt>Keyboard</dt><dd>On-screen, lifting the app so the text box stays in sight.</dd></div>
+          <div><dt>Animation speed</dt><dd>One setting for the whole interface, shell and apps, 75% by default.</dd></div>
+          <div><dt>Haptics</dt><dd>Strength per kind of touch, set in Settings.</dd></div>
+          <div><dt>Other apps</dt><dd>Firefox, Chromium and any Linux app run as windows inside it.</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="apps">
+    <div class="wrap">
+      <div><h2>Apps</h2><p class="sub">What comes installed.</p></div>
+      <div class="body">
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>App</th><th>What it does</th><th>Written with</th></tr></thead>
+            <tbody>
+              <tr><td>Settings</td><td>Wi-Fi, cellular and SIM, haptics, quick actions, theme, developer options</td><td>ZrnMetroCore (C)</td></tr>
+              <tr><td>Phone, Messaging, People</td><td>Calls, SMS and contacts, in the same style</td><td>ZrnMetroCore (C)</td></tr>
+              <tr><td>ZrnDevTest</td><td>What the hardware reports: system, sensors live, the journal and kernel log</td><td>ZrnMetroCore (C)</td></tr>
+              <tr><td>Welcome</td><td>The first-start tour: Start, getting around, your apps, making apps</td><td>ztOS SDK (Python)</td></tr>
+              <tr><td>Updates</td><td>Shows available updates and installs them</td><td>ztOS SDK (Python)</td></tr>
+              <tr><td>Firefox, Chromium, terminal</td><td>Ordinary Linux apps, shown as windows</td><td>Arch packages</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>The native apps share ZrnMetroCore, a small toolkit with the shell's own widgets, page turns, pivots and press tilt.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="sdk">
+    <div class="wrap">
+      <div><h2>The SDK</h2><p class="sub">Apps in Python and Qt that look and move like the built-in ones.</p></div>
+      <div class="body">
+        <p>The ztOS SDK builds an app into a single file: a small C launcher with the app's Python code, pages, pictures and the <code>ztos</code> runtime zipped behind it. Pages, lists, pivots, entries, toggles, round buttons, app bars and dialogs all come from the runtime, with the toolkit's own numbers for every motion.</p>
+<pre>ztos-sdk new "Notes"     <span class="c"># a new app, from the template</span>
+ztos-sdk run             <span class="c"># try it on the computer</span>
+ztos-sdk deploy          <span class="c"># build, install on the phone, open it</span>
+ztos-sdk logs -f         <span class="c"># what it prints, on the phone</span></pre>
+        <h3>Keeping it fast</h3>
+        <ul class="prose">
+          <li><b>Motion on the GPU.</b> While a page turns, a list scrolls or a button leans, a GPU layer over the app shows pictures of the pages as textured quads, drawn by a small C renderer. Widgets are rasterised once, not every frame.</li>
+          <li><b>A warm runtime.</b> <code>ztos-zygote</code> loads Qt for Python once and forks each app from itself, which saves about a second of CPU per launch.</li>
+          <li><b>Compiled code.</b> Apps ship with their Python already compiled, so the phone never compiles it on start.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="services">
+    <div class="wrap">
+      <div><h2>System services</h2><p class="sub">ztOS's parts below the shell.</p></div>
+      <div class="body">
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Name</th><th>What it does</th></tr></thead>
+            <tbody>
+              <tr><td>ztOSCoreSensorFramework</td><td>Starts and watches every piece of hardware support and reports what fails; runs the sensor hub and the sensors</td></tr>
+              <tr><td>ztOSCoreNetworking</td><td>The modem, calls, messages and mobile data, and joining Wi-Fi</td></tr>
+              <tr><td>ztOSCirrusAudio</td><td>Sound: the audio DSP and the Cirrus speaker amplifiers</td></tr>
+              <tr><td>zrnperfd</td><td>Power: dynamic boost from the efficiency cores up, and core power-down</td></tr>
+              <tr><td>ztos-update</td><td>The updater: a daily check, a notification, and the Updates app</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="s9">
+    <div class="wrap">
+      <div><h2>The Galaxy S9 port</h2><p class="sub">Mainline Linux on an Exynos 9810.</p></div>
+      <div class="body">
+        <p>ztOS's first phone is the Galaxy S9, SM-G960N (starlte). It runs mainline Linux 7.1 with the Exynos 9810 drivers, booting from the phone's internal storage, with Arch on BOOT and TWRP left in RECOVERY. The phone's hardware support is built as loadable kernel modules, so drivers can be developed without reflashing. The modem and sensor hub still use Samsung's own Android daemons, run from the phone's stock partitions.</p>
+
+        <h3 id="installing">Installing</h3>
+        <div class="alert" role="note">
+          <b>This erases the phone</b>
+          Android and everything in its storage are replaced. The phone's IMEI and modem calibration are never touched. Read the <a href="#quirks">known quirks</a> below first.
+        </div>
+        <p>You need a Linux computer with about 15 GB free, an internet connection, a USB cable, and the phone charged above 50%. The bootloader must already be unlocked with TWRP installed in RECOVERY.</p>
+        <ol class="steps">
+          <li><div><b>Boot the phone into TWRP</b><span>Turn the phone off, then hold Volume Up, Bixby and Power until TWRP appears. Connect it to the computer with the USB cable.</span></div></li>
+          <li><div><b>Get ztOS on the computer</b><span><code>git clone https://github.com/Zerone-Laboratories/ztOS.git</code><br><code>cd ztOS</code></span></div></li>
+          <li><div><b>Run the installer</b><span><code>installer/ztos install --target starlte</code><br>Choose 1, then pick a user name and password. The build takes 30 to 60 minutes.</span></div></li>
+          <li><div><b>Confirm the install</b><span>Answer yes to write the boot image, then type <code>ERASE</code> when asked. Leave the cable in until it says done.</span></div></li>
+          <li><div><b>Restart the phone</b><span>Hold Power, Volume Up and Volume Down. The first start takes about a minute, then the Welcome app shows how ztOS is used.</span></div></li>
+        </ol>
+        <p>If something fails, the phone goes back to TWRP by itself. Start again from step 3. To try ztOS without a phone, run <code>installer/ztos install --target qemu</code> instead. It opens ztOS in a phone-shaped window on the computer.</p>
+
+        <h3 id="hardware">Hardware status</h3>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Part</th><th>Status</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td>Display, 1440×2960</td><td>Works</td><td>Manual and automatic brightness</td></tr>
+              <tr><td>GPU</td><td>Works</td><td>Mali-G72 MC18 through Panfrost, OpenGL ES 3.1</td></tr>
+              <tr><td>Touchscreen</td><td>Works</td><td>S6SY761, multi-touch</td></tr>
+              <tr><td>CPU, all 8 cores</td><td>Works</td><td>Frequency scaling; big cores powered down when idle</td></tr>
+              <tr><td>Battery and charger</td><td>Works</td><td>MAX17042 gauge, MAX77705 charger</td></tr>
+              <tr><td>Wi-Fi</td><td>Works</td><td>BCM4361, joined from Settings</td></tr>
+              <tr><td>Mobile data, SIM, signal</td><td>Works</td><td>4G through ztOSCoreNetworking</td></tr>
+              <tr><td>Speaker</td><td>Works</td><td>Through ztOSCirrusAudio</td></tr>
+              <tr><td>Light sensor, vibration, notification light</td><td>Works</td><td></td></tr>
+              <tr><td>SMS</td><td>Partial</td><td>Sending works; receiving is untested</td></tr>
+              <tr><td>Calls</td><td>Partial</td><td>They connect, but the call's sound is not routed yet</td></tr>
+              <tr><td>Motion sensors</td><td>Partial</td><td>Readable; nothing in the shell uses them yet</td></tr>
+              <tr><td>Suspend</td><td>Broken</td><td>The big cores don't come back; the screen-off state runs at the lowest clocks instead</td></tr>
+              <tr><td>Bluetooth, camera, GPS, microphone</td><td>Not started</td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="quirks">Known quirks</h3>
+        <ul class="prose">
+          <li><b>The modem or sensor hub doesn't come up.</b> It tends to follow a forced reboot or a crash. One pass through TWRP brings them back: reboot into recovery, then back into ztOS.</li>
+          <li><b>A driver that crashed while loading is skipped at the next boot,</b> so a crash can't become a boot loop. Remove its mark file under <code>/var/lib</code> to try again.</li>
+          <li><b>Reboot rather than unload a driver module</b> to try a new build; a failed unload has left the phone unable to shut down.</li>
+          <li><b>The clock resets at every boot</b> until the network sets it.</li>
+          <li><b>Keep the stock Android partitions.</b> The installer writes only BOOT and USERDATA, and the modem needs the rest.</li>
+        </ul>
+
+        <h3 id="recovery">Getting back in</h3>
+        <p>Nothing can leave the phone unbootable, and every layer has a way back. If Arch doesn't come up, the initramfs opens a rescue shell on the same USB network. If the kernel hangs, a watchdog resets the phone into TWRP after 30 seconds. If nothing appears on USB at all, the boot stage resets the phone after ten minutes. And download mode, which can't be overwritten, has everything needed to put the stock firmware back.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="ztconflo">
+    <div class="wrap">
+      <div><h2>ztConflo: other phones</h2><p class="sub">How ztOS leaves the S9.</p></div>
+      <div class="body">
+        <p>ztConflo takes a phone's codename and builds a flashable ztOS image for it: Arch Linux ARM with ztMETRO, on a kernel and boot setup that postmarketOS already boots. It looks in the ztOS device registry first and falls back to postmarketOS for phones nobody has ported ztOS to yet. It never ports new hardware.</p>
+        <dl class="rules">
+          <div><dt>Eligible phones</dt><dd>135 today, with a mainline aarch64 kernel; 71 of them archived by postmarketOS, and flagged.</dd></div>
+          <div><dt>GPU check</dt><dd>Phones without a Mesa GPU driver still build, with a warning that ztMETRO won't start.</dd></div>
+          <div><dt>Registry</dt><dd>One TOML file per phone; a phone moves from untested to boots to tested through a hardware checklist.</dd></div>
+          <div><dt>Interface</dt><dd>A command line and a terminal UI in ztOS's own look, which installs its tools on first run.</dd></div>
+        </dl>
+        <div class="actions" style="margin-top:1.25rem">
+          <a class="btn" href="https://zerone-laboratories.web.app/ztconflo/">Read the ztConflo article</a>
+          <a class="btn ghost" href="https://github.com/Zerone-Laboratories/ztconflo">ztConflo source</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="status">
+    <div class="wrap">
+      <div><h2>Status and next</h2><p class="sub">Where ztOS is today.</p></div>
+      <div class="body">
+        <div class="alert" role="note">
+          <b>Alpha</b>
+          ztOS 0.1.0 alpha 2 runs daily on one Galaxy S9. The installer's phone path is implemented but not yet validated end to end on a fresh install, and no ztConflo image has booted on another phone yet.
+        </div>
+        <ul class="prose" style="margin-top:1.25rem">
+          <li>The first phone besides the S9 booting a ztConflo build.</li>
+          <li>The sound of calls, and receiving SMS.</li>
+          <li>Suspend on the S9, for idle battery life closer to Android's.</li>
+          <li>Native apps drawing with OpenGL ES the way the shell does, and a ztOS package repository for updates.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="see-also">
+    <div class="wrap">
+      <div><h2>See also</h2></div>
+      <div class="body">
+        <ul class="prose">
+          <li><a href="https://github.com/Zerone-Laboratories/ztOS">ztOS source</a>, with the full status page and the SDK guide</li>
+          <li><a href="https://zerone-laboratories.web.app/ztconflo/">ztConflo</a>, the image builder, and <a href="https://github.com/z3r0n3br4instorm/ztos-devices">ztos-devices</a>, its registry</li>
+          <li><a href="https://github.com/SheroAbi/galaxy-s9plus-mainline-linux">galaxy-s9plus-mainline-linux</a>, the Exynos 9810 mainline drivers ztOS builds on</li>
+          <li><a href="https://postmarketos.org">postmarketOS</a>, whose kernels ztConflo reuses</li>
+          <li><a href="https://omethabeyrathne.web.app">Ometh Abeyrathne</a>, who makes ztOS</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div><span style="font-weight:500">ztOS</span></div>
+    <div><p>A Zerone Laboratories project</p><p class="mute">Released under the GPL 3</p></div>
+    <div><p><a href="https://github.com/Zerone-Laboratories/ztOS">github.com/Zerone-Laboratories/ztOS</a></p><p class="mute">Made by Ometh Abeyrathne</p></div>
+  </div>
+</footer>
+
+</div>
+</div>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var btn = document.getElementById('theme');
+  var mq = window.matchMedia('(prefers-color-scheme: dark)');
+  function isDark() { var t = root.getAttribute('data-theme'); return t ? t === 'dark' : mq.matches; }
+  function sync() { var d = isDark(); btn.textContent = d ? 'Light mode' : 'Dark mode'; btn.setAttribute('aria-pressed', String(d)); }
+  btn.addEventListener('click', function () { root.setAttribute('data-theme', isDark() ? 'light' : 'dark'); sync(); });
+  sync();
+
+  var menu = document.getElementById('menu');
+  var nav = document.getElementById('side-nav');
+  menu.addEventListener('click', function () {
+    var open = nav.classList.toggle('open');
+    menu.setAttribute('aria-expanded', String(open));
+    menu.textContent = open ? 'Close' : 'Menu';
+  });
+  nav.addEventListener('click', function (e) {
+    if (e.target.tagName === 'A' && nav.classList.contains('open')) {
+      nav.classList.remove('open'); menu.setAttribute('aria-expanded', 'false'); menu.textContent = 'Menu';
+    }
+  });
+
+  // Search: keep the contents entries whose section mentions every word typed
+  var q = document.getElementById('q');
+  var items = Array.prototype.slice.call(document.querySelectorAll('#toc li'));
+  var noHits = document.getElementById('no-hits');
+  function textOf(li) {
+    var a = li.querySelector(':scope > a');
+    var el = document.getElementById(a.getAttribute('href').slice(1));
+    if (!el) return '';
+    var sec = el.closest('section');
+    if (el.tagName === 'H3') {
+      var parts = [el.textContent], n = el.nextElementSibling;
+      while (n && n.tagName !== 'H3') { parts.push(n.textContent); n = n.nextElementSibling; }
+      return parts.join(' ').toLowerCase();
+    }
+    return (sec || el).textContent.toLowerCase();
+  }
+  var texts = items.map(textOf);
+  q.addEventListener('input', function () {
+    var words = q.value.toLowerCase().split(/\s+/).filter(Boolean);
+    var shown = 0;
+    var hits = texts.map(function (t) { return words.every(function (w) { return t.indexOf(w) !== -1; }); });
+    items.forEach(function (li, i) {
+      // a parent stays when one of its own sub-entries matches
+      var child = items.some(function (o, j) { return hits[j] && o !== li && li.contains(o); });
+      li.classList.toggle('hidden', !hits[i] && !child);
+    });
+    items.forEach(function (li) { if (!li.classList.contains('hidden')) shown++; });
+    noHits.hidden = shown > 0;
+  });
+  q.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') {
+      var first = items.filter(function (li) { return !li.classList.contains('hidden'); })[0];
+      if (first) { e.preventDefault(); location.hash = first.querySelector('a').getAttribute('href'); }
+    }
+  });
+
+  // Mark the current section in the contents
+  var links = Array.prototype.slice.call(document.querySelectorAll('#toc a'));
+  var targets = links.map(function (a) { return document.getElementById(a.getAttribute('href').slice(1)); });
+  var ticking = false;
+  function spy() {
+    var current = -1;
+    for (var i = 0; i < targets.length; i++) {
+      if (targets[i] && targets[i].getBoundingClientRect().top <= 140) current = i;
+    }
+    links.forEach(function (a, i) { if (i === current) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current'); });
+    ticking = false;
+  }
+  window.addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(spy); } }, { passive: true });
+  spy();
+})();
+</script>
+</body>
+</html>

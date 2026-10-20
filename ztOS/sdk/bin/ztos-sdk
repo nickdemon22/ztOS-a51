@@ -1,0 +1,6 @@
+#!/usr/bin/env python3
+# ztos-sdk: make ztOS apps in Python and Qt (see sdk/README.md)
+import os, sys
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
+from ztos_sdk.cli import main
+sys.exit(main())

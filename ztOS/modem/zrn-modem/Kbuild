@@ -1,0 +1,14 @@
+# Samsung's Shannon modem interface (exynos9810 kernel, GPL) as one module for
+# mainline: the mailbox (mcu_ipc), the shared memory (shm_ipc) and modem_v1's
+# boot, power, framing and io devices. zrn_compat.h stands in for what the
+# vendor kernel had and mainline does not; zinc/ for its missing headers.
+obj-m += zrn-modem.o
+zrn-modem-y := mcu_ipc.o shm_ipc.o \
+	modem_main.o modem_variation.o modem_io_device.o modem_utils.o modem_dump.o \
+	link_device_shmem.o link_device_memory_snapshot.o link_device_memory_flow_control.o \
+	link_device_memory_debug.o link_device_memory_sbd.o modem_notifier.o \
+	modem_ctrl_ss310ap.o zrn_cp_pmu.o zrn_board.o zrn_overlay_blob.o
+ccflags-y += -I$(src) -I$(src)/zinc -include $(src)/zrn_compat.h \
+	-DCONFIG_OPTION_REGION=\"KOR\" \
+	-Wno-unused-function -Wno-unused-variable -Wno-missing-prototypes \
+	-Wno-declaration-after-statement -Wno-missing-declarations

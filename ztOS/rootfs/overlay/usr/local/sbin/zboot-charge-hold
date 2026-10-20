@@ -1,0 +1,97 @@
+#!/bin/sh
+# zboot-charge-hold: do not start the system on an almost empty battery.
+#
+# Run once, very early in the boot (zboot-charge-hold.service, before udev and
+# the file systems), it decides between three things:
+#
+#   - the battery is at HOLD_BELOW % or more, or nothing can be read: go on.
+#   - it is lower and a charger is in: stay here, with nothing else running,
+#     both CPU clusters at their slowest and the screen dark but for a line
+#     now and then, until the battery reaches HOLD_BELOW %; then go on and
+#     start the system. That is also what happens when a charger is plugged
+#     into the phone while it is off (the boot loader starts it for that).
+#   - it is lower and no charger is in: say so and power off, instead of
+#     starting a system that would die half way up.
+#
+# The boot stage's deadman (see initramfs/init) is told to stand down: it
+# would reset a phone that is only waiting. systemd's own watchdog still runs.
+HOLD_BELOW=10
+B=/sys/class/power_supply/max170xx_battery
+TTY=/dev/tty0
+
+level() { cat $B/capacity 2>/dev/null; }
+plugged() {
+	for o in /sys/class/power_supply/*/online; do
+		case "$o" in *max170xx*) continue ;; esac
+		[ "$(cat "$o" 2>/dev/null)" = 1 ] && return 0
+	done
+	return 1
+}
+say() {	# a few lines in the middle of the console
+	[ -w $TTY ] || return 0
+	printf '\033[2J\033[H\n\n\n\n\n\n\n\n' > $TTY
+	for l in "$@"; do printf '        %s\n\n' "$l" > $TTY; done
+}
+screen() {	# on | off: the console's own blanking, where the display driver has it
+	[ -w /sys/class/graphics/fb0/blank ] && echo "$1" > /sys/class/graphics/fb0/blank 2>/dev/null
+	return 0
+}
+
+# the fuel gauge may not be there in the first moments
+i=0
+while [ -z "$(level)" ] && [ $i -lt 20 ]; do i=$((i + 1)); sleep 0.25; done
+L=$(level)
+[ -n "$L" ] || { echo "zboot-charge-hold: no fuel gauge; going on"; exit 0; }
+[ "$L" -ge $HOLD_BELOW ] && exit 0
+
+touch /run/zboot.hold
+if ! plugged; then
+	# a charger takes a moment to be recognised: one more look
+	sleep 3
+	if ! plugged; then
+		echo "zboot-charge-hold: battery at $L % and no charger: powering off"
+		say "Battery empty ($L %)." "Connect a charger."
+		sleep 6
+		systemctl poweroff --no-block
+		exit 0
+	fi
+fi
+
+echo "zboot-charge-hold: battery at $L %, charging; holding the boot until $HOLD_BELOW %"
+# as little as possible while it fills
+for p in /sys/devices/system/cpu/cpufreq/policy*; do
+	echo powersave > "$p/scaling_governor" 2>/dev/null
+done
+[ -x /usr/local/sbin/zrn-charge ] && /usr/local/sbin/zrn-charge 2>/dev/null
+
+n=0
+while :; do
+	L=$(level)
+	[ -n "$L" ] && [ "$L" -ge $HOLD_BELOW ] && break
+	if ! plugged; then
+		# pulled out before it was enough: off, and try again with a charger
+		sleep 5
+		if ! plugged; then
+			say "Battery low (${L:-?} %)." "Powering off."
+			sleep 4
+			systemctl poweroff --no-block
+			exit 0
+		fi
+	fi
+	# the line for ten seconds in every minute, the screen dark for the rest
+	if [ $((n % 6)) = 0 ]; then
+		screen 0
+		say "Charging: ${L:-?} %" "The phone starts at $HOLD_BELOW %."
+	elif [ $((n % 6)) = 1 ]; then
+		screen 4
+	fi
+	n=$((n + 1))
+	sleep 10
+done
+screen 0
+say "Charged to $L %." "Starting."
+for p in /sys/devices/system/cpu/cpufreq/policy*; do
+	echo schedutil > "$p/scaling_governor" 2>/dev/null
+done
+echo "zboot-charge-hold: battery at $L %: going on"
+exit 0
